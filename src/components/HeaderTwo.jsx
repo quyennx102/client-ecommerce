@@ -98,7 +98,7 @@ const HeaderTwo = ({ category }) => {
                 </button>
                 <div className="mobile-menu__inner">
                     <Link to="/" className="mobile-menu__logo">
-                        <img src="assets/images/logo/logo.png" alt="Logo" />
+                        <img src="/assets/images/logo/logo.png" alt="Logo" />
                     </Link>
                     <div className="mobile-menu__menu">
                         {/* Nav Menu Start */}
@@ -266,7 +266,7 @@ const HeaderTwo = ({ category }) => {
                         {/* Logo Start */}
                         <div className="logo">
                             <Link to="/" className="link">
-                                <img src="assets/images/logo/logo-two.png" alt="Logo" />
+                                <img src="/assets/images/logo/logo-two.png" alt="Logo" />
                             </Link>
                         </div>
                         {/* Logo End  */}
@@ -601,7 +601,7 @@ const HeaderTwo = ({ category }) => {
                                     </button>
                                     <div className="logo px-16 d-lg-none d-block">
                                         <Link to="/" className="link">
-                                            <img src="assets/images/logo/logo.png" alt="Logo" />
+                                            <img src="/assets/images/logo/logo.png" alt="Logo" />
                                         </Link>
                                     </div>
                                     <ul className="scroll-sm p-0 py-8 overflow-y-auto">
@@ -1135,7 +1135,7 @@ const HeaderTwo = ({ category }) => {
                                     </button>
                                     <div className="logo px-16 d-lg-none d-block">
                                         <Link to="/" className="link">
-                                            <img src="assets/images/logo/logo.png" alt="Logo" />
+                                            <img src="/assets/images/logo/logo.png" alt="Logo" />
                                         </Link>
                                     </div>
                                     <ul className="scroll-sm p-0 py-8 w-300 max-h-400 overflow-y-auto">
