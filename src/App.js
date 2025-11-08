@@ -23,6 +23,7 @@ import CreateProductPage from "./pages/CreateProductPage";
 import ManageProductsPage from "./pages/ManageProductsPage";
 import ProductsManagementPage from "./pages/ProductsManagementPage";
 import ProductsPage from "./pages/ProductsPage";
+import CategoryManagementPage from "./pages/CategoryManagementPage";
 
 function App() {
   return (
@@ -31,8 +32,8 @@ function App() {
       <PhosphorIconInit />
 
       <Routes>
-        <Route exact path="/" element={<HomePageOne />} />
-        <Route exact path="/index-two" element={<HomePageTwo />} />
+        <Route exact path="/" element={<HomePageTwo />} />
+        <Route exact path="/index-two" element={<HomePageOne />} />
         <Route exact path="/products" element={<ProductsPage />} />
         <Route exact path="/product-details" element={<ProductDetailsPageOne />} />
         <Route exact path="/product-details-two" element={<ProductDetailsPageTwo />} />
@@ -93,6 +94,12 @@ function App() {
         <Route path="/admin/products" element={
           <PrivateRoute roles={['admin']}>
             <ProductsManagementPage />
+          </PrivateRoute>
+        } />
+
+        <Route path="/admin/category" element={
+          <PrivateRoute roles={['admin']}>
+            <CategoryManagementPage />
           </PrivateRoute>
         } />
 

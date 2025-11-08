@@ -33,12 +33,6 @@ const ManageProductsPage = () => {
 
       <ManageProducts />
 
-      {/* ShippingOne */}
-      <ShippingOne />
-
-      {/* NewsletterOne */}
-      <NewsletterOne />
-
       {/* FooterTwo */}
       <FooterTwo />
 
