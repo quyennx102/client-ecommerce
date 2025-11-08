@@ -7,8 +7,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import productService from '../../services/productService';
 import storeService from '../../services/storeService';
-import './ManageProducts.css';
 import sweetAlert from '../../utils/sweetAlert';
+import "./ManageProducts.css"
 const ManageProducts = () => {
     const { storeId } = useParams();
     const navigate = useNavigate();
@@ -17,6 +17,7 @@ const ManageProducts = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState(null);
+    const [showFilters, setShowFilters] = useState(false);
 
     const [filters, setFilters] = useState({
         page: 1,
@@ -100,9 +101,7 @@ const ManageProducts = () => {
             return;
         }
 
-        // Sử dụng SweetAlert2 thay thế window.confirm
         const result = await sweetAlert.confirmBulkDelete(selectedProducts.length);
-
         if (!result.isConfirmed) {
             return;
         }
@@ -114,8 +113,6 @@ const ManageProducts = () => {
                 );
                 toast.success('Products deleted successfully');
             }
-            // Add more bulk actions as needed
-
             setSelectedProducts([]);
             setBulkAction('');
             fetchProducts();
@@ -129,9 +126,7 @@ const ManageProducts = () => {
         const product = products.find(p => p.product_id === productId);
         const productName = product?.product_name || 'This product';
 
-        // Sử dụng SweetAlert2 thay thế window.confirm
         const result = await sweetAlert.confirmDelete(productName);
-
         if (!result.isConfirmed) {
             return;
         }
@@ -151,16 +146,33 @@ const ManageProducts = () => {
 
     const getStatusBadge = (status) => {
         const badges = {
-            'active': 'badge bg-success',
-            'inactive': 'badge bg-secondary',
-            'out_of_stock': 'badge bg-danger'
+            'active': 'bg-success',
+            'inactive': 'bg-secondary',
+            'out_of_stock': 'bg-danger'
         };
-        return badges[status] || 'badge bg-secondary';
+        return badges[status] || 'bg-secondary';
     };
 
     const getStatusText = (status) => {
-        return status.replace('_', ' ').toUpperCase();
+        const statusMap = {
+            'active': 'Active',
+            'inactive': 'Inactive',
+            'out_of_stock': 'Out of Stock'
+        };
+        return statusMap[status] || status;
     };
+
+    const resetFilters = () => {
+        setFilters({
+            page: 1,
+            limit: 10,
+            status: '',
+            search: '',
+            sort_by: 'created_at',
+            order: 'DESC'
+        });
+    };
+
     return (
         <section className="py-80">
             <div className="container container-lg">
@@ -176,82 +188,121 @@ const ManageProducts = () => {
                                 </p>
                             )}
                         </div>
-                        <Link
-                            to={`/seller/stores/${storeId}/products/create`}
-                            className="btn btn-main py-12 px-32"
-                        >
-                            <i className="ph ph-plus me-8"></i>
-                            Add New Product
-                        </Link>
-                    </div>
-
-                    {/* Filters Bar */}
-                    <div className="border border-gray-100 rounded-16 p-24">
-                        <div className="row g-16">
-                            {/* Search */}
-                            <div className="col-lg-4">
-                                <input
-                                    type="text"
-                                    className="common-input"
-                                    placeholder="Search products..."
-                                    value={filters.search}
-                                    onChange={(e) => handleFilterChange('search', e.target.value)}
-                                />
-                            </div>
-
-                            {/* Status Filter */}
-                            <div className="col-lg-3">
-                                <select
-                                    className="common-input"
-                                    value={filters.status}
-                                    onChange={(e) => handleFilterChange('status', e.target.value)}
-                                >
-                                    <option value="">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                    <option value="out_of_stock">Out of Stock</option>
-                                </select>
-                            </div>
-
-                            {/* Sort */}
-                            <div className="col-lg-3">
-                                <select
-                                    className="common-input"
-                                    value={`${filters.sort_by}_${filters.order}`}
-                                    onChange={(e) => {
-                                        const [sort_by, order] = e.target.value.split('_');
-                                        setFilters(prev => ({ ...prev, sort_by, order }));
-                                    }}
-                                >
-                                    <option value="created_at_DESC">Newest First</option>
-                                    <option value="created_at_ASC">Oldest First</option>
-                                    <option value="product_name_ASC">Name: A to Z</option>
-                                    <option value="product_name_DESC">Name: Z to A</option>
-                                    <option value="price_ASC">Price: Low to High</option>
-                                    <option value="price_DESC">Price: High to Low</option>
-                                    <option value="stock_quantity_ASC">Stock: Low to High</option>
-                                    <option value="sold_quantity_DESC">Most Sold</option>
-                                </select>
-                            </div>
-
-                            {/* Clear */}
-                            <div className="col-lg-2">
-                                <button
-                                    className="btn btn-outline-main w-100"
-                                    onClick={() => setFilters({
-                                        page: 1,
-                                        limit: 10,
-                                        status: '',
-                                        search: '',
-                                        sort_by: 'created_at',
-                                        order: 'DESC'
-                                    })}
-                                >
-                                    <i className="ph ph-x"></i>
-                                </button>
-                            </div>
+                        <div className="flex-align gap-16">
+                            <button
+                                className="btn btn-outline-main"
+                                onClick={() => setShowFilters(!showFilters)}
+                            >
+                                <i className={`ph ph-${showFilters ? 'funnel-simple-x' : 'funnel-simple'} me-8`}></i>
+                                {showFilters ? 'Hide' : 'Show'} Filters
+                            </button>
+                            <Link
+                                to={`/seller/stores/${storeId}/products/create`}
+                                className="btn btn-main py-12 px-32"
+                            >
+                                <i className="ph ph-plus me-8"></i>
+                                Add New Product
+                            </Link>
                         </div>
                     </div>
+
+                    {/* Stats Cards */}
+                    {pagination && (
+                        <div className="row g-3 mb-24">
+                            <div className="col-xl-3 col-md-6">
+                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
+                                    <div className="text-xl fw-bold text-main-600 mb-2">
+                                        {pagination.totalItems || 0}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Total Products</div>
+                                </div>
+                            </div>
+                            <div className="col-xl-3 col-md-6">
+                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
+                                    <div className="text-xl fw-bold text-success mb-2">
+                                        {products.filter(p => p.status === 'active').length}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Active</div>
+                                </div>
+                            </div>
+                            <div className="col-xl-3 col-md-6">
+                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
+                                    <div className="text-xl fw-bold text-danger mb-2">
+                                        {products.filter(p => p.stock_quantity === 0).length}
+                                    </div>
+                                    <div className="text-sm text-gray-600">Out of Stock</div>
+                                </div>
+                            </div>
+                            <div className="col-xl-3 col-md-6">
+                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
+                                    <div className="text-sm text-gray-600 mb-2">Showing {products.length} products</div>
+                                    <div className="progress" style={{ height: '6px' }}>
+                                        <div
+                                            className="progress-bar bg-main-600"
+                                            style={{ width: `${(products.length / (pagination.totalItems || 1)) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Filters Bar */}
+                    {showFilters && (
+                        <div className="border border-gray-100 rounded-16 p-24 mb-24 bg-white">
+                            <div className="row g-3">
+                                <div className="col-lg-4">
+                                    <input
+                                        type="text"
+                                        className="common-input"
+                                        placeholder="Search products..."
+                                        value={filters.search}
+                                        onChange={(e) => handleFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-lg-3">
+                                    <select
+                                        className="common-input"
+                                        value={filters.status}
+                                        onChange={(e) => handleFilterChange('status', e.target.value)}
+                                    >
+                                        <option value="">All Status</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                        <option value="out_of_stock">Out of Stock</option>
+                                    </select>
+                                </div>
+                                <div className="col-lg-3">
+                                    <select
+                                        className="common-input"
+                                        value={`${filters.sort_by}_${filters.order}`}
+                                        onChange={(e) => {
+                                            const [sort_by, order] = e.target.value.split('_');
+                                            setFilters(prev => ({ ...prev, sort_by, order }));
+                                        }}
+                                    >
+                                        <option value="created_at_DESC">Newest First</option>
+                                        <option value="created_at_ASC">Oldest First</option>
+                                        <option value="product_name_ASC">Name: A to Z</option>
+                                        <option value="product_name_DESC">Name: Z to A</option>
+                                        <option value="price_ASC">Price: Low to High</option>
+                                        <option value="price_DESC">Price: High to Low</option>
+                                        <option value="stock_quantity_ASC">Stock: Low to High</option>
+                                        <option value="sold_quantity_DESC">Most Sold</option>
+                                    </select>
+                                </div>
+                                <div className="col-lg-2">
+                                    <button
+                                        className="btn btn-outline-main w-100"
+                                        onClick={resetFilters}
+                                    >
+                                        <i className="ph ph-x me-8"></i>
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bulk Actions */}
@@ -290,12 +341,12 @@ const ManageProducts = () => {
                     </div>
                 )}
 
-                {/* Products Table */}
-                {/* Products Table */}
-                <div className="border border-gray-100 rounded-16 overflow-hidden">
+                {/* Products Table - FIXED VERSION */}
+                <div className="border border-gray-100 rounded-16 overflow-hidden bg-white">
                     {loading ? (
                         <div className="text-center py-80">
                             <div className="spinner-border text-main-600"></div>
+                            <p className="mt-16 text-gray-500">Loading products...</p>
                         </div>
                     ) : products.length === 0 ? (
                         <div className="text-center py-80">
@@ -313,113 +364,111 @@ const ManageProducts = () => {
                     ) : (
                         <>
                             <div className="table-responsive">
-                                <table
-                                    className="table align-middle text-center mb-0"
-                                    style={{
-                                        verticalAlign: 'middle',
-                                        tableLayout: 'fixed',
-                                        width: '100%',
-                                    }}
-                                >
-                                    <thead className="bg-gray-50" style={{ whiteSpace: 'nowrap' }}>
+                                <table className="table align-middle mb-0">
+                                    <thead className="bg-gray-50">
                                         <tr>
-                                            <th style={{ width: '50px' }}>
+                                            <th style={{ width: '100px' }} className="text-center">
                                                 <input
                                                     type="checkbox"
-                                                    checked={selectedProducts.length === products.length}
+                                                    className="form-check-input"
+                                                    checked={selectedProducts.length === products.length && products.length > 0}
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
-                                            <th style={{ width: '100px' }}>Image</th>
-                                            <th>Product Name</th>
-                                            <th style={{ width: '120px' }}>Price</th>
-                                            <th style={{ width: '100px' }}>Stock</th>
-                                            <th style={{ width: '100px' }}>Sold</th>
-                                            <th style={{ width: '120px' }}>Status</th>
-                                            <th style={{ width: '150px' }}>Actions</th>
+                                            <th style={{ width: '130px' }} className="text-center">Image</th>
+                                            <th className="text-center">Product Name</th>
+                                            <th style={{ width: '120px' }} className="text-center">Price</th>
+                                            <th style={{ width: '120px' }} className="text-center">Stock</th>
+                                            <th style={{ width: '120px' }} className="text-center">Sold</th>
+                                            <th style={{ width: '130px' }} className="text-center">Status</th>
+                                            <th style={{ width: '160px' }} className="text-center">Actions</th>
                                         </tr>
                                     </thead>
-
                                     <tbody>
                                         {products.map(product => (
-                                            <tr key={product.product_id}>
+                                            <tr key={product.product_id} className="border-bottom">
                                                 {/* Checkbox */}
-                                                <td>
+                                                <td className="text-center">
                                                     <input
                                                         type="checkbox"
+                                                        className="form-check-input"
                                                         checked={selectedProducts.includes(product.product_id)}
                                                         onChange={() => handleSelectProduct(product.product_id)}
                                                     />
                                                 </td>
 
                                                 {/* Image */}
-                                                <td>
-                                                    <img
-                                                        src={
-                                                            product.images?.[0]?.image_url
-                                                                ? `${process.env.REACT_APP_IMAGE_URL}${product.images[0].image_url}`
-                                                                : '/placeholder.jpg'
-                                                        }
-                                                        alt={product.product_name}
-                                                        className="rounded-8"
-                                                        style={{
-                                                            width: '70px',
-                                                            height: '70px',
-                                                            objectFit: 'cover',
-                                                            borderRadius: '8px',
-                                                        }}
-                                                    />
+                                                <td className="text-center">
+                                                    <div className="d-flex justify-content-center">
+                                                        <img
+                                                            src={
+                                                                product.images?.[0]?.image_url
+                                                                    ? `${process.env.REACT_APP_IMAGE_URL}${product.images[0].image_url}`
+                                                                    : '/images/placeholder-product.jpg'
+                                                            }
+                                                            alt={product.product_name}
+                                                            className="rounded-8 border"
+                                                            style={{
+                                                                width: '60px',
+                                                                height: '60px',
+                                                                objectFit: 'cover',
+                                                            }}
+                                                            onError={(e) => {
+                                                                e.target.src = '/images/placeholder-product.jpg';
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </td>
 
                                                 {/* Product Name + Category */}
-                                                <td className="text-start">
-                                                    <div className="fw-semibold text-dark">
+                                                <td>
+                                                    <div className="fw-semibold text-dark mb-1">
                                                         {product.product_name}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        {product.category?.category_name || '—'}
+                                                        {product.category?.category_name || 'No Category'}
                                                     </div>
                                                 </td>
 
                                                 {/* Price */}
-                                                <td className="fw-bold text-main-600">
-                                                    {parseInt(product.price).toLocaleString('vi-VN')}đ
+                                                <td className="text-center fw-bold text-main-600">
+                                                    {parseInt(product.price || 0).toLocaleString('vi-VN')}đ
                                                 </td>
 
                                                 {/* Stock */}
-                                                <td>
+                                                <td className="text-center">
                                                     <span
-                                                        className={
-                                                            product.stock_quantity === 0
-                                                                ? 'text-danger'
+                                                        className={`badge ${product.stock_quantity === 0
+                                                                ? 'bg-danger'
                                                                 : product.stock_quantity < 10
-                                                                    ? 'text-warning'
-                                                                    : 'text-dark'
-                                                        }
+                                                                    ? 'bg-warning text-dark'
+                                                                    : 'bg-success'
+                                                            } px-3 py-2`}
                                                     >
-                                                        {product.stock_quantity}
+                                                        {product.stock_quantity || 0}
                                                     </span>
                                                 </td>
 
                                                 {/* Sold */}
-                                                <td>{product.sold_quantity || 0}</td>
+                                                <td className="text-center fw-semibold">
+                                                    {product.sold_quantity || 0}
+                                                </td>
 
                                                 {/* Status */}
-                                                <td>
+                                                <td className="text-center">
                                                     <span
-                                                        className={`${getStatusBadge(product.status)} px-12 py-6 rounded-pill`}
-                                                        style={{ fontSize: '13px' }}
+                                                        className={`badge ${getStatusBadge(product.status)} px-3 py-2 text-white`}
                                                     >
                                                         {getStatusText(product.status)}
                                                     </span>
                                                 </td>
 
                                                 {/* Actions */}
-                                                <td>
-                                                    <div className="d-flex justify-content-center gap-2">
+                                                <td className="text-center">
+                                                    <div className="action-buttons">
                                                         <Link
                                                             to={`/products/${product.product_id}`}
-                                                            className="btn btn-sm btn-outline-main"
+                                                            className="action-btn btn-view"
                                                             title="View"
                                                             target="_blank"
                                                         >
@@ -427,13 +476,13 @@ const ManageProducts = () => {
                                                         </Link>
                                                         <Link
                                                             to={`/seller/products/${product.product_id}/edit`}
-                                                            className="btn btn-sm btn-outline-main"
+                                                            className="action-btn btn-edit"
                                                             title="Edit"
                                                         >
                                                             <i className="ph ph-pencil"></i>
                                                         </Link>
                                                         <button
-                                                            className="btn btn-sm btn-danger" // Thay đổi từ btn-outline-danger thành btn-danger
+                                                            className="action-btn btn-delete"
                                                             title="Delete"
                                                             onClick={() => handleDeleteProduct(product.product_id)}
                                                         >
@@ -462,6 +511,7 @@ const ManageProducts = () => {
                                                     <button
                                                         className="page-link"
                                                         onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
+                                                        disabled={pagination.currentPage === 1}
                                                     >
                                                         Previous
                                                     </button>
@@ -483,6 +533,7 @@ const ManageProducts = () => {
                                                     <button
                                                         className="page-link"
                                                         onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
+                                                        disabled={pagination.currentPage === pagination.totalPages}
                                                     >
                                                         Next
                                                     </button>
@@ -495,7 +546,6 @@ const ManageProducts = () => {
                         </>
                     )}
                 </div>
-
             </div>
         </section>
     );

@@ -1,11 +1,65 @@
-.btn-outline-danger {
-    color: #dc3545;
-    background-color: #ffe6e6;
-    border-color: #dc3545;
+/* Nút Action trong bảng */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
 }
 
-.btn-outline-danger:hover {
-    color: #fff;
-    background-color: #dc3545;
-    border-color: #dc3545;
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border: 2px solid;
+    border-radius: 6px;
+    background: white;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    cursor: pointer;
+    min-width: 32px;
+    height: 32px;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Nút View */
+.btn-view {
+    border-color: #6b7280 !important; /* gray-500 */
+    color: #374151 !important; /* gray-700 */
+}
+
+.btn-view:hover {
+    background-color: #f9fafb !important; /* gray-50 */
+    border-color: #4b5563 !important; /* gray-600 */
+}
+
+/* Nút Edit */
+.btn-edit {
+    border-color: #3b82f6 !important; /* blue-500 */
+    color: #1d4ed8 !important; /* blue-700 */
+}
+
+.btn-edit:hover {
+    background-color: #dbeafe !important; /* blue-100 */
+    border-color: #2563eb !important; /* blue-600 */
+}
+
+/* Nút Delete */
+.btn-delete {
+    border-color: #ef4444 !important; /* red-500 */
+    color: #dc2626 !important; /* red-600 */
+}
+
+.btn-delete:hover {
+    background-color: #fef2f2 !important; /* red-50 */
+    border-color: #dc2626 !important; /* red-600 */
+}
+
+/* Icon trong nút */
+.action-btn i {
+    font-size: 14px;
+    line-height: 1;
 }

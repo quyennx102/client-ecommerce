@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useAuth } from '../contexts/AuthContext'; // Thêm import
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { updateUser } = useAuth(); // Sử dụng AuthContext
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -12,7 +14,7 @@ const AuthCallback = () => {
 
     if (error) {
       toast.error('Social login failed. Please try again.');
-      navigate('/account');
+      navigate('/auth');
       return;
     }
 
@@ -28,24 +30,29 @@ const AuthCallback = () => {
       })
         .then(res => res.json())
         .then(data => {
+          
           if (data.success) {
-            localStorage.setItem('user', JSON.stringify(data.data));
+            const userData = data.data;
+            localStorage.setItem('user', JSON.stringify(userData));
+            
+            // QUAN TRỌNG: Cập nhật AuthContext
+            updateUser(userData);
+            
             toast.success('Login successful!');
             navigate('/');
           } else {
             toast.error('Failed to fetch user data');
-            navigate('/account');
+            navigate('/auth');
           }
         })
         .catch(error => {
-          console.error('Error:', error);
           toast.error('An error occurred');
-          navigate('/account');
+          navigate('/auth');
         });
     } else {
-      navigate('/account');
+      navigate('/auth');
     }
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, updateUser]); // Thêm updateUser vào dependencies
 
   return (
     <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>

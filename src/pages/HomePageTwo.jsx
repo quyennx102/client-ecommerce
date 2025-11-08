@@ -1,6 +1,5 @@
 import React from "react";
 import Preloader from "../helper/Preloader";
-import HeaderTwo from "../components/HeaderTwo";
 import BannerTwo from "../components/BannerTwo";
 import PromotionalTwo from "../components/PromotionalTwo";
 import DealsOne from "../components/DealsOne";
@@ -17,16 +16,11 @@ import RecentlyViewedOne from "../components/RecentlyViewedOne";
 import BrandTwo from "../components/BrandTwo";
 import ShippingTwo from "../components/ShippingTwo";
 import NewsletterTwo from "../components/NewsletterTwo";
-import FooterTwo from "../components/FooterTwo";
-import BottomFooter from "../components/BottomFooter";
 import ColorInit from "../helper/ColorInit";
 import ScrollToTop from "react-scroll-to-top";
 
 const HomePageTwo = () => {
-
-
   return (
-
     <>
       {/* ColorInit */}
       <ColorInit color={true} />
@@ -37,8 +31,7 @@ const HomePageTwo = () => {
       {/* Preloader */}
       <Preloader />
 
-      {/* HeaderTwo */}
-      <HeaderTwo category={false} />
+      {/* ĐÃ XÓA HeaderTwo ở đây - vì đã được đặt trong App.js */}
 
       {/* BannerTwo */}
       <BannerTwo />
@@ -88,13 +81,7 @@ const HomePageTwo = () => {
       {/* NewsletterTwo */}
       <NewsletterTwo />
 
-      {/* FooterTwo */}
-      <FooterTwo />
-
-      {/* BottomFooter */}
-      <BottomFooter />
-
-
+      {/* ĐÃ XÓA FooterTwo và BottomFooter ở đây - vì đã được đặt trong App.js */}
     </>
   );
 };

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import authService from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 
 const Account = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login: authLogin, isAuthenticated } = useAuth(); // Sử dụng auth context
 
   // Login state
   const [loginData, setLoginData] = useState({
@@ -14,6 +17,14 @@ const Account = () => {
   });
   const [loginLoading, setLoginLoading] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  // Redirect nếu đã đăng nhập
+  useEffect(() => {
+    if (isAuthenticated) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, location]);
 
   // Register state
   const [registerData, setRegisterData] = useState({
@@ -39,8 +50,7 @@ const Account = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
-    // Validation
+
     if (!loginData.email || !loginData.password) {
       toast.error('Please enter email and password');
       return;
@@ -49,18 +59,12 @@ const Account = () => {
     setLoginLoading(true);
 
     try {
-      const response = await authService.login({
+      const result = await authLogin({
         email: loginData.email,
         password: loginData.password
       });
 
-      if (response.success) {
-        // Save token
-        localStorage.setItem('token', response.data.token);
-        
-        // Save user data
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-        
+      if (result.success) {
         // Remember me
         if (loginData.rememberMe) {
           localStorage.setItem('rememberEmail', loginData.email);
@@ -70,18 +74,12 @@ const Account = () => {
 
         toast.success('Login successful!');
 
-        // Redirect based on role
-        const userRole = response.data.user.role;
-        if (userRole === 'admin') {
-          navigate('/admin/dashboard');
-        } else if (userRole === 'seller') {
-          navigate('/seller/dashboard');
-        } else {
-          navigate('/');
-        }
+        // Redirect sẽ được xử lý tự động bởi useEffect ở trên
+      } else {
+        toast.error(result.error);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error('Login failed. Please try again.');
     } finally {
       setLoginLoading(false);
     }
@@ -197,7 +195,7 @@ const Account = () => {
           <div className="col-xl-6 pe-xl-5">
             <div className="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40 h-100">
               <h6 className="text-xl mb-32">Login</h6>
-              
+
               <form onSubmit={handleLogin}>
                 {/* Email */}
                 <div className="mb-24">
@@ -239,9 +237,8 @@ const Account = () => {
                       required
                     />
                     <span
-                      className={`toggle-password position-absolute top-50 inset-inline-end-0 me-16 translate-middle-y cursor-pointer ph ${
-                        showLoginPassword ? 'ph-eye' : 'ph-eye-slash'
-                      }`}
+                      className={`toggle-password position-absolute top-50 inset-inline-end-0 me-16 translate-middle-y cursor-pointer ph ${showLoginPassword ? 'ph-eye' : 'ph-eye-slash'
+                        }`}
                       onClick={() => setShowLoginPassword(!showLoginPassword)}
                       style={{ cursor: 'pointer' }}
                     />
@@ -251,8 +248,8 @@ const Account = () => {
                 {/* Remember & Submit */}
                 <div className="mb-24 mt-48">
                   <div className="flex-align gap-48 flex-wrap">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="btn btn-main py-18 px-40"
                       disabled={loginLoading}
                     >
@@ -287,7 +284,7 @@ const Account = () => {
                 {/* Forgot Password */}
                 <div className="mt-24 mb-32">
                   <Link
-                    to="/account/forgot-password"
+                    to="/auth/forgot-password"
                     className="text-danger-600 text-sm fw-semibold hover-text-decoration-underline"
                   >
                     Forgot your password?
@@ -299,7 +296,7 @@ const Account = () => {
               <div className="mt-32">
                 <div className="position-relative">
                   <hr className="text-gray-100" />
-                  <span 
+                  <span
                     className="position-absolute top-50 start-50 translate-middle bg-white px-3 text-gray-500"
                     style={{ fontSize: '14px' }}
                   >
@@ -335,7 +332,7 @@ const Account = () => {
           <div className="col-xl-6">
             <div className="border border-gray-100 hover-border-main-600 transition-1 rounded-16 px-24 py-40">
               <h6 className="text-xl mb-32">Register</h6>
-              
+
               <form onSubmit={handleRegister}>
                 {/* Full Name */}
                 <div className="mb-24">
@@ -416,9 +413,8 @@ const Account = () => {
                       required
                     />
                     <span
-                      className={`toggle-password position-absolute top-50 inset-inline-end-0 me-16 translate-middle-y cursor-pointer ph ${
-                        showRegisterPassword ? 'ph-eye' : 'ph-eye-slash'
-                      }`}
+                      className={`toggle-password position-absolute top-50 inset-inline-end-0 me-16 translate-middle-y cursor-pointer ph ${showRegisterPassword ? 'ph-eye' : 'ph-eye-slash'
+                        }`}
                       onClick={() => setShowRegisterPassword(!showRegisterPassword)}
                       style={{ cursor: 'pointer' }}
                     />
@@ -462,8 +458,8 @@ const Account = () => {
 
                 {/* Submit Button */}
                 <div className="mt-32">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="btn btn-main py-18 px-40 w-100"
                     disabled={registerLoading}
                   >
@@ -483,7 +479,7 @@ const Account = () => {
               <div className="mt-32">
                 <div className="position-relative">
                   <hr className="text-gray-100" />
-                  <span 
+                  <span
                     className="position-absolute top-50 start-50 translate-middle bg-white px-3 text-gray-500"
                     style={{ fontSize: '14px' }}
                   >

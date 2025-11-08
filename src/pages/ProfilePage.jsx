@@ -1,19 +1,14 @@
 import React from "react";
 import Preloader from "../helper/Preloader";
-
 import HeaderTwo from "../components/HeaderTwo";
 import Breadcrumb from "../components/Breadcrumb";
+import ShippingTwo from "../components/ShippingTwo";
 import FooterTwo from "../components/FooterTwo";
-import BottomFooter from "../components/BottomFooter";
-import ShippingOne from "../components/ShippingOne";
-import Account from "../components/Account";
-import ScrollToTop from "react-scroll-to-top";
 import ColorInit from "../helper/ColorInit";
+import ScrollToTop from "react-scroll-to-top";
+import Profile from "../components/Profile";
 
-
-const AccountPage = () => {
-
-
+const ProfilePage = () => {
 
   return (
     <>
@@ -26,27 +21,23 @@ const AccountPage = () => {
       {/* Preloader */}
       <Preloader />
 
-      {/* HeaderTwo */}
+      {/* HeaderOne */}
       {/* <HeaderTwo category={true} /> */}
 
       {/* Breadcrumb */}
-      <Breadcrumb paths={[{ label: "Login" }]} />
+      <Breadcrumb title={"Profile"} />
 
-      {/* Account */}
-      <Account />
+      <Profile />
 
-      {/* ShippingOne */}
-      <ShippingOne />
+      {/* ShippingTwo */}
+      <ShippingTwo />
 
       {/* FooterTwo */}
-      <FooterTwo />
-
-      {/* BottomFooter */}
-      {/* <BottomFooter /> */}
+      {/* <FooterTwo /> */}
 
 
     </>
   );
 };
 
-export default AccountPage;
+export default ProfilePage;
