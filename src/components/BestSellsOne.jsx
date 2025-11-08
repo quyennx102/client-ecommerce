@@ -401,7 +401,7 @@ const BestSellsOne = () => {
                                     </ul>
                                 </div>
                                 <Link
-                                    to="/shop"
+                                    to="/products"
                                     className="mt-16 btn btn-main-two fw-medium d-inline-flex align-items-center rounded-pill gap-8"
                                     tabIndex={0}
                                 >

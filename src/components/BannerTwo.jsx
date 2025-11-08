@@ -48,22 +48,22 @@ const BannerTwo = () => {
                                         </h6>
                                         <ul className="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
                                             <li>
-                                                <Link to="/shop">Samsung</Link>
+                                                <Link to="/products">Samsung</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Iphone</Link>
+                                                <Link to="/products">Iphone</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Vivo</Link>
+                                                <Link to="/products">Vivo</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Oppo</Link>
+                                                <Link to="/products">Oppo</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Itel</Link>
+                                                <Link to="/products">Itel</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Realme</Link>
+                                                <Link to="/products">Realme</Link>
                                             </li>
                                         </ul>
                                     </div>
@@ -299,19 +299,19 @@ const BannerTwo = () => {
                                         </h6>
                                         <ul className="submenus-submenu__list max-h-300 overflow-y-auto scroll-sm">
                                             <li>
-                                                <Link to="/shop">Samsung</Link>
+                                                <Link to="/products">Samsung</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Iphone</Link>
+                                                <Link to="/products">Iphone</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Vivo</Link>
+                                                <Link to="/products">Vivo</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Oppo</Link>
+                                                <Link to="/products">Oppo</Link>
                                             </li>
                                             <li>
-                                                <Link to="/shop">Itel</Link>
+                                                <Link to="/products">Itel</Link>
                                             </li>
                                             <li>
                                                 <Link to="/shop">Realme</Link>

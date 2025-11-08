@@ -2,13 +2,13 @@ import React from "react";
 import Preloader from "../helper/Preloader";
 import HeaderTwo from "../components/HeaderTwo";
 import Breadcrumb from "../components/Breadcrumb";
-import ShopSection from "../components/ShopSection";
 import ShippingTwo from "../components/ShippingTwo";
 import FooterTwo from "../components/FooterTwo";
 import ColorInit from "../helper/ColorInit";
 import ScrollToTop from "react-scroll-to-top";
+import ProductList from "../components/ProductList";
 
-const ShopPage = () => {
+const ProductsPage = () => {
 
   return (
     <>
@@ -28,7 +28,7 @@ const ShopPage = () => {
       <Breadcrumb title={"Shop"} />
 
       {/* ShopSection */}
-      <ShopSection />
+      <ProductList />
 
       {/* ShippingTwo */}
       <ShippingTwo />
@@ -41,4 +41,4 @@ const ShopPage = () => {
   );
 };
 
-export default ShopPage;
+export default ProductsPage;

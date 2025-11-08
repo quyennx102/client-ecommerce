@@ -147,7 +147,7 @@ const HeaderTwo = ({ category }) => {
                                 >
                                     <li className="common-dropdown__item nav-submenu__item">
                                         <Link onClick={() => setActiveIndex(null)}
-                                            to="/shop"
+                                            to="/products"
                                             className="common-dropdown__link nav-submenu__link hover-bg-neutral-100"
                                         >
                                             {" "}
@@ -1453,7 +1453,7 @@ const HeaderTwo = ({ category }) => {
                                         <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
                                             <li className="common-dropdown__item nav-submenu__item">
                                                 <NavLink
-                                                    to="/shop"
+                                                    to="/products"
                                                     className={(navData) =>
                                                         navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
                                                     }

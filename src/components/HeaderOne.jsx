@@ -166,7 +166,7 @@ const HeaderOne = () => {
                                 >
                                     <li className="common-dropdown__item nav-submenu__item">
                                         <Link
-                                            to="/shop"
+                                            to="/products"
                                             className="common-dropdown__link nav-submenu__link hover-bg-neutral-100"
                                             onClick={() => setActiveIndex(null)}
                                         >
@@ -1042,7 +1042,7 @@ const HeaderOne = () => {
                                         <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
                                             <li className="common-dropdown__item nav-submenu__item">
                                                 <NavLink
-                                                    to="/shop"
+                                                    to="/products"
                                                     className={(navData) =>
                                                         navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
                                                     }

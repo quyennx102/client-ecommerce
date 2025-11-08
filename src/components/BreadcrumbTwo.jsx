@@ -18,7 +18,7 @@ const BreadcrumbTwo = () => {
                             <i className="ph ph-caret-right" />
                         </li>
                         <li className="text-sm">
-                            <Link to="/shop" className="text-main-600 flex-align gap-8">
+                            <Link to="/products" className="text-main-600 flex-align gap-8">
 
                                 Shop
                             </Link>

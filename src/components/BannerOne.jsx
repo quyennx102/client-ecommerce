@@ -71,7 +71,7 @@ const BannerOne = () => {
                                             Daily Grocery Order and Get Express Delivery
                                         </h1>
                                         <Link
-                                            to="/shop"
+                                            to="/products"
                                             className="btn btn-main d-inline-flex align-items-center rounded-pill gap-8"
                                         >
                                             Explore Shop{" "}
@@ -92,7 +92,7 @@ const BannerOne = () => {
                                             Daily Grocery Order and Get Express Delivery
                                         </h1>
                                         <Link
-                                            to="/shop"
+                                            to="/products"
                                             className="btn btn-main d-inline-flex align-items-center rounded-pill gap-8"
                                         >
                                             Explore Shop{" "}
