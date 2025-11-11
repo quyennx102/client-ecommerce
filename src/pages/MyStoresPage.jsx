@@ -26,7 +26,7 @@ const MyStoresPage = () => {
       <Preloader />
 
       {/* HeaderTwo */}
-      <HeaderTwo category={true} />
+      {/* <HeaderTwo category={true} /> */}
 
       {/* Breadcrumb */}
       <Breadcrumb title={"Create store"} />
@@ -40,10 +40,10 @@ const MyStoresPage = () => {
       <NewsletterOne />
 
       {/* FooterTwo */}
-      <FooterTwo />
+      {/* <FooterTwo /> */}
 
       {/* BottomFooter */}
-      <BottomFooter />
+      {/* <BottomFooter /> */}
 
 
     </>

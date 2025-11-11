@@ -1,14 +1,10 @@
-// =============================================
-// 2. SELLER - QUẢN LÝ SẢN PHẨM
-// src/pages/seller/ManageProducts.jsx
-// =============================================
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import productService from '../../services/productService';
 import storeService from '../../services/storeService';
 import sweetAlert from '../../utils/sweetAlert';
-import "./ManageProducts.css"
+
 const ManageProducts = () => {
     const { storeId } = useParams();
     const navigate = useNavigate();
@@ -146,11 +142,11 @@ const ManageProducts = () => {
 
     const getStatusBadge = (status) => {
         const badges = {
-            'active': 'bg-success',
-            'inactive': 'bg-secondary',
-            'out_of_stock': 'bg-danger'
+            'active': 'bg-success-600',
+            'inactive': 'bg-gray-400',
+            'out_of_stock': 'bg-danger-600'
         };
-        return badges[status] || 'bg-secondary';
+        return badges[status] || 'bg-gray-400';
     };
 
     const getStatusText = (status) => {
@@ -173,151 +169,175 @@ const ManageProducts = () => {
         });
     };
 
+    if (loading && products.length === 0) {
+        return (
+            <section className="cart py-80">
+                <div className="container container-lg">
+                    <div className="text-center">
+                        <div className="spinner-border text-main-600" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                        <p className="text-gray-600 mt-16">Loading products...</p>
+                    </div>
+                </div>
+            </section>
+        );
+    }
+
     return (
-        <section className="py-80">
+        <section className="cart py-80">
             <div className="container container-lg">
                 {/* Header */}
-                <div className="mb-32">
-                    <div className="flex-between flex-wrap gap-16 mb-24">
-                        <div>
-                            <h4 className="mb-8">Manage Products</h4>
-                            {store && (
-                                <p className="text-gray-500 mb-0">
-                                    <i className="ph ph-storefront me-8"></i>
-                                    {store.store_name}
-                                </p>
-                            )}
+                <div className="flex-between flex-wrap gap-16 mb-40">
+                    <div>
+                        <h4 className="mb-8">Manage Products</h4>
+                        {store && (
+                            <p className="text-gray-500 mb-0">
+                                <i className="ph ph-storefront me-8"></i>
+                                {store.store_name}
+                            </p>
+                        )}
+                    </div>
+                    <div className="flex-align gap-8">
+                        <button
+                            className="btn btn-outline-main py-12 px-24 rounded-8"
+                            onClick={() => setShowFilters(!showFilters)}
+                        >
+                            <i className={`ph ph-${showFilters ? 'funnel-simple-x' : 'funnel-simple'} me-8`}></i>
+                            {showFilters ? 'Hide' : 'Show'} Filters
+                        </button>
+                        <Link
+                            to={`/seller/stores/${storeId}/products/create`}
+                            className="btn btn-main py-12 px-32 rounded-8"
+                        >
+                            <i className="ph ph-plus me-8"></i>
+                            Add New Product
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Stats Cards */}
+                {pagination && (
+                    <div className="row g-12 mb-24">
+                        <div className="col-xxl-3 col-sm-6">
+                            <div className="border border-gray-100 rounded-16 p-24 bg-white hover-shadow-sm transition-2">
+                                <div className="flex-between mb-16">
+                                    <span className="text-gray-600 text-sm">Total Products</span>
+                                    <i className="ph ph-package text-main-600" style={{fontSize: '24px'}}></i>
+                                </div>
+                                <h3 className="mb-0 text-main-600">{pagination.totalItems || 0}</h3>
+                            </div>
                         </div>
-                        <div className="flex-align gap-16">
-                            <button
-                                className="btn btn-outline-main"
-                                onClick={() => setShowFilters(!showFilters)}
-                            >
-                                <i className={`ph ph-${showFilters ? 'funnel-simple-x' : 'funnel-simple'} me-8`}></i>
-                                {showFilters ? 'Hide' : 'Show'} Filters
-                            </button>
-                            <Link
-                                to={`/seller/stores/${storeId}/products/create`}
-                                className="btn btn-main py-12 px-32"
-                            >
-                                <i className="ph ph-plus me-8"></i>
-                                Add New Product
-                            </Link>
+                        <div className="col-xxl-3 col-sm-6">
+                            <div className="border border-gray-100 rounded-16 p-24 bg-white hover-shadow-sm transition-2">
+                                <div className="flex-between mb-16">
+                                    <span className="text-gray-600 text-sm">Active Products</span>
+                                    <i className="ph ph-check-circle text-success-600" style={{fontSize: '24px'}}></i>
+                                </div>
+                                <h3 className="mb-0 text-success-600">
+                                    {products.filter(p => p.status === 'active').length}
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="col-xxl-3 col-sm-6">
+                            <div className="border border-gray-100 rounded-16 p-24 bg-white hover-shadow-sm transition-2">
+                                <div className="flex-between mb-16">
+                                    <span className="text-gray-600 text-sm">Out of Stock</span>
+                                    <i className="ph ph-warning text-danger-600" style={{fontSize: '24px'}}></i>
+                                </div>
+                                <h3 className="mb-0 text-danger-600">
+                                    {products.filter(p => p.stock_quantity === 0).length}
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="col-xxl-3 col-sm-6">
+                            <div className="border border-gray-100 rounded-16 p-24 bg-white hover-shadow-sm transition-2">
+                                <div className="flex-between mb-16">
+                                    <span className="text-gray-600 text-sm">Total Sold</span>
+                                    <i className="ph ph-trend-up text-warning-600" style={{fontSize: '24px'}}></i>
+                                </div>
+                                <h3 className="mb-0 text-warning-600">
+                                    {products.reduce((sum, p) => sum + (p.sold_quantity || 0), 0)}
+                                </h3>
+                            </div>
                         </div>
                     </div>
+                )}
 
-                    {/* Stats Cards */}
-                    {pagination && (
-                        <div className="row g-3 mb-24">
-                            <div className="col-xl-3 col-md-6">
-                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
-                                    <div className="text-xl fw-bold text-main-600 mb-2">
-                                        {pagination.totalItems || 0}
-                                    </div>
-                                    <div className="text-sm text-gray-600">Total Products</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
-                                    <div className="text-xl fw-bold text-success mb-2">
-                                        {products.filter(p => p.status === 'active').length}
-                                    </div>
-                                    <div className="text-sm text-gray-600">Active</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
-                                    <div className="text-xl fw-bold text-danger mb-2">
-                                        {products.filter(p => p.stock_quantity === 0).length}
-                                    </div>
-                                    <div className="text-sm text-gray-600">Out of Stock</div>
-                                </div>
-                            </div>
-                            <div className="col-xl-3 col-md-6">
-                                <div className="border border-gray-100 rounded-12 p-16 text-center bg-white hover-shadow transition-1">
-                                    <div className="text-sm text-gray-600 mb-2">Showing {products.length} products</div>
-                                    <div className="progress" style={{ height: '6px' }}>
-                                        <div
-                                            className="progress-bar bg-main-600"
-                                            style={{ width: `${(products.length / (pagination.totalItems || 1)) * 100}%` }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Filters Bar */}
-                    {showFilters && (
-                        <div className="border border-gray-100 rounded-16 p-24 mb-24 bg-white">
-                            <div className="row g-3">
-                                <div className="col-lg-4">
+                {/* Filters Bar */}
+                {showFilters && (
+                    <div className="border border-gray-100 rounded-16 p-24 mb-24 bg-white">
+                        <div className="row g-16">
+                            <div className="col-lg-4">
+                                <div className="position-relative">
                                     <input
                                         type="text"
-                                        className="common-input"
+                                        className="common-input common-input--lg"
                                         placeholder="Search products..."
                                         value={filters.search}
                                         onChange={(e) => handleFilterChange('search', e.target.value)}
                                     />
-                                </div>
-                                <div className="col-lg-3">
-                                    <select
-                                        className="common-input"
-                                        value={filters.status}
-                                        onChange={(e) => handleFilterChange('status', e.target.value)}
-                                    >
-                                        <option value="">All Status</option>
-                                        <option value="active">Active</option>
-                                        <option value="inactive">Inactive</option>
-                                        <option value="out_of_stock">Out of Stock</option>
-                                    </select>
-                                </div>
-                                <div className="col-lg-3">
-                                    <select
-                                        className="common-input"
-                                        value={`${filters.sort_by}_${filters.order}`}
-                                        onChange={(e) => {
-                                            const [sort_by, order] = e.target.value.split('_');
-                                            setFilters(prev => ({ ...prev, sort_by, order }));
-                                        }}
-                                    >
-                                        <option value="created_at_DESC">Newest First</option>
-                                        <option value="created_at_ASC">Oldest First</option>
-                                        <option value="product_name_ASC">Name: A to Z</option>
-                                        <option value="product_name_DESC">Name: Z to A</option>
-                                        <option value="price_ASC">Price: Low to High</option>
-                                        <option value="price_DESC">Price: High to Low</option>
-                                        <option value="stock_quantity_ASC">Stock: Low to High</option>
-                                        <option value="sold_quantity_DESC">Most Sold</option>
-                                    </select>
-                                </div>
-                                <div className="col-lg-2">
-                                    <button
-                                        className="btn btn-outline-main w-100"
-                                        onClick={resetFilters}
-                                    >
-                                        <i className="ph ph-x me-8"></i>
-                                        Reset
-                                    </button>
+                                    <i className="ph ph-magnifying-glass position-absolute top-50 translate-middle-y end-0 me-16 text-gray-500"></i>
                                 </div>
                             </div>
+                            <div className="col-lg-3">
+                                <select
+                                    className="common-input common-input--lg"
+                                    value={filters.status}
+                                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                                >
+                                    <option value="">All Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                    <option value="out_of_stock">Out of Stock</option>
+                                </select>
+                            </div>
+                            <div className="col-lg-3">
+                                <select
+                                    className="common-input common-input--lg"
+                                    value={`${filters.sort_by}_${filters.order}`}
+                                    onChange={(e) => {
+                                        const [sort_by, order] = e.target.value.split('_');
+                                        setFilters(prev => ({ ...prev, sort_by, order }));
+                                    }}
+                                >
+                                    <option value="created_at_DESC">Newest First</option>
+                                    <option value="created_at_ASC">Oldest First</option>
+                                    <option value="product_name_ASC">Name: A to Z</option>
+                                    <option value="product_name_DESC">Name: Z to A</option>
+                                    <option value="price_ASC">Price: Low to High</option>
+                                    <option value="price_DESC">Price: High to Low</option>
+                                    <option value="stock_quantity_ASC">Stock: Low to High</option>
+                                    <option value="sold_quantity_DESC">Most Sold</option>
+                                </select>
+                            </div>
+                            <div className="col-lg-2">
+                                <button
+                                    className="btn btn-outline-main w-100 py-12 rounded-8"
+                                    onClick={resetFilters}
+                                >
+                                    <i className="ph ph-x me-8"></i>
+                                    Reset
+                                </button>
+                            </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Bulk Actions */}
                 {selectedProducts.length > 0 && (
                     <div className="border border-main-600 rounded-16 p-16 mb-24 bg-main-50">
-                        <div className="flex-between">
-                            <span className="fw-bold">
+                        <div className="flex-between flex-wrap gap-16">
+                            <span className="fw-semibold text-main-600">
+                                <i className="ph ph-check-circle me-8"></i>
                                 {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''} selected
                             </span>
-                            <div className="flex-align gap-16">
+                            <div className="flex-align gap-8">
                                 <select
-                                    className="form-select"
+                                    className="common-input"
                                     value={bulkAction}
                                     onChange={(e) => setBulkAction(e.target.value)}
-                                    style={{ width: 'auto' }}
+                                    style={{ width: '180px' }}
                                 >
                                     <option value="">Bulk Actions</option>
                                     <option value="delete">Delete Selected</option>
@@ -325,13 +345,13 @@ const ManageProducts = () => {
                                     <option value="deactivate">Set Inactive</option>
                                 </select>
                                 <button
-                                    className="btn btn-main btn-sm"
+                                    className="btn btn-main py-9 px-24 rounded-8"
                                     onClick={handleBulkAction}
                                 >
                                     Apply
                                 </button>
                                 <button
-                                    className="btn btn-outline-main btn-sm"
+                                    className="btn btn-outline-main py-9 px-24 rounded-8"
                                     onClick={() => setSelectedProducts([])}
                                 >
                                     Clear
@@ -341,21 +361,16 @@ const ManageProducts = () => {
                     </div>
                 )}
 
-                {/* Products Table - FIXED VERSION */}
-                <div className="border border-gray-100 rounded-16 overflow-hidden bg-white">
-                    {loading ? (
-                        <div className="text-center py-80">
-                            <div className="spinner-border text-main-600"></div>
-                            <p className="mt-16 text-gray-500">Loading products...</p>
-                        </div>
-                    ) : products.length === 0 ? (
+                {/* Products Table */}
+                <div className="cart-table border border-gray-100 rounded-16 bg-white">
+                    {products.length === 0 ? (
                         <div className="text-center py-80">
                             <i className="ph ph-package text-gray-300" style={{ fontSize: '80px' }}></i>
-                            <h5 className="mt-24 mb-16">No Products Yet</h5>
+                            <h5 className="mt-24 mb-16 text-gray-900">No Products Yet</h5>
                             <p className="text-gray-500 mb-32">Start adding products to your store</p>
                             <Link
                                 to={`/seller/stores/${storeId}/products/create`}
-                                className="btn btn-main px-40"
+                                className="btn btn-main py-18 px-40 rounded-8"
                             >
                                 <i className="ph ph-plus me-8"></i>
                                 Add First Product
@@ -363,11 +378,11 @@ const ManageProducts = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="table-responsive">
-                                <table className="table align-middle mb-0">
-                                    <thead className="bg-gray-50">
+                            <div className="overflow-x-auto scroll-sm scroll-sm-horizontal">
+                                <table className="table style-three">
+                                    <thead>
                                         <tr>
-                                            <th style={{ width: '100px' }} className="text-center">
+                                            <th className="h6 mb-0 text-lg fw-bold" style={{width: '60px'}}>
                                                 <input
                                                     type="checkbox"
                                                     className="form-check-input"
@@ -375,20 +390,20 @@ const ManageProducts = () => {
                                                     onChange={handleSelectAll}
                                                 />
                                             </th>
-                                            <th style={{ width: '130px' }} className="text-center">Image</th>
-                                            <th className="text-center">Product Name</th>
-                                            <th style={{ width: '120px' }} className="text-center">Price</th>
-                                            <th style={{ width: '120px' }} className="text-center">Stock</th>
-                                            <th style={{ width: '120px' }} className="text-center">Sold</th>
-                                            <th style={{ width: '130px' }} className="text-center">Status</th>
-                                            <th style={{ width: '160px' }} className="text-center">Actions</th>
+                                            <th className="h6 mb-0 text-lg fw-bold" style={{width: '100px'}}>Image</th>
+                                            <th className="h6 mb-0 text-lg fw-bold">Product</th>
+                                            <th className="h6 mb-0 text-lg fw-bold text-center" style={{width: '120px'}}>Price</th>
+                                            <th className="h6 mb-0 text-lg fw-bold text-center" style={{width: '120px'}}>Stock</th>
+                                            <th className="h6 mb-0 text-lg fw-bold text-center" style={{width: '120px'}}>Sold</th>
+                                            <th className="h6 mb-0 text-lg fw-bold text-center" style={{width: '120px'}}>Status</th>
+                                            <th className="h6 mb-0 text-lg fw-bold text-center" style={{width: '150px'}}>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {products.map(product => (
-                                            <tr key={product.product_id} className="border-bottom">
+                                            <tr key={product.product_id}>
                                                 {/* Checkbox */}
-                                                <td className="text-center">
+                                                <td>
                                                     <input
                                                         type="checkbox"
                                                         className="form-check-input"
@@ -398,8 +413,8 @@ const ManageProducts = () => {
                                                 </td>
 
                                                 {/* Image */}
-                                                <td className="text-center">
-                                                    <div className="d-flex justify-content-center">
+                                                <td>
+                                                    <div className="table-product__thumb border border-gray-100 rounded-8 flex-center" style={{width: '80px', height: '80px'}}>
                                                         <img
                                                             src={
                                                                 product.images?.[0]?.image_url
@@ -407,12 +422,7 @@ const ManageProducts = () => {
                                                                     : '/images/placeholder-product.jpg'
                                                             }
                                                             alt={product.product_name}
-                                                            className="rounded-8 border"
-                                                            style={{
-                                                                width: '60px',
-                                                                height: '60px',
-                                                                objectFit: 'cover',
-                                                            }}
+                                                            className="w-100 h-100 object-fit-cover rounded-8"
                                                             onError={(e) => {
                                                                 e.target.src = '/images/placeholder-product.jpg';
                                                             }}
@@ -420,73 +430,79 @@ const ManageProducts = () => {
                                                     </div>
                                                 </td>
 
-                                                {/* Product Name + Category */}
+                                                {/* Product Info */}
                                                 <td>
-                                                    <div className="fw-semibold text-dark mb-1">
-                                                        {product.product_name}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {product.category?.category_name || 'No Category'}
+                                                    <div className="table-product__content">
+                                                        <h6 className="title text-lg fw-semibold mb-8">
+                                                            <Link to={`/products/${product.product_id}`} className="link text-line-2">
+                                                                {product.product_name}
+                                                            </Link>
+                                                        </h6>
+                                                        <span className="text-sm text-gray-500">
+                                                            <i className="ph ph-tag me-4"></i>
+                                                            {product.category?.category_name || 'No Category'}
+                                                        </span>
                                                     </div>
                                                 </td>
 
                                                 {/* Price */}
-                                                <td className="text-center fw-bold text-main-600">
-                                                    {parseInt(product.price || 0).toLocaleString('vi-VN')}đ
+                                                <td className="text-center">
+                                                    <span className="text-lg fw-bold text-main-600">
+                                                        {parseInt(product.price || 0).toLocaleString('vi-VN')}đ
+                                                    </span>
                                                 </td>
 
                                                 {/* Stock */}
                                                 <td className="text-center">
-                                                    <span
-                                                        className={`badge ${product.stock_quantity === 0
-                                                                ? 'bg-danger'
-                                                                : product.stock_quantity < 10
-                                                                    ? 'bg-warning text-dark'
-                                                                    : 'bg-success'
-                                                            } px-3 py-2`}
-                                                    >
+                                                    <span className={`px-16 py-6 text-sm fw-medium rounded-pill ${
+                                                        product.stock_quantity === 0
+                                                            ? 'bg-danger-50 text-danger-600'
+                                                            : product.stock_quantity < 10
+                                                            ? 'bg-warning-50 text-warning-600'
+                                                            : 'bg-success-50 text-success-600'
+                                                    }`}>
                                                         {product.stock_quantity || 0}
                                                     </span>
                                                 </td>
 
                                                 {/* Sold */}
-                                                <td className="text-center fw-semibold">
-                                                    {product.sold_quantity || 0}
+                                                <td className="text-center">
+                                                    <span className="fw-semibold text-gray-900">
+                                                        {product.sold_quantity || 0}
+                                                    </span>
                                                 </td>
 
                                                 {/* Status */}
                                                 <td className="text-center">
-                                                    <span
-                                                        className={`badge ${getStatusBadge(product.status)} px-3 py-2 text-white`}
-                                                    >
+                                                    <span style={{width: '100px'}} className={`px-16 py-6 text-sm fw-medium rounded-pill text-white ${getStatusBadge(product.status)}`}>
                                                         {getStatusText(product.status)}
                                                     </span>
                                                 </td>
 
                                                 {/* Actions */}
                                                 <td className="text-center">
-                                                    <div className="action-buttons">
+                                                    <div className="flex-center gap-8">
                                                         <Link
                                                             to={`/products/${product.product_id}`}
-                                                            className="action-btn btn-view"
+                                                            className="w-40 h-40 bg-main-50 text-main-600 hover-bg-main-600 hover-text-white rounded-circle flex-center"
                                                             title="View"
                                                             target="_blank"
                                                         >
-                                                            <i className="ph ph-eye"></i>
+                                                            <i className="ph ph-eye text-xl"></i>
                                                         </Link>
                                                         <Link
                                                             to={`/seller/products/${product.product_id}/edit`}
-                                                            className="action-btn btn-edit"
+                                                            className="w-40 h-40 bg-success-50 text-success-600 hover-bg-success-600 hover-text-white rounded-circle flex-center"
                                                             title="Edit"
                                                         >
-                                                            <i className="ph ph-pencil"></i>
+                                                            <i className="ph ph-pencil-simple text-xl"></i>
                                                         </Link>
                                                         <button
-                                                            className="action-btn btn-delete"
+                                                            className="w-40 h-40 bg-danger-50 text-danger-600 hover-bg-danger-600 hover-text-white rounded-circle flex-center"
                                                             title="Delete"
                                                             onClick={() => handleDeleteProduct(product.product_id)}
                                                         >
-                                                            <i className="ph ph-trash"></i>
+                                                            <i className="ph ph-trash text-xl"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -498,49 +514,63 @@ const ManageProducts = () => {
 
                             {/* Pagination */}
                             {pagination && pagination.totalPages > 1 && (
-                                <div className="border-top border-gray-100 p-24">
-                                    <div className="flex-between flex-wrap gap-16">
-                                        <div className="text-sm text-gray-500">
-                                            Showing {((pagination.currentPage - 1) * filters.limit) + 1} to{' '}
-                                            {Math.min(pagination.currentPage * filters.limit, pagination.totalItems)} of{' '}
-                                            {pagination.totalItems} products
-                                        </div>
-                                        <nav>
-                                            <ul className="pagination mb-0">
-                                                <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
+                                <div className="flex-between flex-wrap gap-16 mt-24 px-40 pb-40">
+                                    <span className="text-gray-500 text-sm">
+                                        Showing {((pagination.currentPage - 1) * filters.limit) + 1} to{' '}
+                                        {Math.min(pagination.currentPage * filters.limit, pagination.totalItems)} of{' '}
+                                        {pagination.totalItems} products
+                                    </span>
+                                    <ul className="pagination flex-align flex-wrap gap-8">
+                                        <li className="page-item">
+                                            <button
+                                                className={`page-link h-48 w-48 flex-center text-xxl rounded-8 fw-medium ${
+                                                    pagination.currentPage === 1 ? 'text-gray-300 pointer-events-none' : 'text-gray-900 hover-bg-main-600 hover-text-white'
+                                                }`}
+                                                onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
+                                                disabled={pagination.currentPage === 1}
+                                            >
+                                                <i className="ph ph-caret-left"></i>
+                                            </button>
+                                        </li>
+                                        {[...Array(Math.min(pagination.totalPages, 5))].map((_, i) => {
+                                            let pageNum;
+                                            if (pagination.totalPages <= 5) {
+                                                pageNum = i + 1;
+                                            } else if (pagination.currentPage <= 3) {
+                                                pageNum = i + 1;
+                                            } else if (pagination.currentPage >= pagination.totalPages - 2) {
+                                                pageNum = pagination.totalPages - 4 + i;
+                                            } else {
+                                                pageNum = pagination.currentPage - 2 + i;
+                                            }
+                                            
+                                            return (
+                                                <li key={pageNum} className="page-item">
                                                     <button
-                                                        className="page-link"
-                                                        onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
-                                                        disabled={pagination.currentPage === 1}
+                                                        className={`page-link h-48 w-48 flex-center text-md rounded-8 fw-medium ${
+                                                            pagination.currentPage === pageNum 
+                                                                ? 'bg-main-600 text-white' 
+                                                                : 'text-gray-900 hover-bg-main-600 hover-text-white'
+                                                        }`}
+                                                        onClick={() => handleFilterChange('page', pageNum)}
                                                     >
-                                                        Previous
+                                                        {pageNum}
                                                     </button>
                                                 </li>
-                                                {[...Array(pagination.totalPages)].map((_, i) => (
-                                                    <li
-                                                        key={i + 1}
-                                                        className={`page-item ${pagination.currentPage === i + 1 ? 'active' : ''}`}
-                                                    >
-                                                        <button
-                                                            className="page-link"
-                                                            onClick={() => handleFilterChange('page', i + 1)}
-                                                        >
-                                                            {i + 1}
-                                                        </button>
-                                                    </li>
-                                                ))}
-                                                <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
-                                                        disabled={pagination.currentPage === pagination.totalPages}
-                                                    >
-                                                        Next
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                    </div>
+                                            );
+                                        })}
+                                        <li className="page-item">
+                                            <button
+                                                className={`page-link h-48 w-48 flex-center text-xxl rounded-8 fw-medium ${
+                                                    pagination.currentPage === pagination.totalPages ? 'text-gray-300 pointer-events-none' : 'text-gray-900 hover-bg-main-600 hover-text-white'
+                                                }`}
+                                                onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
+                                                disabled={pagination.currentPage === pagination.totalPages}
+                                            >
+                                                <i className="ph ph-caret-right"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
                             )}
                         </>

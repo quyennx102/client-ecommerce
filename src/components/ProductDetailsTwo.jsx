@@ -19,7 +19,7 @@ const ProductDetailsTwo = () => {
     // Quantity state
     const [quantity, setQuantity] = useState(1);
     const [addingToCart, setAddingToCart] = useState(false);
-    
+
     // Review form state
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewForm, setReviewForm] = useState({
@@ -46,10 +46,10 @@ const ProductDetailsTwo = () => {
             try {
                 setLoading(true);
                 const response = await productService.getProductById(id);
-                
+
                 if (response.success) {
                     setProduct(response.data);
-                    
+
                     // Set images
                     if (response.data.images && response.data.images.length > 0) {
                         setProductImages(response.data.images);
@@ -77,10 +77,10 @@ const ProductDetailsTwo = () => {
             try {
                 setLoadingReviews(true);
                 const response = await reviewService.getProductReviews(id);
-                
+
                 if (response.success) {
                     setReviews(response.data);
-                    
+
                     // Calculate rating distribution
                     const distribution = calculateRatingDistribution(response.data);
                     setRatingDistribution(distribution);
@@ -101,7 +101,7 @@ const ProductDetailsTwo = () => {
     const calculateRatingDistribution = (reviewsData) => {
         const total = reviewsData.length;
         const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-        
+
         reviewsData.forEach(review => {
             counts[review.rating]++;
         });
@@ -170,7 +170,7 @@ const ProductDetailsTwo = () => {
     // Submit review handler
     const handleSubmitReview = async (e) => {
         e.preventDefault();
-        
+
         if (!reviewForm.title || !reviewForm.content) {
             toast.error('Please fill in all review fields');
             return;
@@ -188,7 +188,7 @@ const ProductDetailsTwo = () => {
                 toast.success('Review submitted successfully!');
                 setReviewForm({ title: '', content: '' });
                 setReviewRating(5);
-                
+
                 // Reload reviews
                 const reviewsResponse = await reviewService.getProductReviews(id);
                 if (reviewsResponse.success) {
@@ -211,11 +211,11 @@ const ProductDetailsTwo = () => {
     const handleLikeReview = async (reviewId) => {
         try {
             const response = await reviewService.likeReview(reviewId);
-            
+
             if (response.success) {
                 // Update local state
-                setReviews(reviews.map(review => 
-                    review.review_id === reviewId 
+                setReviews(reviews.map(review =>
+                    review.review_id === reviewId
                         ? { ...review, likes: (review.likes || 0) + 1 }
                         : review
                 ));
@@ -289,14 +289,14 @@ const ProductDetailsTwo = () => {
         <section className="product-details py-80">
             <div className="container container-lg">
                 <div className="row gy-4">
-                    <div className="col-xl-9">
+                    <div className="col-lg-9">
                         <div className="row gy-4">
                             <div className="col-xl-6">
                                 <div className="product-details__left">
                                     <div className="product-details__thumb-slider border border-gray-100 rounded-16">
                                         <div className="">
                                             <div className="product-details__thumb flex-center h-100">
-                                                <img src={mainImage} alt={product.product_name} />
+                                                <img src={`${process.env.REACT_APP_IMAGE_URL}${mainImage}`} alt={product.product_name} />
                                             </div>
                                         </div>
                                     </div>
@@ -305,12 +305,8 @@ const ProductDetailsTwo = () => {
                                             <div className="product-details__images-slider">
                                                 <Slider {...settingsThumbs}>
                                                     {productImages.map((image, index) => (
-                                                        <div 
-                                                            className="center max-w-120 max-h-120 h-100 flex-center border border-gray-100 rounded-16 p-8" 
-                                                            key={index} 
-                                                            onClick={() => setMainImage(image.image_url)}
-                                                        >
-                                                            <img className='thum' src={image.image_url} alt={`${product.product_name} ${index + 1}`} />
+                                                        <div className="center max-w-120 max-h-120 h-100 flex-center border border-gray-100 rounded-16 p-8" key={index} onClick={() => setMainImage(image)}>
+                                                            <img className='thum' src={`${process.env.REACT_APP_IMAGE_URL}${image.image_url}`} alt={`${product.product_name} ${index + 1}`} />
                                                         </div>
                                                     ))}
                                                 </Slider>
@@ -362,13 +358,12 @@ const ProductDetailsTwo = () => {
                                         <div className="flex-align gap-12 flex-wrap">
                                             <div className="flex-align gap-8">
                                                 {[...Array(5)].map((_, index) => (
-                                                    <span 
+                                                    <span
                                                         key={index}
-                                                        className={`text-15 fw-medium d-flex ${
-                                                            index < Math.round(product.average_rating || 0)
+                                                        className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
                                                                 ? 'text-warning-600'
                                                                 : 'text-gray-400'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <i className="ph-fill ph-star" />
                                                     </span>
@@ -419,7 +414,7 @@ const ProductDetailsTwo = () => {
                                         {product.category && (
                                             <div className="mb-16">
                                                 <span className="text-gray-700">Category: </span>
-                                                <Link 
+                                                <Link
                                                     to={`/shop?category=${product.category.category_id}`}
                                                     className="text-main-600 hover-text-main-800"
                                                 >
@@ -430,7 +425,7 @@ const ProductDetailsTwo = () => {
                                         {product.store && (
                                             <div className="mb-16">
                                                 <span className="text-gray-700">Store: </span>
-                                                <Link 
+                                                <Link
                                                     to={`/store/${product.store.store_id}`}
                                                     className="text-main-600 hover-text-main-800 fw-medium"
                                                 >
@@ -441,8 +436,8 @@ const ProductDetailsTwo = () => {
                                         <div className="mb-16">
                                             <span className="text-gray-700">Stock: </span>
                                             <span className={product.stock_quantity > 0 ? 'text-success-600 fw-medium' : 'text-danger-600 fw-medium'}>
-                                                {product.stock_quantity > 0 
-                                                    ? `${product.stock_quantity} available` 
+                                                {product.stock_quantity > 0
+                                                    ? `${product.stock_quantity} available`
                                                     : 'Out of Stock'
                                                 }
                                             </span>
@@ -465,7 +460,7 @@ const ProductDetailsTwo = () => {
                                     Quantity
                                 </label>
                                 <div className="d-flex rounded-4 overflow-hidden">
-                                    <button 
+                                    <button
                                         onClick={decrementQuantity}
                                         type="button"
                                         className="quantity__minus flex-shrink-0 h-48 w-48 text-neutral-600 bg-gray-50 flex-center hover-bg-main-600 hover-text-white"
@@ -480,7 +475,7 @@ const ProductDetailsTwo = () => {
                                         value={quantity}
                                         readOnly
                                     />
-                                    <button 
+                                    <button
                                         onClick={incrementQuantity}
                                         type="button"
                                         className="quantity__plus flex-shrink-0 h-48 w-48 text-neutral-600 bg-gray-50 flex-center hover-bg-main-600 hover-text-white"
@@ -676,7 +671,7 @@ const ProductDetailsTwo = () => {
                                         {/* Reviews List */}
                                         <div className="col-lg-6">
                                             <h6 className="mb-24">Customer Reviews</h6>
-                                            
+
                                             {loadingReviews ? (
                                                 <div className="text-center py-4">
                                                     <div className="spinner-border text-main-600" role="status">
@@ -687,11 +682,10 @@ const ProductDetailsTwo = () => {
                                                 <p className="text-gray-500">No reviews yet. Be the first to review!</p>
                                             ) : (
                                                 reviews.map((review, index) => (
-                                                    <div 
-                                                        key={review.review_id} 
-                                                        className={`d-flex align-items-start gap-24 ${
-                                                            index < reviews.length - 1 ? 'pb-44 border-bottom border-gray-100 mb-44' : ''
-                                                        }`}
+                                                    <div
+                                                        key={review.review_id}
+                                                        className={`d-flex align-items-start gap-24 ${index < reviews.length - 1 ? 'pb-44 border-bottom border-gray-100 mb-44' : ''
+                                                            }`}
                                                     >
                                                         <img
                                                             src={review.user?.avatar_url || "/assets/images/thumbs/comment-img1.png"}
@@ -704,13 +698,12 @@ const ProductDetailsTwo = () => {
                                                                     <h6 className="mb-12 text-md">{review.user?.full_name || 'Anonymous'}</h6>
                                                                     <div className="flex-align gap-8">
                                                                         {[...Array(5)].map((_, starIndex) => (
-                                                                            <span 
+                                                                            <span
                                                                                 key={starIndex}
-                                                                                className={`text-15 fw-medium d-flex ${
-                                                                                    starIndex < review.rating
+                                                                                className={`text-15 fw-medium d-flex ${starIndex < review.rating
                                                                                         ? 'text-warning-600'
                                                                                         : 'text-gray-400'
-                                                                                }`}
+                                                                                    }`}
                                                                             >
                                                                                 <i className="ph-fill ph-star" />
                                                                             </span>
@@ -724,7 +717,7 @@ const ProductDetailsTwo = () => {
                                                             <h6 className="mb-14 text-md mt-24">{review.title}</h6>
                                                             <p className="text-gray-700">{review.content}</p>
                                                             <div className="flex-align gap-20 mt-44">
-                                                                <button 
+                                                                <button
                                                                     className="flex-align gap-12 text-gray-700 hover-text-main-600"
                                                                     onClick={() => handleLikeReview(review.review_id)}
                                                                 >
@@ -746,13 +739,12 @@ const ProductDetailsTwo = () => {
                                                     </span>
                                                     <div className="flex-align gap-8 mb-16">
                                                         {[...Array(5)].map((_, index) => (
-                                                            <span 
+                                                            <span
                                                                 key={index}
-                                                                className={`text-15 fw-medium d-flex cursor-pointer ${
-                                                                    index < reviewRating
+                                                                className={`text-15 fw-medium d-flex cursor-pointer ${index < reviewRating
                                                                         ? 'text-warning-600'
                                                                         : 'text-gray-400'
-                                                                }`}
+                                                                    }`}
                                                                 onClick={() => setReviewRating(index + 1)}
                                                                 style={{ cursor: 'pointer' }}
                                                             >
@@ -779,7 +771,7 @@ const ProductDetailsTwo = () => {
                                                                 id="review-title"
                                                                 placeholder="Great Product"
                                                                 value={reviewForm.title}
-                                                                onChange={(e) => setReviewForm({...reviewForm, title: e.target.value})}
+                                                                onChange={(e) => setReviewForm({ ...reviewForm, title: e.target.value })}
                                                                 required
                                                             />
                                                         </div>
@@ -796,7 +788,7 @@ const ProductDetailsTwo = () => {
                                                                 rows="5"
                                                                 placeholder="Share your experience with this product..."
                                                                 value={reviewForm.content}
-                                                                onChange={(e) => setReviewForm({...reviewForm, content: e.target.value})}
+                                                                onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })}
                                                                 required
                                                             />
                                                         </div>
@@ -830,13 +822,12 @@ const ProductDetailsTwo = () => {
                                                         </h2>
                                                         <div className="flex-center gap-8">
                                                             {[...Array(5)].map((_, index) => (
-                                                                <span 
+                                                                <span
                                                                     key={index}
-                                                                    className={`text-15 fw-medium d-flex ${
-                                                                        index < Math.round(product.average_rating || 0)
+                                                                    className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
                                                                             ? 'text-warning-600'
                                                                             : 'text-gray-400'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     <i className="ph-fill ph-star" />
                                                                 </span>
@@ -865,13 +856,12 @@ const ProductDetailsTwo = () => {
                                                                 </div>
                                                                 <div className="flex-align gap-4">
                                                                     {[...Array(5)].map((_, starIndex) => (
-                                                                        <span 
+                                                                        <span
                                                                             key={starIndex}
-                                                                            className={`text-xs fw-medium d-flex ${
-                                                                                starIndex < dist.stars
+                                                                            className={`text-xs fw-medium d-flex ${starIndex < dist.stars
                                                                                     ? 'text-warning-600'
                                                                                     : 'text-gray-400'
-                                                                            }`}
+                                                                                }`}
                                                                         >
                                                                             <i className="ph-fill ph-star" />
                                                                         </span>

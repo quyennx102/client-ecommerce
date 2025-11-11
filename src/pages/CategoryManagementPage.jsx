@@ -28,7 +28,7 @@ const CategoryManagementPage = () => {
             <Preloader />
 
             {/* HeaderTwo */}
-            <HeaderTwo category={true} />
+            {/* <HeaderTwo category={true} /> */}
 
             {/* Breadcrumb */}
             <Breadcrumb title={"Category Management"} />
@@ -37,10 +37,10 @@ const CategoryManagementPage = () => {
             <CategoryManagement />
 
             {/* FooterTwo */}
-            <FooterTwo />
+            {/* <FooterTwo /> */}
 
             {/* BottomFooter */}
-            <BottomFooter />
+            {/* <BottomFooter /> */}
 
 
         </>

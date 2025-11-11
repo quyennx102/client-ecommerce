@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react'
 import query from 'jquery';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Thêm import
-
+import './HeaderTwo.css';
 const HeaderTwo = ({ category }) => {
     const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger } = useAuth(); // Sử dụng auth context
-    
+
     const [scroll, setScroll] = useState(false)
     useEffect(() => {
         window.onscroll = () => {
@@ -74,7 +74,7 @@ const HeaderTwo = ({ category }) => {
         <>
             <div className="overlay" />
             <div className={`side-overlay ${(menuActive || activeCategory) && "show"}`} />
-            
+
             {/* ==================== Search Box Start Here ==================== */}
             <form action="#" className={`search-box ${activeSearch && "active"}`}>
                 <button onClick={handleSearchToggle}
@@ -100,7 +100,7 @@ const HeaderTwo = ({ category }) => {
                 </div>
             </form>
             {/* ==================== Search Box End Here ==================== */}
-            
+
             {/* ==================== Mobile Menu Start Here ==================== */}
             <div className={`mobile-menu scroll-sm d-lg-none d-block ${menuActive && "active"}`}>
                 <button onClick={() => { handleMenuToggle(); setActiveIndex(null) }} type="button" className="close-button">
@@ -110,7 +110,7 @@ const HeaderTwo = ({ category }) => {
                     <Link to="/" className="mobile-menu__logo">
                         <img src="/assets/images/logo/logo.png" alt="Logo" />
                     </Link>
-                    
+
                     {/* User Info in Mobile Menu */}
                     {isAuthenticated && (
                         <div className="mobile-user-info bg-main-50 p-3 rounded-8 mb-3">
@@ -118,10 +118,9 @@ const HeaderTwo = ({ category }) => {
                                 <i className="ph ph-user text-main-600"></i>
                                 <div>
                                     <div className="fw-medium text-dark">{user?.full_name}</div>
-                                    <span className={`badge ${
-                                        user?.role === 'admin' ? 'bg-danger' : 
+                                    <span className={`badge ${user?.role === 'admin' ? 'bg-danger' :
                                         user?.role === 'seller' ? 'bg-warning text-dark' : 'bg-secondary'
-                                    } text-xs`}>
+                                        } text-xs`}>
                                         {user?.role}
                                     </span>
                                 </div>
@@ -344,7 +343,7 @@ const HeaderTwo = ({ category }) => {
                                         </Link>
                                     </li>
                                     <li className="nav-menu__item">
-                                        <button 
+                                        <button
                                             onClick={handleLogout}
                                             className="nav-menu__link text-danger border-0 bg-transparent w-100 text-start"
                                         >
@@ -367,7 +366,7 @@ const HeaderTwo = ({ category }) => {
                 </div>
             </div>
             {/* ==================== Mobile Menu End Here ==================== */}
-            
+
             {/* ======================= Middle Header Two Start ========================= */}
             <header className="header-middle style-two bg-color-neutral">
                 <div className="container container-lg">
@@ -379,7 +378,7 @@ const HeaderTwo = ({ category }) => {
                             </Link>
                         </div>
                         {/* Logo End  */}
-                        
+
                         {/* form Category Start */}
                         <div className="flex-align gap-16">
                             <div className="select-dropdown-for-home-two d-lg-none d-block">
@@ -420,7 +419,7 @@ const HeaderTwo = ({ category }) => {
                             </form>
                         </div>
                         {/* form Category start */}
-                        
+
                         {/* Header Middle Right start */}
                         <div className="header-right flex-align d-lg-block d-none">
                             <div className="header-two-activities flex-align flex-wrap gap-32">
@@ -447,13 +446,13 @@ const HeaderTwo = ({ category }) => {
                                         Cart
                                     </span>
                                 </Link>
-                                
+
                                 {/* User Profile Dropdown */}
                                 {isAuthenticated ? (
                                     <div className="dropdown">
-                                        <button 
+                                        <button
                                             className="flex-align flex-column gap-8 item-hover-two border-0 bg-transparent"
-                                            type="button" 
+                                            type="button"
                                             data-bs-toggle="dropdown"
                                         >
                                             <span className="text-2xl text-white d-flex position-relative item-hover__text">
@@ -463,15 +462,14 @@ const HeaderTwo = ({ category }) => {
                                                 {user?.full_name?.split(' ')[0] || 'Profile'}
                                             </span>
                                         </button>
-                                        <ul className="dropdown-menu dropdown-menu-end">
+                                        <ul className="dropdown-menu dropdown-menu-end" style={{width: '150px'}}>
                                             <li>
                                                 <span className="dropdown-item-text">
                                                     <small className="text-muted">Signed in as</small>
                                                     <div className="fw-medium">{user?.full_name}</div>
-                                                    <span className={`badge ${
-                                                        user?.role === 'admin' ? 'bg-danger' : 
+                                                    <span className={`badge ${user?.role === 'admin' ? 'bg-danger' :
                                                         user?.role === 'seller' ? 'bg-warning text-dark' : 'bg-secondary'
-                                                    }`}>
+                                                        }`}>
                                                         {user?.role}
                                                     </span>
                                                 </span>
@@ -489,48 +487,74 @@ const HeaderTwo = ({ category }) => {
                                                     My Cart
                                                 </Link>
                                             </li>
-                                            
+
                                             {/* Role-specific dropdown items */}
                                             {isSeller() && (
                                                 <>
                                                     <li><hr className="dropdown-divider" /></li>
+                                                    <li className="dropdown-header text-warning">Seller Tools</li>
                                                     <li>
-                                                        <Link className="dropdown-item text-warning" to="/seller/dashboard">
+                                                        <Link className="dropdown-item" to="/seller/dashboard">
                                                             <i className="ph ph-gauge me-2"></i>
                                                             Seller Dashboard
                                                         </Link>
                                                     </li>
                                                     <li>
-                                                        <Link className="dropdown-item text-warning" to="/seller/stores">
+                                                        <Link className="dropdown-item" to="/seller/stores">
                                                             <i className="ph ph-storefront me-2"></i>
                                                             My Stores
                                                         </Link>
                                                     </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/seller/products">
+                                                            <i className="ph ph-package me-2"></i>
+                                                            My Products
+                                                        </Link>
+                                                    </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/seller/orders">
+                                                            <i className="ph ph-shopping-cart me-2"></i>
+                                                            Orders
+                                                        </Link>
+                                                    </li>
                                                 </>
                                             )}
-                                            
+
                                             {isAdmin() && (
                                                 <>
                                                     <li><hr className="dropdown-divider" /></li>
+                                                    <li className="dropdown-header text-danger">Admin Tools</li>
                                                     <li>
-                                                        <Link className="dropdown-item text-danger" to="/admin/dashboard">
+                                                        <Link className="dropdown-item" to="/admin/dashboard">
                                                             <i className="ph ph-gauge me-2"></i>
                                                             Admin Dashboard
                                                         </Link>
                                                     </li>
                                                     <li>
-                                                        <Link className="dropdown-item text-danger" to="/admin/products">
+                                                        <Link className="dropdown-item" to="/admin/users">
+                                                            <i className="ph ph-users me-2"></i>
+                                                            Manage Users
+                                                        </Link>
+                                                    </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/admin/products">
                                                             <i className="ph ph-package me-2"></i>
                                                             Manage Products
                                                         </Link>
                                                     </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/admin/transactions">
+                                                            <i className="ph ph-currency-dollar me-2"></i>
+                                                            Transactions
+                                                        </Link>
+                                                    </li>
                                                 </>
                                             )}
-                                            
+
                                             <li><hr className="dropdown-divider" /></li>
                                             <li>
-                                                <button 
-                                                    className="dropdown-item text-danger" 
+                                                <button
+                                                    className="dropdown-item text-danger"
                                                     onClick={handleLogout}
                                                 >
                                                     <i className="ph ph-sign-out me-2"></i>
@@ -559,14 +583,14 @@ const HeaderTwo = ({ category }) => {
                 </div>
             </header>
             {/* ======================= Middle Header Two End ========================= */}
-            
+
             {/* ==================== Header Two Start Here ==================== */}
             <header className={`header bg-white border-bottom border-gray-100 ${scroll && "fixed-header"}`}>
                 <div className="container container-lg">
                     <nav className="header-inner d-flex justify-content-between gap-8">
                         <div className="flex-align menu-category-wrapper">
                             {/* Category Dropdown - Giữ nguyên */}
-                            
+
                             {/* Menu Start  */}
                             <div className="header-menu d-lg-block d-none">
                                 {/* Nav Menu Start */}
@@ -639,28 +663,45 @@ const HeaderTwo = ({ category }) => {
                                     {/* Seller Menu in Desktop */}
                                     {isSeller() && (
                                         <li className="on-hover-item nav-menu__item has-submenu">
-                                            <Link to="#" className="nav-menu__link text-warning">
+                                            <Link to="#" className="nav-menu__link text-warning fw-bold">
+                                                <i className="ph ph-storefront me-1"></i>
                                                 Seller
                                             </Link>
                                             <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
                                                 <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/seller/dashboard"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
+                                                    <NavLink to="/seller/dashboard" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-gauge me-2"></i>
                                                         Dashboard
                                                     </NavLink>
                                                 </li>
                                                 <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/seller/stores"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
-                                                        My Stores
+                                                    <NavLink to="/seller/stores" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-storefront me-2"></i>
+                                                        Cửa hàng của tôi
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/seller/products" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-package me-2"></i>
+                                                        Sản phẩm
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/seller/orders" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-shopping-cart me-2"></i>
+                                                        Đơn hàng
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/seller/discounts" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-ticket me-2"></i>
+                                                        Mã giảm giá
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/seller/revenue" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-currency-dollar me-2"></i>
+                                                        Doanh thu
                                                     </NavLink>
                                                 </li>
                                             </ul>
@@ -670,38 +711,51 @@ const HeaderTwo = ({ category }) => {
                                     {/* Admin Menu in Desktop */}
                                     {isAdmin() && (
                                         <li className="on-hover-item nav-menu__item has-submenu">
-                                            <Link to="#" className="nav-menu__link text-danger">
+                                            <Link to="#" className="nav-menu__link text-danger fw-bold">
+                                                <i className="ph ph-gear me-1"></i>
                                                 Admin
                                             </Link>
                                             <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
                                                 <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/admin/dashboard"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
+                                                    <NavLink to="/admin/dashboard" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-gauge me-2"></i>
                                                         Dashboard
                                                     </NavLink>
                                                 </li>
                                                 <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/admin/products"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
-                                                        Products
+                                                    <NavLink to="/admin/users" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-users me-2"></i>
+                                                        Quản lý người dùng
                                                     </NavLink>
                                                 </li>
                                                 <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/admin/category"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
-                                                        Categories
+                                                    <NavLink to="/admin/products" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-package me-2"></i>
+                                                        Quản lý sản phẩm
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/admin/category" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-tag me-2"></i>
+                                                        Danh mục
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/admin/transactions" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-currency-dollar me-2"></i>
+                                                        Giao dịch
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/admin/discounts" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-ticket me-2"></i>
+                                                        Duyệt mã giảm giá
+                                                    </NavLink>
+                                                </li>
+                                                <li className="common-dropdown__item nav-submenu__item">
+                                                    <NavLink to="/admin/history" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
+                                                        <i className="ph ph-clock me-2"></i>
+                                                        Lịch sử thay đổi
                                                     </NavLink>
                                                 </li>
                                             </ul>
@@ -770,11 +824,11 @@ const HeaderTwo = ({ category }) => {
                             </div>
                             {/* Menu End  */}
                         </div>
-                        
+
                         {/* Header Right start */}
                         <div className="header-right flex-align">
                             {/* Language & Currency - Giữ nguyên */}
-                            
+
                             <div className="me-8 d-lg-none d-block">
                                 {/* Mobile icons - Giữ nguyên */}
                             </div>
