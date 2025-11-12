@@ -18,7 +18,7 @@ const PrivateRoute = ({ children, roles = [] }) => {
 
   if (!isAuthenticated) {
     // Redirect to login page with return url
-    return <Navigate to="/account" state={{ from: location }} replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Check if user has required role

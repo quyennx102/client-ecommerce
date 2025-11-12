@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import query from 'jquery';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Thêm import
 import './HeaderTwo.css';
 const HeaderTwo = ({ category }) => {
     const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger } = useAuth(); // Sử dụng auth context
-
     const [scroll, setScroll] = useState(false)
+    const navigate = useNavigate();
     useEffect(() => {
         window.onscroll = () => {
             if (window.pageYOffset < 150) {
@@ -68,6 +68,11 @@ const HeaderTwo = ({ category }) => {
     const handleLogout = () => {
         logout();
         setMenuActive(false);
+        navigate('/'); // Điều hướng về trang chủ sau khi logout
+    };
+    // Hàm xác định class active cho NavLink
+    const getNavLinkClass = ({ isActive }) => {
+        return isActive ? "nav-menu__link activePage" : "nav-menu__link";
     };
 
     return (
@@ -462,7 +467,7 @@ const HeaderTwo = ({ category }) => {
                                                 {user?.full_name?.split(' ')[0] || 'Profile'}
                                             </span>
                                         </button>
-                                        <ul className="dropdown-menu dropdown-menu-end" style={{width: '150px'}}>
+                                        <ul className="dropdown-menu dropdown-menu-end" style={{ width: '200px' }}>
                                             <li>
                                                 <span className="dropdown-item-text">
                                                     <small className="text-muted">Signed in as</small>
@@ -662,104 +667,102 @@ const HeaderTwo = ({ category }) => {
 
                                     {/* Seller Menu in Desktop */}
                                     {isSeller() && (
-                                        <li className="on-hover-item nav-menu__item has-submenu">
-                                            <Link to="#" className="nav-menu__link text-warning fw-bold">
-                                                <i className="ph ph-storefront me-1"></i>
-                                                Seller
-                                            </Link>
-                                            <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/dashboard" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-gauge me-2"></i>
-                                                        Dashboard
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/stores" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-storefront me-2"></i>
-                                                        Cửa hàng của tôi
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/products" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-package me-2"></i>
-                                                        Sản phẩm
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/orders" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-shopping-cart me-2"></i>
-                                                        Đơn hàng
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/discounts" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-ticket me-2"></i>
-                                                        Mã giảm giá
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/seller/revenue" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-currency-dollar me-2"></i>
-                                                        Doanh thu
-                                                    </NavLink>
-                                                </li>
-                                            </ul>
-                                        </li>
+                                        <>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/seller/dashboard" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
+                                                }>
+                                                    <i className="ph ph-gauge me-1"></i>
+                                                    Dashboard
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/seller/stores" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
+                                                }>
+                                                    <i className="ph ph-storefront me-1"></i>
+                                                    Stores
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/seller/products" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
+                                                }>
+                                                    <i className="ph ph-package me-1"></i>
+                                                    Products
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/seller/orders" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
+                                                }>
+                                                    <i className="ph ph-shopping-cart me-1"></i>
+                                                    Orders
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/seller/revenue" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
+                                                }>
+                                                    <i className="ph ph-currency-dollar me-1"></i>
+                                                    Revenue
+                                                </NavLink>
+                                            </li>
+                                        </>
                                     )}
 
                                     {/* Admin Menu in Desktop */}
                                     {isAdmin() && (
-                                        <li className="on-hover-item nav-menu__item has-submenu">
-                                            <Link to="#" className="nav-menu__link text-danger fw-bold">
-                                                <i className="ph ph-gear me-1"></i>
-                                                Admin
-                                            </Link>
-                                            <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/dashboard" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-gauge me-2"></i>
-                                                        Dashboard
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/users" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-users me-2"></i>
-                                                        Quản lý người dùng
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/products" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-package me-2"></i>
-                                                        Quản lý sản phẩm
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/category" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-tag me-2"></i>
-                                                        Danh mục
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/transactions" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-currency-dollar me-2"></i>
-                                                        Giao dịch
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/discounts" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-ticket me-2"></i>
-                                                        Duyệt mã giảm giá
-                                                    </NavLink>
-                                                </li>
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink to="/admin/history" className={({ isActive }) => isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"}>
-                                                        <i className="ph ph-clock me-2"></i>
-                                                        Lịch sử thay đổi
-                                                    </NavLink>
-                                                </li>
-                                            </ul>
-                                        </li>
+                                        <>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/dashboard" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-gauge me-1"></i>
+                                                    Dashboard
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/users" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-users me-1"></i>
+                                                    Users
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/products" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-package me-1"></i>
+                                                    Products
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/category" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-tag me-1"></i>
+                                                    Categories
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/transactions" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-currency-dollar me-1"></i>
+                                                    Transactions
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/discounts" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-ticket me-1"></i>
+                                                    Discounts
+                                                </NavLink>
+                                            </li>
+                                        </>
                                     )}
 
                                     {/* <li className="on-hover-item nav-menu__item has-submenu">

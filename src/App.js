@@ -29,6 +29,9 @@ import ProfilePage from "./pages/ProfilePage"; // Thêm trang profile
 import FooterTwo from "./components/FooterTwo";
 import BottomFooter from "./components/BottomFooter";
 import HeaderTwo from "./components/HeaderTwo";
+import SellerDiscountsPage from "./pages/SellerDiscountsPage";
+import SellerCreateDiscountPage from "./pages/SellerCreateDiscountPage";
+import AdminDiscountsPage from "./pages/AdminDiscountsPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 // import SellerDashboard from "./pages/seller/SellerDashboard"; // Thêm seller dashboard
 
@@ -86,6 +89,16 @@ function App() {
                 <CreateStorePage />
               </PrivateRoute>
             } />
+            <Route path="/seller/stores/:storeId/discounts" element={
+              <PrivateRoute roles={['seller', 'admin']}>
+                <SellerDiscountsPage />
+              </PrivateRoute>
+            } />
+            <Route path="/seller/stores/:storeId/discounts/create" element={
+              <PrivateRoute roles={['seller', 'admin']}>
+                <SellerCreateDiscountPage />
+              </PrivateRoute>
+            } />
             <Route path="/seller/stores/:storeId/products/create" element={
               <PrivateRoute roles={['seller', 'admin']}>
                 <CreateProductPage />
@@ -116,6 +129,11 @@ function App() {
             <Route path="/admin/category" element={
               <PrivateRoute roles={['admin']}>
                 <CategoryManagementPage />
+              </PrivateRoute>
+            } />
+            <Route path="/admin/discounts" element={
+              <PrivateRoute roles={['admin']}>
+                <AdminDiscountsPage />
               </PrivateRoute>
             } />
 

@@ -76,7 +76,7 @@ const MyStores = () => {
                   {store.banner_url && (
                     <div className="mb-16">
                       <img
-                        src={`${process.env.REACT_APP_API_URL}${store.banner_url}`}
+                        src={`${process.env.REACT_APP_IMAGE_URL}${store.banner_url}`}
                         alt={store.store_name}
                         className="w-100 rounded-8"
                         style={{ height: '150px', objectFit: 'cover' }}
@@ -105,6 +105,13 @@ const MyStores = () => {
                       className="btn btn-main py-12 px-24 flex-grow-1"
                     >
                       Manage Products
+                    </Link>
+                    <Link
+                      to={`/seller/stores/${store.store_id}/discounts`}
+                      className="btn btn-outline-main py-12 px-24"
+                      title="Manage Discounts"
+                    >
+                      <i className="ph ph-ticket"></i>
                     </Link>
                     <Link
                       to={`/seller/stores/${store.store_id}/stats`}
