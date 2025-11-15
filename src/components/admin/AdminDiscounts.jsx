@@ -12,7 +12,6 @@ const AdminDiscounts = () => {
         setLoading(true);
         try {
             const response = await discountService.getPendingCodes();
-            console.log(response.data);
             if (response.data.success) {
                 setPendingCodes(response.data.data);
             }

@@ -8,7 +8,7 @@ const productService = {
 
   // Get product by ID
   getProductById: async (id) => {
-    const response = await axiosInstance.get(`/products/${id}`);
+    const response = await axiosInstance.get(`/products/detail/${id}`);
     return response.data;
   },
 
@@ -32,7 +32,25 @@ const productService = {
   deleteProduct: async (id) => {
     const response = await axiosInstance.delete(`/products/${id}`);
     return response.data;
-  }
+  },
+
+  getTopSellingProducts: async () => {
+    const response = await axiosInstance.get('/products/top-selling');
+    return response.data;
+  },
+
+  getPopularProducts: async () => {
+    const response = await axiosInstance.get('/products/popular');
+    return response.data;
+  },
+  getTrendingProducts: async () => {
+    const response = await axiosInstance.get('/products/trending');
+    return response.data;
+  },
+  getDealProducts: async () => {
+    const response = await axiosInstance.get('/products/deals');
+    return response.data;
+  },
 };
 
 export default productService;

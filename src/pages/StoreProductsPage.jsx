@@ -1,15 +1,12 @@
 import React from "react";
 import Preloader from "../helper/Preloader";
-import HeaderTwo from "../components/HeaderTwo";
 import Breadcrumb from "../components/Breadcrumb";
 import ShippingTwo from "../components/ShippingTwo";
-import FooterTwo from "../components/FooterTwo";
 import ColorInit from "../helper/ColorInit";
 import ScrollToTop from "react-scroll-to-top";
-import ProductList from "../components/ProductList";
+import StoreProducts from "../components/product/StoreProducts";
 
-const ProductsPage = () => {
-
+const StoreProductsPage = () => {
   return (
     <>
       {/* ColorInit */}
@@ -21,24 +18,16 @@ const ProductsPage = () => {
       {/* Preloader */}
       <Preloader />
 
-      {/* HeaderOne */}
-      {/* <HeaderTwo category={true} /> */}
-
       {/* Breadcrumb */}
-      <Breadcrumb title={"Product"} />
+      <Breadcrumb title={"Store Products"} />
 
-      {/* ShopSection */}
-      <ProductList />
+      {/* StoreProducts */}
+      <StoreProducts />
 
       {/* ShippingTwo */}
       <ShippingTwo />
-
-      {/* FooterTwo */}
-      {/* <FooterTwo /> */}
-
-
     </>
   );
 };
 
-export default ProductsPage;
+export default StoreProductsPage;

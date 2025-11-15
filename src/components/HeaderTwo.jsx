@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react'
 import query from 'jquery';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext'; // Thêm import
+import ProductSection from "../components/home/ProductSection";
 import './HeaderTwo.css';
 const HeaderTwo = ({ category }) => {
-    const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger } = useAuth(); // Sử dụng auth context
+    const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger, cartCount } = useAuth(); // Sử dụng auth context
     const [scroll, setScroll] = useState(false)
     const navigate = useNavigate();
     useEffect(() => {
@@ -443,9 +444,11 @@ const HeaderTwo = ({ category }) => {
                                 >
                                     <span className="text-2xl text-white d-flex position-relative me-6 mt-6 item-hover__text">
                                         <i className="ph ph-shopping-cart-simple" />
-                                        <span className="w-16 h-16 flex-center rounded-circle bg-main-two-600 text-white text-xs position-absolute top-n6 end-n4">
-                                            2
-                                        </span>
+                                        {cartCount > 0 && (
+                                            <span className="w-16 h-16 flex-center rounded-circle bg-main-two-600 text-white text-xs position-absolute top-n6 end-n4">
+                                                {cartCount}
+                                            </span>
+                                        )}
                                     </span>
                                     <span className="text-md text-white item-hover__text d-none d-lg-flex">
                                         Cart
@@ -522,6 +525,12 @@ const HeaderTwo = ({ category }) => {
                                                             Orders
                                                         </Link>
                                                     </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/seller/orders">
+                                                            <i className="ph ph-currency-dollar me-2"></i>
+                                                            Revenue
+                                                        </Link>
+                                                    </li>
                                                 </>
                                             )}
 
@@ -548,9 +557,21 @@ const HeaderTwo = ({ category }) => {
                                                         </Link>
                                                     </li>
                                                     <li>
+                                                        <Link className="dropdown-item" to="/admin/category">
+                                                            <i className="ph ph-tag me-2"></i>
+                                                            Manage Categories
+                                                        </Link>
+                                                    </li>
+                                                    <li>
                                                         <Link className="dropdown-item" to="/admin/transactions">
                                                             <i className="ph ph-currency-dollar me-2"></i>
                                                             Transactions
+                                                        </Link>
+                                                    </li>
+                                                    <li>
+                                                        <Link className="dropdown-item" to="/admin/products">
+                                                            <i className="ph ph-ticket me-2"></i>
+                                                            Manage Discounts
                                                         </Link>
                                                     </li>
                                                 </>
@@ -728,6 +749,14 @@ const HeaderTwo = ({ category }) => {
                                                 }>
                                                     <i className="ph ph-users me-1"></i>
                                                     Users
+                                                </NavLink>
+                                            </li>
+                                            <li className="nav-menu__item">
+                                                <NavLink to="/admin/stores" className={({ isActive }) =>
+                                                    isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
+                                                }>
+                                                    <i className="ph ph-storefront me-1"></i>
+                                                    Stores
                                                 </NavLink>
                                             </li>
                                             <li className="nav-menu__item">

@@ -32,6 +32,9 @@ import HeaderTwo from "./components/HeaderTwo";
 import SellerDiscountsPage from "./pages/SellerDiscountsPage";
 import SellerCreateDiscountPage from "./pages/SellerCreateDiscountPage";
 import AdminDiscountsPage from "./pages/AdminDiscountsPage";
+import StoreProductsPage from "./pages/StoreProductsPage";
+import AdminStoresPage from "./pages/AdminStoresPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 // import SellerDashboard from "./pages/seller/SellerDashboard"; // Thêm seller dashboard
 
@@ -79,6 +82,7 @@ function App() {
               <SellerDashboard />
             </PrivateRoute>
           } /> */}
+            <Route exact path="/stores/:storeId/products" element={<StoreProductsPage />} />
             <Route path="/seller/stores" element={
               <PrivateRoute roles={['seller', 'admin']}>
                 <MyStoresPage />
@@ -116,11 +120,11 @@ function App() {
             } />
 
             {/* Admin routes */}
-            {/* <Route path="/admin/dashboard" element={
-            <PrivateRoute roles={['admin']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          } /> */}
+            <Route path="/admin/dashboard" element={
+              <PrivateRoute roles={['admin']}>
+                <AdminDashboardPage />
+              </PrivateRoute>
+            } />
             <Route path="/admin/products" element={
               <PrivateRoute roles={['admin']}>
                 <ProductsManagementPage />
@@ -134,6 +138,12 @@ function App() {
             <Route path="/admin/discounts" element={
               <PrivateRoute roles={['admin']}>
                 <AdminDiscountsPage />
+              </PrivateRoute>
+            } />
+
+            <Route path="/admin/stores" element={
+              <PrivateRoute roles={['admin']}>
+                <AdminStoresPage />
               </PrivateRoute>
             } />
 

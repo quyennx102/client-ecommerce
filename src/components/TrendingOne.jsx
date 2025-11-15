@@ -1,7 +1,54 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import Slider from 'react-slick';
+import { toast } from 'react-toastify';
+import productService from '../services/productService';
+import ProductCardTwo from './product/ProductCardTwo';
 
 const TrendingOne = () => {
+    function SampleNextArrow(props) {
+        const { className, onClick } = props;
+        return (
+            <button
+                type="button" onClick={onClick}
+                className={` ${className} slick-next slick-arrow flex-center rounded-circle border border-gray-100 hover-border-neutral-600 text-xl hover-bg-neutral-600 hover-text-white transition-1`}
+            >
+                <i className="ph ph-caret-right" />
+            </button>
+        );
+    }
+    function SamplePrevArrow(props) {
+        const { className, onClick } = props;
+
+        return (
+
+            <button
+                type="button"
+                onClick={onClick}
+                className={`${className} slick-prev slick-arrow flex-center rounded-circle border border-gray-100 hover-border-neutral-600 text-xl hover-bg-neutral-600 hover-text-white transition-1`}
+            >
+                <i className="ph ph-caret-left" />
+            </button>
+        );
+    }
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const fetchTopSelling = async () => {
+            try {
+                const response = await productService.getTrendingProducts();
+                if (response.success) {
+                    setProducts(response.data);
+                }
+            } catch (error) {
+                toast.error('Failed to load top selling products');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTopSelling();
+    }, []);
     return (
         <section className="trending-productss pt-80">
             <div className="container container-lg">
@@ -138,7 +185,13 @@ const TrendingOne = () => {
                             tabIndex={0}
                         >
                             <div className="row g-12">
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
+
+                                {products.map(product => (
+                                    <div key={product.product_id}>
+                                        <ProductCardTwo product={product} />
+                                    </div>
+                                ))}
+                                {/* <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
                                     <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
                                         <Link
                                             to="/product-details-two"
@@ -206,352 +259,7 @@ const TrendingOne = () => {
                                             </span>
                                         </div>
                                     </div>
-                                </div>
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <span className="product-card__badge bg-warning-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                New
-                                            </span>
-                                            <img
-                                                src="assets/images/thumbs/product-two-img2.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <span className="text-success-600 bg-success-50 text-sm fw-medium py-4 px-8">
-                                                19%OFF
-                                            </span>
-                                            <h6 className="title text-lg fw-semibold my-16">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Instax Mini 12 Instant Film Camera - Green
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align gap-6">
-                                                <div className="flex-align gap-8">
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-xs fw-medium text-gray-500">
-                                                    (12K)
-                                                </span>
-                                            </div>
-                                            <span className="py-2 px-8 text-xs rounded-pill text-main-two-600 bg-main-two-50 mt-16">
-                                                Fulfilled by Marketpro
-                                            </span>
-                                            <div className="product-card__price mt-16 mb-30">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99{" "}
-                                                    <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <span className="text-neutral-600">
-                                                Delivered by <span className="text-main-600">Aug 02</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <span className="product-card__badge bg-danger-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                Sale 50%
-                                            </span>
-                                            <img
-                                                src="assets/images/thumbs/product-two-img3.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <span className="text-success-600 bg-success-50 text-sm fw-medium py-4 px-8">
-                                                19%OFF
-                                            </span>
-                                            <h6 className="title text-lg fw-semibold my-16">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Instax Mini 12 Instant Film Camera - Green
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align gap-6">
-                                                <div className="flex-align gap-8">
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-xs fw-medium text-gray-500">
-                                                    (12K)
-                                                </span>
-                                            </div>
-                                            <span className="py-2 px-8 text-xs rounded-pill text-main-two-600 bg-main-two-50 mt-16">
-                                                Fulfilled by Marketpro
-                                            </span>
-                                            <div className="product-card__price mt-16 mb-30">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99{" "}
-                                                    <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <span className="text-neutral-600">
-                                                Delivered by <span className="text-main-600">Aug 02</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <span className="product-card__badge bg-success-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                Sold
-                                            </span>
-                                            <img
-                                                src="assets/images/thumbs/product-two-img4.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <span className="text-success-600 bg-success-50 text-sm fw-medium py-4 px-8">
-                                                19%OFF
-                                            </span>
-                                            <h6 className="title text-lg fw-semibold my-16">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Instax Mini 12 Instant Film Camera - Green
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align gap-6">
-                                                <div className="flex-align gap-8">
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-xs fw-medium text-gray-500">
-                                                    (12K)
-                                                </span>
-                                            </div>
-                                            <span className="py-2 px-8 text-xs rounded-pill text-main-two-600 bg-main-two-50 mt-16">
-                                                Fulfilled by Marketpro
-                                            </span>
-                                            <div className="product-card__price mt-16 mb-30">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99{" "}
-                                                    <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <span className="text-neutral-600">
-                                                Delivered by <span className="text-main-600">Aug 02</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <span className="product-card__badge bg-tertiary-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                Best Seller{" "}
-                                            </span>
-                                            <img
-                                                src="assets/images/thumbs/product-two-img5.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <span className="text-success-600 bg-success-50 text-sm fw-medium py-4 px-8">
-                                                19%OFF
-                                            </span>
-                                            <h6 className="title text-lg fw-semibold my-16">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Instax Mini 12 Instant Film Camera - Green
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align gap-6">
-                                                <div className="flex-align gap-8">
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-xs fw-medium text-gray-500">
-                                                    (12K)
-                                                </span>
-                                            </div>
-                                            <span className="py-2 px-8 text-xs rounded-pill text-main-two-600 bg-main-two-50 mt-16">
-                                                Fulfilled by Marketpro
-                                            </span>
-                                            <div className="product-card__price mt-16 mb-30">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99{" "}
-                                                    <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <span className="text-neutral-600">
-                                                Delivered by <span className="text-main-600">Aug 02</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <span className="product-card__badge bg-warning-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                New
-                                            </span>
-                                            <img
-                                                src="assets/images/thumbs/product-two-img6.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <span className="text-success-600 bg-success-50 text-sm fw-medium py-4 px-8">
-                                                19%OFF
-                                            </span>
-                                            <h6 className="title text-lg fw-semibold my-16">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Instax Mini 12 Instant Film Camera - Green
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align gap-6">
-                                                <div className="flex-align gap-8">
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                    <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                        <i className="ph-fill ph-star" />
-                                                    </span>
-                                                </div>
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-xs fw-medium text-gray-500">
-                                                    (12K)
-                                                </span>
-                                            </div>
-                                            <span className="py-2 px-8 text-xs rounded-pill text-main-two-600 bg-main-two-50 mt-16">
-                                                Fulfilled by Marketpro
-                                            </span>
-                                            <div className="product-card__price mt-16 mb-30">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99{" "}
-                                                    <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <span className="text-neutral-600">
-                                                Delivered by <span className="text-main-600">Aug 02</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
                         <div

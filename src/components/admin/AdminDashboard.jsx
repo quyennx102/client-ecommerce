@@ -57,9 +57,31 @@ const AdminDashboard = () => {
               <i className="ph ph-storefront text-info text-xl mb-3"></i>
               <h5 className="mb-2">Stores</h5>
               <p className="text-gray-600 mb-0">Manage stores</p>
-              <button className="btn btn-main btn-sm mt-3">
+              <Link to="/admin/stores" className="btn btn-main btn-sm mt-3">
                 Manage
-              </button>
+              </Link>
+            </div>
+          </div>
+
+          <div className="col-md-3">
+            <div className="border border-gray-200 rounded-16 p-24 text-center hover-shadow transition-1">
+              <i className="ph ph-ticket text-warning text-xl mb-3"></i>
+              <h5 className="mb-2">Tickets</h5>
+              <p className="text-gray-600 mb-0">Manage tickets</p>
+              <Link to="/admin/tickets" className="btn btn-main btn-sm mt-3">
+                Manage
+              </Link>
+            </div>
+          </div>
+
+          <div className="col-md-3">
+            <div className="border border-gray-200 rounded-16 p-24 text-center hover-shadow transition-1">
+              <i className="ph ph-currency-dollar text-danger text-xl mb-3"></i>
+              <h5 className="mb-2">Transactions</h5>
+              <p className="text-gray-600 mb-0">Manage transactions</p>
+              <Link to="/admin/transactions" className="btn btn-main btn-sm mt-3">
+                Manage
+              </Link>
             </div>
           </div>
         </div>

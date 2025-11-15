@@ -400,7 +400,7 @@ const Profile = () => {
                                             <div className="col-12">
                                                 <button
                                                     type="submit"
-                                                    className="btn btn-main py-3 px-5"
+                                                    className="btn btn-main py-8 px-10"
                                                     disabled={loading}
                                                 >
                                                     {loading ? (

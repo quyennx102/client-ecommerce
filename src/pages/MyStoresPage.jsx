@@ -34,10 +34,10 @@ const MyStoresPage = () => {
       <MyStores />
 
       {/* ShippingOne */}
-      <ShippingOne />
+      {/* <ShippingOne /> */}
 
       {/* NewsletterOne */}
-      <NewsletterOne />
+      {/* <NewsletterOne /> */}
 
       {/* FooterTwo */}
       {/* <FooterTwo /> */}

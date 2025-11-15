@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import cartService from '../services/cartService';
 
 const AuthContext = createContext();
 
@@ -18,6 +19,23 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [updateTrigger, setUpdateTrigger] = useState(0); // Thêm trigger
     const navigate = useNavigate();
+    const [cartCount, setCartCount] = useState(0);
+
+    // Hàm lấy số lượng giỏ hàng
+    const fetchCartCount = useCallback(async () => {
+        try {
+            // Chỉ fetch khi đã đăng nhập
+            if (localStorage.getItem('token')) {
+                const response = await cartService.getCartSize();
+                if (response.success) {
+                    setCartCount(response.data.count); // Giả định API trả về { success: true, data: { count: 5 } }
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch cart count:", error);
+            setCartCount(0); // Đặt lại về 0 nếu có lỗi
+        }
+    }, []);
 
     // Hàm check auth có thể gọi từ bên ngoài
     const checkAuth = useCallback(async () => {
@@ -29,17 +47,20 @@ export const AuthProvider = ({ children }) => {
                 const userData = JSON.parse(savedUser);
                 setUser(userData);
                 setIsAuthenticated(true);
+                await fetchCartCount();
             } else {
                 setUser(null);
                 setIsAuthenticated(false);
+                setCartCount(0);
             }
         } catch (error) {
             setUser(null);
             setIsAuthenticated(false);
+            setCartCount(0);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [fetchCartCount]);
 
     useEffect(() => {
         checkAuth();
@@ -81,6 +102,7 @@ export const AuthProvider = ({ children }) => {
 
             setUser(user);
             setIsAuthenticated(true);
+            await fetchCartCount();
             setUpdateTrigger(prev => prev + 1); // Trigger update
 
             return { success: true, user };
@@ -97,6 +119,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
         setUser(null);
         setIsAuthenticated(false);
+        setCartCount(0);
         setUpdateTrigger(prev => prev + 1); // Trigger update
     }, []);
 
@@ -132,7 +155,9 @@ export const AuthProvider = ({ children }) => {
         isSeller,
         isUser,
         hasRole,
-        hasAnyRole
+        hasAnyRole,
+        cartCount,
+        fetchCartCount
     };
 
     return (

@@ -6,6 +6,7 @@ import { getCountdown } from '../helper/Countdown';
 import productService from '../services/productService';
 import cartService from '../services/cartService';
 import reviewService from '../services/reviewService';
+import { useAuth } from '../contexts/AuthContext';
 
 const ProductDetailsTwo = () => {
     const { id } = useParams(); // Lấy product ID từ URL
@@ -15,6 +16,7 @@ const ProductDetailsTwo = () => {
     const [reviews, setReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [ratingDistribution, setRatingDistribution] = useState([]);
+    const { fetchCartCount } = useAuth();
 
     // Quantity state
     const [quantity, setQuantity] = useState(1);
@@ -146,6 +148,7 @@ const ProductDetailsTwo = () => {
 
             if (response.success) {
                 toast.success('Product added to cart successfully!');
+                await fetchCartCount();
                 // Dispatch event để update cart count
                 window.dispatchEvent(new Event('cartUpdated'));
             } else {

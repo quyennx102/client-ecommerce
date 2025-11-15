@@ -3,7 +3,7 @@ import axiosInstance from '../utils/axios';
 const reviewService = {
   // Lấy reviews của sản phẩm
   getProductReviews: async (productId) => {
-    const response = await axiosInstance.get(`/products/${productId}/reviews`);
+    const response = await axiosInstance.get(`reviews/product/${productId}`);
     return response.data;
   },
 

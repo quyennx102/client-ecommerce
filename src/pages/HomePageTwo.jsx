@@ -18,6 +18,7 @@ import ShippingTwo from "../components/ShippingTwo";
 import NewsletterTwo from "../components/NewsletterTwo";
 import ColorInit from "../helper/ColorInit";
 import ScrollToTop from "react-scroll-to-top";
+import TopStores from "../components/store/TopStores";
 
 const HomePageTwo = () => {
   return (
@@ -44,36 +45,36 @@ const HomePageTwo = () => {
 
       {/* TopSellingOne */}
       <TopSellingOne />
+      {/* DiscountOne */}
+      <DiscountOne />
 
       {/* TrendingOne */}
       <TrendingOne />
 
-      {/* DiscountOne */}
-      <DiscountOne />
-
       {/* FeaturedOne */}
-      <FeaturedOne />
+      {/* <FeaturedOne /> */}
 
       {/* BigDealOne */}
       <BigDealOne />
 
       {/* TopSellingTwo */}
-      <TopSellingTwo />
+      {/* <TopSellingTwo /> */}
 
       {/* PopularProductsOne */}
-      <PopularProductsOne />
+      {/* <PopularProductsOne /> */}
 
       {/* TopVendorsTwo */}
-      <TopVendorsTwo />
+      {/* <TopVendorsTwo /> */}
 
       {/* DaySaleOne */}
       <DaySaleOne />
 
       {/* RecentlyViewedOne */}
-      <RecentlyViewedOne />
+      {/* <RecentlyViewedOne /> */}
 
       {/* BrandTwo */}
-      <BrandTwo />
+      {/* <BrandTwo /> */}
+      <TopStores /> 
 
       {/* ShippingTwo */}
       <ShippingTwo />
