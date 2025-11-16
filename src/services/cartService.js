@@ -36,6 +36,15 @@ const cartService = {
     const response = await axiosInstance.get('/carts/size');
     return response.data;
   },
+  // Validate discount code
+  validateDiscountCode: async (code, storeId, orderTotal) => {
+    const response = await axiosInstance.post('/discounts/validate', {
+      code,
+      store_id: storeId,
+      order_total: orderTotal
+    });
+    return response.data;
+  }
 };
 
 export default cartService;

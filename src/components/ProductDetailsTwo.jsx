@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
 import { toast } from 'react-toastify';
 import { getCountdown } from '../helper/Countdown';
@@ -10,6 +10,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const ProductDetailsTwo = () => {
     const { id } = useParams(); // Lấy product ID từ URL
+    const navigate = useNavigate();
     const [timeLeft, setTimeLeft] = useState(getCountdown());
     const [loading, setLoading] = useState(true);
     const [product, setProduct] = useState(null);
@@ -166,7 +167,7 @@ const ProductDetailsTwo = () => {
     const handleBuyNow = async () => {
         await handleAddToCart();
         setTimeout(() => {
-            window.location.href = '/cart';
+            navigate('/cart');
         }, 1000);
     };
 
@@ -364,8 +365,8 @@ const ProductDetailsTwo = () => {
                                                     <span
                                                         key={index}
                                                         className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
-                                                                ? 'text-warning-600'
-                                                                : 'text-gray-400'
+                                                            ? 'text-warning-600'
+                                                            : 'text-gray-400'
                                                             }`}
                                                     >
                                                         <i className="ph-fill ph-star" />
@@ -638,7 +639,8 @@ const ProductDetailsTwo = () => {
                                 >
                                     <div className="mb-40">
                                         <h6 className="mb-24">Product Description</h6>
-                                        <p>{product.description}</p>
+                                        {/* <p>{product.description}</p> */}
+                                        <div dangerouslySetInnerHTML={{ __html: product.description }} />
                                     </div>
 
                                     {/* Product Specifications */}
@@ -704,8 +706,8 @@ const ProductDetailsTwo = () => {
                                                                             <span
                                                                                 key={starIndex}
                                                                                 className={`text-15 fw-medium d-flex ${starIndex < review.rating
-                                                                                        ? 'text-warning-600'
-                                                                                        : 'text-gray-400'
+                                                                                    ? 'text-warning-600'
+                                                                                    : 'text-gray-400'
                                                                                     }`}
                                                                             >
                                                                                 <i className="ph-fill ph-star" />
@@ -745,8 +747,8 @@ const ProductDetailsTwo = () => {
                                                             <span
                                                                 key={index}
                                                                 className={`text-15 fw-medium d-flex cursor-pointer ${index < reviewRating
-                                                                        ? 'text-warning-600'
-                                                                        : 'text-gray-400'
+                                                                    ? 'text-warning-600'
+                                                                    : 'text-gray-400'
                                                                     }`}
                                                                 onClick={() => setReviewRating(index + 1)}
                                                                 style={{ cursor: 'pointer' }}
@@ -828,8 +830,8 @@ const ProductDetailsTwo = () => {
                                                                 <span
                                                                     key={index}
                                                                     className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
-                                                                            ? 'text-warning-600'
-                                                                            : 'text-gray-400'
+                                                                        ? 'text-warning-600'
+                                                                        : 'text-gray-400'
                                                                         }`}
                                                                 >
                                                                     <i className="ph-fill ph-star" />
@@ -862,8 +864,8 @@ const ProductDetailsTwo = () => {
                                                                         <span
                                                                             key={starIndex}
                                                                             className={`text-xs fw-medium d-flex ${starIndex < dist.stars
-                                                                                    ? 'text-warning-600'
-                                                                                    : 'text-gray-400'
+                                                                                ? 'text-warning-600'
+                                                                                : 'text-gray-400'
                                                                                 }`}
                                                                         >
                                                                             <i className="ph-fill ph-star" />

@@ -31,7 +31,45 @@ export const sweetAlert = {
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#dc3545',
       reverseButtons: true,
-    //   ...defaultConfig,
+      //   ...defaultConfig,
+      ...options
+    });
+  },
+
+  // Xác nhận xóa toàn bộ giỏ hàng
+  confirmClearCart: (options = {}) => {
+    return MySwal.fire({
+      title: 'Are you sure?',
+      html: `
+      <strong>Your entire cart</strong> will be cleared.<br>
+      This action cannot be undone.
+    `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, clear cart!',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc3545',
+      reverseButtons: true,
+      // ...defaultConfig,
+      ...options
+    });
+  },
+
+  // Xác nhận xóa 1 sản phẩm khỏi giỏ hàng (có truyền tên sản phẩm)
+  confirmRemoveItem: (productName = '', options = {}) => {
+    return MySwal.fire({
+      title: 'Remove this item?',
+      html: `
+      The product <strong>${productName}</strong><br>
+      will be removed from your cart.
+    `,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, remove it',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc3545',
+      reverseButtons: true,
+      // ...defaultConfig,
       ...options
     });
   },
@@ -47,7 +85,7 @@ export const sweetAlert = {
       cancelButtonText: 'Cancel',
       confirmButtonColor: '#dc3545',
       reverseButtons: true,
-    //   ...defaultConfig,
+      //   ...defaultConfig,
       ...options
     });
   },

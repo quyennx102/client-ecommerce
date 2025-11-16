@@ -446,7 +446,7 @@ const HeaderTwo = ({ category }) => {
                                         <i className="ph ph-shopping-cart-simple" />
                                         {cartCount > 0 && (
                                             <span className="w-16 h-16 flex-center rounded-circle bg-main-two-600 text-white text-xs position-absolute top-n6 end-n4">
-                                                {cartCount}
+                                                {cartCount > 99 ? '99+' : cartCount}
                                             </span>
                                         )}
                                     </span>

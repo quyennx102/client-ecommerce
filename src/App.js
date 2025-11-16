@@ -35,6 +35,9 @@ import AdminDiscountsPage from "./pages/AdminDiscountsPage";
 import StoreProductsPage from "./pages/StoreProductsPage";
 import AdminStoresPage from "./pages/AdminStoresPage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import OrderDetailPage from "./pages/OrderDetailPage";
+import { PaymentFailurePage } from "./pages/PaymentFailurePage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 // import SellerDashboard from "./pages/seller/SellerDashboard"; // Thêm seller dashboard
 
@@ -56,8 +59,34 @@ function App() {
             <Route exact path="/products" element={<ProductsPage />} />
             <Route exact path="/product-details" element={<ProductDetailsPageOne />} />
             <Route exact path="/products/:id" element={<ProductDetailsPageTwo />} />
-            <Route exact path="/cart" element={<CartPage />} />
-            <Route exact path="/checkout" element={<CheckoutPage />} />
+            <Route exact path="/cart" element={
+              <PrivateRoute>
+                <CartPage />
+              </PrivateRoute>
+            } />
+
+            <Route exact path="/checkout" element={
+              <PrivateRoute>
+                <CheckoutPage />
+              </PrivateRoute>
+            } />
+            <Route exact path="/payment/success" element={
+              <PrivateRoute>
+                <PaymentSuccessPage />
+              </PrivateRoute>
+            } />
+
+            <Route exact path="/payment/failure" element={
+              <PrivateRoute>
+                <PaymentFailurePage />
+              </PrivateRoute>
+            } />
+
+            <Route exact path="/orders/:orderId" element={
+              <PrivateRoute>
+                <OrderDetailPage />
+              </PrivateRoute>
+            } />
 
             {/* ✅ Account routes group */}
             <Route path="/auth">
