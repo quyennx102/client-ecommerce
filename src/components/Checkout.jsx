@@ -8,7 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, fetchCartCount } = useAuth();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     
@@ -53,6 +53,7 @@ const Checkout = () => {
                     navigate('/cart');
                     return;
                 }
+                await fetchCartCount();
                 setCartItems(response.data.items);
             }
         } catch (error) {

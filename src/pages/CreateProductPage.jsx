@@ -28,7 +28,7 @@ const CreateProductPage = () => {
       <Preloader />
 
       {/* HeaderTwo */}
-      <HeaderTwo category={true} />
+      {/* <HeaderTwo category={true} /> */}
 
       {/* Breadcrumb */}
       <Breadcrumb title={"Create Product"} />
@@ -46,10 +46,10 @@ const CreateProductPage = () => {
       <NewsletterOne />
 
       {/* FooterTwo */}
-      <FooterTwo />
+      {/* <FooterTwo /> */}
 
       {/* BottomFooter */}
-      <BottomFooter />
+      {/* <BottomFooter /> */}
 
 
     </>

@@ -24,7 +24,7 @@ const ProductsManagementPage = () => {
       <Preloader />
 
       {/* HeaderTwo */}
-      <HeaderTwo category={true} />
+      {/* <HeaderTwo category={true} /> */}
 
       {/* Breadcrumb */}
       <Breadcrumb title={"Manage Products"} />
@@ -32,10 +32,10 @@ const ProductsManagementPage = () => {
       <ProductsManagement />
 
       {/* FooterTwo */}
-      <FooterTwo />
+      {/* <FooterTwo /> */}
 
       {/* BottomFooter */}
-      <BottomFooter />
+      {/* <BottomFooter /> */}
 
 
     </>

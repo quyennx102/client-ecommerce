@@ -225,7 +225,7 @@ const ManageProducts = () => {
                                     <span className="text-gray-600 text-sm">Total Products</span>
                                     <i className="ph ph-package text-main-600" style={{fontSize: '24px'}}></i>
                                 </div>
-                                <h3 className="mb-0 text-main-600">{pagination.totalItems || 0}</h3>
+                                <h3 className="mb-0 text-main-600">{pagination?.totalItems?.[0]?.count || 0}</h3>
                             </div>
                         </div>
                         <div className="col-xxl-3 col-sm-6">
@@ -448,7 +448,7 @@ const ManageProducts = () => {
                                                 {/* Price */}
                                                 <td className="text-center">
                                                     <span className="text-lg fw-bold text-main-600">
-                                                        {parseInt(product.price || 0).toLocaleString('vi-VN')}đ
+                                                        $ {product.price || 0}
                                                     </span>
                                                 </td>
 
@@ -517,8 +517,8 @@ const ManageProducts = () => {
                                 <div className="flex-between flex-wrap gap-16 mt-24 px-40 pb-40">
                                     <span className="text-gray-500 text-sm">
                                         Showing {((pagination.currentPage - 1) * filters.limit) + 1} to{' '}
-                                        {Math.min(pagination.currentPage * filters.limit, pagination.totalItems)} of{' '}
-                                        {pagination.totalItems} products
+                                        {Math.min(pagination.currentPage * filters.limit, pagination?.totalItems?.[0]?.count)} of{' '}
+                                        {pagination?.totalItems?.[0]?.count} products
                                     </span>
                                     <ul className="pagination flex-align flex-wrap gap-8">
                                         <li className="page-item">

@@ -30,7 +30,7 @@ const categoryService = {
     const response = await axiosInstance(`/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      data: JSON.stringify(data)
     });
     return response.data;
   },
@@ -39,7 +39,7 @@ const categoryService = {
     const response = await axiosInstance(`/categories/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      data: JSON.stringify(data)
     });
     return response.data;
   },
@@ -56,7 +56,7 @@ const categoryService = {
     const response = await axiosInstance(`/categories/reorder`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ categories })
+      data: JSON.stringify({ categories })
     });
     return response.data;
   },
