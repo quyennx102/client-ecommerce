@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import query from 'jquery';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext'; // Thêm import
+import { useAuth } from '../contexts/AuthContext';
 import ProductSection from "../components/home/ProductSection";
 import './HeaderTwo.css';
+
 const HeaderTwo = ({ category }) => {
-    const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger, cartCount } = useAuth(); // Sử dụng auth context
+    const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger, cartCount } = useAuth();
     const [scroll, setScroll] = useState(false)
     const navigate = useNavigate();
+
     useEffect(() => {
         window.onscroll = () => {
             if (window.pageYOffset < 150) {
@@ -69,8 +71,9 @@ const HeaderTwo = ({ category }) => {
     const handleLogout = () => {
         logout();
         setMenuActive(false);
-        navigate('/'); // Điều hướng về trang chủ sau khi logout
+        navigate('/');
     };
+
     // Hàm xác định class active cho NavLink
     const getNavLinkClass = ({ isActive }) => {
         return isActive ? "nav-menu__link activePage" : "nav-menu__link";
@@ -339,6 +342,20 @@ const HeaderTwo = ({ category }) => {
                                 </Link>
                             </li>
 
+                            {/* Become a Seller Link in Mobile - CHỈ hiện khi CHƯA phải seller và đã đăng nhập */}
+                            {isAuthenticated && !isSeller() && !isAdmin() && (
+                                <li className="nav-menu__item">
+                                    <Link
+                                        to="/seller/register"
+                                        className="nav-menu__link text-success"
+                                        onClick={() => setActiveIndex(null)}
+                                    >
+                                        <i className="ph ph-storefront me-2"></i>
+                                        Become a Seller
+                                    </Link>
+                                </li>
+                            )}
+
                             {/* Authentication Links in Mobile */}
                             {isAuthenticated ? (
                                 <>
@@ -388,7 +405,7 @@ const HeaderTwo = ({ category }) => {
                         {/* form Category Start */}
                         <div className="flex-align gap-16">
                             <div className="select-dropdown-for-home-two d-lg-none d-block">
-                                {/* Language & Currency Dropdown - Giữ nguyên */}
+                                {/* Language & Currency Dropdown */}
                             </div>
                             <form action="#" className="flex-align flex-wrap form-location-wrapper">
                                 <div className="search-category style-two d-flex h-48 search-form d-sm-flex d-none">
@@ -438,6 +455,22 @@ const HeaderTwo = ({ category }) => {
                                         <i className="ph ph-magnifying-glass" />
                                     </span>
                                 </button>
+
+                                {/* Become a Seller Button - CHỈ hiện khi CHƯA phải seller và đã đăng nhập */}
+                                {isAuthenticated && !isSeller() && !isAdmin() && (
+                                    <Link
+                                        to="/seller/register"
+                                        className="flex-align flex-column gap-8 item-hover-two"
+                                    >
+                                        <span className="text-2xl text-white d-flex position-relative item-hover__text">
+                                            <i className="ph ph-storefront" />
+                                        </span>
+                                        <span className="text-md text-white item-hover__text d-none d-lg-flex">
+                                            Become Seller
+                                        </span>
+                                    </Link>
+                                )}
+
                                 <Link
                                     to="/cart"
                                     className="flex-align flex-column gap-8 item-hover-two"
@@ -496,6 +529,19 @@ const HeaderTwo = ({ category }) => {
                                                 </Link>
                                             </li>
 
+                                            {/* Become a Seller trong dropdown - CHỈ khi CHƯA phải seller */}
+                                            {!isSeller() && !isAdmin() && (
+                                                <>
+                                                    <li><hr className="dropdown-divider" /></li>
+                                                    <li>
+                                                        <Link className="dropdown-item text-success" to="/seller/register">
+                                                            <i className="ph ph-storefront me-2"></i>
+                                                            Become a Seller
+                                                        </Link>
+                                                    </li>
+                                                </>
+                                            )}
+
                                             {/* Role-specific dropdown items */}
                                             {isSeller() && (
                                                 <>
@@ -526,7 +572,7 @@ const HeaderTwo = ({ category }) => {
                                                         </Link>
                                                     </li>
                                                     <li>
-                                                        <Link className="dropdown-item" to="/seller/orders">
+                                                        <Link className="dropdown-item" to="/seller/revenue">
                                                             <i className="ph ph-currency-dollar me-2"></i>
                                                             Revenue
                                                         </Link>
@@ -569,7 +615,7 @@ const HeaderTwo = ({ category }) => {
                                                         </Link>
                                                     </li>
                                                     <li>
-                                                        <Link className="dropdown-item" to="/admin/products">
+                                                        <Link className="dropdown-item" to="/admin/discounts">
                                                             <i className="ph ph-ticket me-2"></i>
                                                             Manage Discounts
                                                         </Link>
@@ -615,77 +661,10 @@ const HeaderTwo = ({ category }) => {
                 <div className="container container-lg">
                     <nav className="header-inner d-flex justify-content-between gap-8">
                         <div className="flex-align menu-category-wrapper">
-                            {/* Category Dropdown - Giữ nguyên */}
-
                             {/* Menu Start  */}
                             <div className="header-menu d-lg-block d-none">
                                 {/* Nav Menu Start */}
                                 <ul className="nav-menu flex-align">
-                                    {/* <li className="on-hover-item nav-menu__item has-submenu">
-                                        <Link to="#" className="nav-menu__link">
-                                            Home
-                                        </Link>
-                                        <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Home One
-                                                </NavLink>
-                                            </li>
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/index-two"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Home Two
-                                                </NavLink>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <li className="on-hover-item nav-menu__item has-submenu">
-                                        <Link to="#" className="nav-menu__link">
-                                            Shop
-                                        </Link>
-                                        <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/products"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Shop
-                                                </NavLink>
-                                            </li>
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/product-details"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Shop Details
-                                                </NavLink>
-                                            </li>
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/product-details-two"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Shop Details Two
-                                                </NavLink>
-                                            </li>
-                                        </ul>
-                                    </li> */}
-
                                     {/* Seller Menu in Desktop */}
                                     {isSeller() && (
                                         <>
@@ -794,63 +773,17 @@ const HeaderTwo = ({ category }) => {
                                         </>
                                     )}
 
-                                    {/* <li className="on-hover-item nav-menu__item has-submenu">
-                                        <span className="badge-notification bg-warning-600 text-white text-sm py-2 px-8 rounded-4">
-                                            New
-                                        </span>
-                                        <Link to="#" className="nav-menu__link">
-                                            Pages
-                                        </Link>
-                                        <ul className="on-hover-dropdown common-dropdown nav-submenu scroll-sm">
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/cart"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Cart
-                                                </NavLink>
-                                            </li>
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/checkout"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Checkout
-                                                </NavLink>
-                                            </li>
-                                            <li className="common-dropdown__item nav-submenu__item">
-                                                <NavLink
-                                                    to="/profile"
-                                                    className={(navData) =>
-                                                        navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                    }
-                                                >
-                                                    Profile
-                                                </NavLink>
-                                            </li>
-                                            {!isAuthenticated && (
-                                                <li className="common-dropdown__item nav-submenu__item">
-                                                    <NavLink
-                                                        to="/auth"
-                                                        className={(navData) =>
-                                                            navData.isActive ? "common-dropdown__link nav-submenu__link hover-bg-neutral-100 activePage" : "common-dropdown__link nav-submenu__link hover-bg-neutral-100"
-                                                        }
-                                                    >
-                                                        Account
-                                                    </NavLink>
-                                                </li>
-                                            )}
-                                        </ul>
-                                    </li>
-                                    <li className="nav-menu__item">
-                                        <Link to="/contact" className="nav-menu__link">
-                                            Contact Us
-                                        </Link>
-                                    </li> */}
+                                    {/* Become a Seller Link - CHỈ hiện khi CHƯA phải seller và đã đăng nhập */}
+                                    {/* {isAuthenticated && !isSeller() && !isAdmin() && (
+                                        <li className="nav-menu__item">
+                                            <NavLink to="/seller/register" className={({ isActive }) =>
+                                                isActive ? "nav-menu__link activePage text-success" : "nav-menu__link text-success"
+                                            }>
+                                                <i className="ph ph-storefront me-1"></i>
+                                                Become a Seller
+                                            </NavLink>
+                                        </li>
+                                    )} */}
                                 </ul>
                                 {/* Nav Menu End */}
                             </div>
@@ -859,10 +792,14 @@ const HeaderTwo = ({ category }) => {
 
                         {/* Header Right start */}
                         <div className="header-right flex-align">
-                            {/* Language & Currency - Giữ nguyên */}
-
                             <div className="me-8 d-lg-none d-block">
-                                {/* Mobile icons - Giữ nguyên */}
+                                <button
+                                    onClick={handleMenuToggle}
+                                    type="button"
+                                    className="toggle-mobileMenu flex-center text-white text-4xl d-flex d-lg-none"
+                                >
+                                    <i className="ph ph-list" />
+                                </button>
                             </div>
                         </div>
                         {/* Header Right End  */}

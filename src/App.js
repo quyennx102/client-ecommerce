@@ -38,6 +38,7 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import { PaymentFailurePage } from "./pages/PaymentFailurePage";
+import SellerRegisterPage from "./pages/SellerRegisterPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 // import SellerDashboard from "./pages/seller/SellerDashboard"; // Thêm seller dashboard
 
@@ -145,6 +146,12 @@ function App() {
             <Route path="/seller/products/:productId/edit" element={
               <PrivateRoute roles={['seller', 'admin']}>
                 <CreateProductPage />
+              </PrivateRoute>
+            } />
+
+            <Route path="/seller/register" element={
+              <PrivateRoute>
+                <SellerRegisterPage />
               </PrivateRoute>
             } />
 
