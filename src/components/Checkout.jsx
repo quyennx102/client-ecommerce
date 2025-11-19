@@ -11,17 +11,17 @@ const Checkout = () => {
     const { user, fetchCartCount } = useAuth();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    
+
     // Cart data
     const [cartItems, setCartItems] = useState([]);
     const [subtotal, setSubtotal] = useState(0);
     const [tax, setTax] = useState(0);
     const [total, setTotal] = useState(0);
-    
+
     // Applied discount from cart page
     const [appliedDiscount, setAppliedDiscount] = useState(null);
     const [discountAmount, setDiscountAmount] = useState(0);
-    
+
     // Form data
     const [formData, setFormData] = useState({
         shipping_name: user?.full_name || '',
@@ -132,7 +132,7 @@ const Checkout = () => {
             };
 
             const response = await orderService.createOrder(orderData);
-            
+
             if (response.success) {
                 // Clear discount from session
                 sessionStorage.removeItem('appliedDiscount');
@@ -161,6 +161,13 @@ const Checkout = () => {
                     if (paymentResponse.success) {
                         // Redirect to ZaloPay payment page
                         window.location.href = paymentResponse.data.orderUrl;
+                    }
+                } else if (formData.payment_method === 'vnpay') {
+                    // vnpay payment
+                    const paymentResponse = await paymentService.createVnPayPayment(firstOrder.order_id);
+                    if (paymentResponse.success) {
+                        // Redirect to VNPay payment page
+                        window.location.href = paymentResponse.data.payUrl;
                     }
                 }
             }
@@ -362,7 +369,7 @@ const Checkout = () => {
                                 {/* Payment Methods */}
                                 <div className="mt-32">
                                     <h6 className="mb-24">Payment Method</h6>
-                                    
+
                                     <div className="payment-item mb-16">
                                         <div className="form-check common-check common-radio">
                                             <input
@@ -427,6 +434,28 @@ const Checkout = () => {
                                             <div className="payment-item__content px-16 py-16 mt-12 rounded-8 bg-main-50">
                                                 <p className="text-gray-800 text-sm mb-0">
                                                     Pay securely with ZaloPay. You will be redirected to ZaloPay payment page.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="payment-item mb-16">
+                                        <div className="form-check common-check common-radio">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="payment"
+                                                id="payment_vnpay"
+                                                checked={formData.payment_method === 'vnpay'}
+                                                onChange={() => handlePaymentChange('vnpay')}
+                                            />
+                                            <label className="form-check-label fw-semibold" htmlFor="payment_vnpay">
+                                                VNPay
+                                            </label>
+                                        </div>
+                                        {formData.payment_method === 'vnpay' && (
+                                            <div className="payment-item__content px-16 py-16 mt-12 rounded-8 bg-main-50">
+                                                <p className="text-gray-800 text-sm mb-0">
+                                                    Pay securely with VNPay. You will be redirected to VNPay payment page.
                                                 </p>
                                             </div>
                                         )}

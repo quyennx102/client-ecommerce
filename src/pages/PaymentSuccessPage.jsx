@@ -20,7 +20,6 @@ const PaymentSuccessPage = () => {
         const paymentMethod = searchParams.get('payment_method');
         const transId = searchParams.get('transId');
         const apptransid = searchParams.get('apptransid');
-
         if (!orderId || !paymentMethod) {
             navigate('/');
             return;
