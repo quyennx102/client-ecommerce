@@ -23,7 +23,7 @@ const SellerDashboard = () => {
               <i className="ph ph-storefront text-warning text-xl mb-3"></i>
               <h5 className="mb-2">My Stores</h5>
               <p className="text-gray-600 mb-0">Manage your stores</p>
-              <Link to="/seller/stores" className="btn btn-warning btn-sm mt-3">
+              <Link to="/seller/stores" className="btn btn-main btn-sm mt-3">
                 Manage Stores
               </Link>
             </div>
@@ -45,7 +45,7 @@ const SellerDashboard = () => {
               <i className="ph ph-chart-line text-primary text-xl mb-3"></i>
               <h5 className="mb-2">Analytics</h5>
               <p className="text-gray-600 mb-0">View sales analytics</p>
-              <button className="btn btn-outline-main btn-sm mt-3">
+              <button className="btn btn-main btn-sm mt-3">
                 View Analytics
               </button>
             </div>

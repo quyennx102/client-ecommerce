@@ -40,7 +40,7 @@ import OrderDetailPage from "./pages/OrderDetailPage";
 import { PaymentFailurePage } from "./pages/PaymentFailurePage";
 import SellerRegisterPage from "./pages/SellerRegisterPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
-// import SellerDashboard from "./pages/seller/SellerDashboard"; // Thêm seller dashboard
+import SellerDashboardPage from "./pages/SellerDashboardPage";
 
 function App() {
   return (
@@ -107,11 +107,11 @@ function App() {
             } />
 
             {/* Seller routes */}
-            {/* <Route path="/seller/dashboard" element={
-            <PrivateRoute roles={['seller', 'admin']}>
-              <SellerDashboard />
-            </PrivateRoute>
-          } /> */}
+            <Route path="/seller/dashboard" element={
+              <PrivateRoute roles={['seller', 'admin']}>
+                <SellerDashboardPage />
+              </PrivateRoute>
+            } />
             <Route exact path="/stores/:storeId/products" element={<StoreProductsPage />} />
             <Route path="/seller/stores" element={
               <PrivateRoute roles={['seller', 'admin']}>

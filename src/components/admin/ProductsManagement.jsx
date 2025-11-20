@@ -230,7 +230,7 @@ const ProductsManagement = () => {
               <div className="col-lg-2 col-md-4 col-sm-6">
                 <div className="border border-gray-100 rounded-16 p-20 bg-main-50">
                   <div className="text-2xl fw-bold text-main-600 mb-4">
-                    {pagination?.totalItems || 0}
+                    {pagination?.totalItems?.[0]?.count || 0}
                   </div>
                   <div className="text-sm text-gray-600">Total Products</div>
                 </div>
@@ -444,29 +444,29 @@ const ProductsManagement = () => {
                 <table className="table table-hover mb-0">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th style={{ width: '40px' }}>
+                      <th className="text-center">
                         <input
                           type="checkbox"
                           checked={selectedProducts.length === products.length}
                           onChange={handleSelectAll}
                         />
                       </th>
-                      <th style={{ width: '60px' }}>ID</th>
-                      <th style={{ width: '80px' }}>Image</th>
-                      <th>Product</th>
-                      <th style={{ width: '150px' }}>Store</th>
-                      <th style={{ width: '120px' }}>Category</th>
-                      <th style={{ width: '120px' }}>Price</th>
-                      <th style={{ width: '80px' }}>Stock</th>
-                      <th style={{ width: '80px' }}>Sold</th>
-                      <th style={{ width: '120px' }}>Status</th>
-                      <th style={{ width: '100px' }}>Actions</th>
+                      <th className="text-center" style={{ width: '100px' }}>ID</th>
+                      <th className="text-center" style={{ width: '130px' }}>Image</th>
+                      <th className="text-center">Product</th>
+                      <th className="text-center" style={{ width: '150px' }}>Store</th>
+                      <th className="text-center" style={{ width: '160px' }}>Category</th>
+                      <th className="text-center" style={{ width: '120px' }}>Price</th>
+                      <th className="text-center" style={{ width: '120px' }}>Stock</th>
+                      <th className="text-center" style={{ width: '120px' }}>Sold</th>
+                      <th className="text-center" style={{ width: '130px' }}>Status</th>
+                      <th className="text-center" style={{ width: '130px' }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {products.map(product => (
                       <tr key={product.product_id}>
-                        <td>
+                        <td className="text-center">
                           <input
                             type="checkbox"
                             checked={selectedProducts.includes(product.product_id)}
@@ -476,7 +476,7 @@ const ProductsManagement = () => {
                         <td className="text-gray-500">#{product.product_id}</td>
                         <td>
                           <img
-                            src={product.images?.[0]?.image_url ? `${process.env.REACT_APP_API_URL}${product.images[0].image_url}` : '/placeholder.jpg'}
+                            src={product.images?.[0]?.image_url ? `${process.env.REACT_APP_IMAGE_URL}${product.images[0].image_url}` : '/placeholder.jpg'}
                             alt={product.product_name}
                             className="rounded-8"
                             style={{ width: '50px', height: '50px', objectFit: 'cover' }}
@@ -493,21 +493,20 @@ const ProductsManagement = () => {
                             {product.category?.category_name}
                           </span>
                         </td>
-                        <td className="fw-bold">{parseInt(product.price).toLocaleString('vi-VN')}đ</td>
+                        <td className="fw-bold">{parseInt(product.price).toLocaleString('vi-VN')}$</td>
                         <td>
                           <span className={
                             product.stock_quantity === 0 ? 'text-danger fw-bold' :
-                            product.stock_quantity < 10 ? 'text-warning fw-bold' : ''
+                              product.stock_quantity < 10 ? 'text-warning fw-bold' : ''
                           }>
                             {product.stock_quantity}
                           </span>
                         </td>
                         <td>{product.sold_quantity || 0}</td>
                         <td>
-                          <span className={`badge ${
-                            product.status === 'active' ? 'bg-success' :
-                            product.status === 'out_of_stock' ? 'bg-danger' : 'bg-secondary'
-                          }`}>
+                          <span className={`badge ${product.status === 'active' ? 'bg-success' :
+                              product.status === 'out_of_stock' ? 'bg-danger' : 'bg-secondary'
+                            }`}>
                             {product.status.replace('_', ' ').toUpperCase()}
                           </span>
                         </td>
@@ -542,8 +541,8 @@ const ProductsManagement = () => {
                   <div className="flex-between">
                     <div className="text-sm text-gray-500">
                       Showing {((pagination.currentPage - 1) * filters.limit) + 1} to{' '}
-                      {Math.min(pagination.currentPage * filters.limit, pagination.totalItems)} of{' '}
-                      {pagination.totalItems} products
+                      {Math.min(pagination.currentPage * filters.limit, pagination?.totalItems?.[0]?.count)} of{' '}
+                      {pagination?.totalItems?.[0]?.count} products
                     </div>
                     <nav>
                       <ul className="pagination mb-0">
