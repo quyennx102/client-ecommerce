@@ -79,11 +79,12 @@ const OrderDetail = () => {
                             </p>
                         </div>
                         <div className="text-end">
+                            <span className="text-gray-600">Order status:  </span>
                             <span className={getStatusBadge(order.order_status)}>
                                 {order.order_status}
                             </span>
                             <div className="mt-8">
-                                <span className="text-gray-600">Payment: </span>
+                                <span className="text-gray-600">Payment status:  </span>
                                 <span className={`badge ${order.payment_status === 'paid' ? 'bg-success' : 'bg-warning'}`}>
                                     {order.payment_status}
                                 </span>

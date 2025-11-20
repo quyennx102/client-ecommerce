@@ -4,6 +4,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ProductSection from "../components/home/ProductSection";
 import './HeaderTwo.css';
+import NotificationBell from './NotificationBell';
 
 const HeaderTwo = ({ category }) => {
     const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger, cartCount } = useAuth();
@@ -470,6 +471,9 @@ const HeaderTwo = ({ category }) => {
                                         </span>
                                     </Link>
                                 )}
+
+                                {/* Notification Bell - Only when authenticated */}
+                                {isAuthenticated && <NotificationBell />}
 
                                 <Link
                                     to="/cart"

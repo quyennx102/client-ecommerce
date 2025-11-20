@@ -135,6 +135,10 @@ export const AuthProvider = ({ children }) => {
         checkAuth();
     }, [checkAuth]);
 
+    const getAccessToken = () => {
+        return localStorage.getItem('token');
+    };
+
     // Role checking functions
     const isAdmin = () => user?.role === 'admin';
     const isSeller = () => user?.role === 'seller';
@@ -157,7 +161,8 @@ export const AuthProvider = ({ children }) => {
         hasRole,
         hasAnyRole,
         cartCount,
-        fetchCartCount
+        fetchCartCount,
+        getAccessToken
     };
 
     return (

@@ -41,170 +41,177 @@ import { PaymentFailurePage } from "./pages/PaymentFailurePage";
 import SellerRegisterPage from "./pages/SellerRegisterPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 import SellerDashboardPage from "./pages/SellerDashboardPage";
-
+import NotificationsPage from "./pages/NotificationsPage";
+import { SocketProvider } from './contexts/SocketContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <RouteScrollToTop />
-        <PhosphorIconInit />
+        <SocketProvider>
+          <NotificationProvider>
+            <RouteScrollToTop />
+            <PhosphorIconInit />
 
-        {/* Header được đặt ở đây - sẽ hiển thị trên tất cả các trang */}
-        <HeaderTwo category={false} />
+            {/* Header được đặt ở đây - sẽ hiển thị trên tất cả các trang */}
+            <HeaderTwo category={false} />
 
-        {/* Main content */}
-        <main>
-          <Routes>
-            <Route exact path="/" element={<HomePageTwo />} />
-            <Route exact path="/index-two" element={<HomePageOne />} />
-            <Route exact path="/products" element={<ProductsPage />} />
-            <Route exact path="/product-details" element={<ProductDetailsPageOne />} />
-            <Route exact path="/products/:id" element={<ProductDetailsPageTwo />} />
-            <Route exact path="/cart" element={
-              <PrivateRoute>
-                <CartPage />
-              </PrivateRoute>
-            } />
+            {/* Main content */}
+            <main>
+              <Routes>
+                <Route exact path="/" element={<HomePageTwo />} />
+                <Route exact path="/index-two" element={<HomePageOne />} />
+                <Route exact path="/products" element={<ProductsPage />} />
+                <Route exact path="/product-details" element={<ProductDetailsPageOne />} />
+                <Route exact path="/products/:id" element={<ProductDetailsPageTwo />} />
+                <Route exact path="/cart" element={
+                  <PrivateRoute>
+                    <CartPage />
+                  </PrivateRoute>
+                } />
 
-            <Route exact path="/checkout" element={
-              <PrivateRoute>
-                <CheckoutPage />
-              </PrivateRoute>
-            } />
-            <Route exact path="/payment/success" element={
-              <PrivateRoute>
-                <PaymentSuccessPage />
-              </PrivateRoute>
-            } />
+                <Route exact path="/checkout" element={
+                  <PrivateRoute>
+                    <CheckoutPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route exact path="/payment/success" element={
+                  <PrivateRoute>
+                    <PaymentSuccessPage />
+                  </PrivateRoute>
+                } />
 
-            <Route exact path="/payment/failure" element={
-              <PrivateRoute>
-                <PaymentFailurePage />
-              </PrivateRoute>
-            } />
+                <Route exact path="/payment/failure" element={
+                  <PrivateRoute>
+                    <PaymentFailurePage />
+                  </PrivateRoute>
+                } />
 
-            <Route exact path="/orders/:orderId" element={
-              <PrivateRoute>
-                <OrderDetailPage />
-              </PrivateRoute>
-            } />
+                <Route exact path="/orders/:orderId" element={
+                  <PrivateRoute>
+                    <OrderDetailPage />
+                  </PrivateRoute>
+                } />
 
-            {/* ✅ Account routes group */}
-            <Route path="/auth">
-              <Route index element={<AccountPage />} />
-              <Route path="forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="reset-password/:token" element={<ResetPasswordPage />} />
-            </Route>
+                {/* ✅ Account routes group */}
+                <Route path="/auth">
+                  <Route index element={<AccountPage />} />
+                  <Route path="forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="reset-password/:token" element={<ResetPasswordPage />} />
+                </Route>
 
-            {/* ✅ CALLBACK ROUTE - QUAN TRỌNG! */}
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+                {/* ✅ CALLBACK ROUTE - QUAN TRỌNG! */}
+                <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-            {/* Protected routes - Common */}
-            <Route path="/profile" element={
-              <PrivateRoute>
-                <ProfilePage />
-              </PrivateRoute>
-            } />
+                {/* Protected routes - Common */}
+                <Route path="/profile" element={
+                  <PrivateRoute>
+                    <ProfilePage />
+                  </PrivateRoute>
+                } />
 
-            {/* Seller routes */}
-            <Route path="/seller/dashboard" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <SellerDashboardPage />
-              </PrivateRoute>
-            } />
-            <Route exact path="/stores/:storeId/products" element={<StoreProductsPage />} />
-            <Route path="/seller/stores" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <MyStoresPage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/stores/create" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <CreateStorePage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/stores/:storeId/discounts" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <SellerDiscountsPage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/stores/:storeId/discounts/create" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <SellerCreateDiscountPage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/stores/:storeId/products/create" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <CreateProductPage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/stores/:storeId/products" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <ManageProductsPage />
-              </PrivateRoute>
-            } />
-            <Route path="/seller/products/:productId/edit" element={
-              <PrivateRoute roles={['seller', 'admin']}>
-                <CreateProductPage />
-              </PrivateRoute>
-            } />
+                {/* Seller routes */}
+                <Route path="/seller/dashboard" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <SellerDashboardPage />
+                  </PrivateRoute>
+                } />
+                <Route exact path="/stores/:storeId/products" element={<StoreProductsPage />} />
+                <Route path="/seller/stores" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <MyStoresPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/stores/create" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <CreateStorePage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/stores/:storeId/discounts" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <SellerDiscountsPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/stores/:storeId/discounts/create" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <SellerCreateDiscountPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/stores/:storeId/products/create" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <CreateProductPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/stores/:storeId/products" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <ManageProductsPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/seller/products/:productId/edit" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <CreateProductPage />
+                  </PrivateRoute>
+                } />
 
-            <Route path="/seller/register" element={
-              <PrivateRoute>
-                <SellerRegisterPage />
-              </PrivateRoute>
-            } />
+                <Route path="/seller/register" element={
+                  <PrivateRoute>
+                    <SellerRegisterPage />
+                  </PrivateRoute>
+                } />
 
-            {/* Admin routes */}
-            <Route path="/admin/dashboard" element={
-              <PrivateRoute roles={['admin']}>
-                <AdminDashboardPage />
-              </PrivateRoute>
-            } />
-            <Route path="/admin/products" element={
-              <PrivateRoute roles={['admin']}>
-                <ProductsManagementPage />
-              </PrivateRoute>
-            } />
-            <Route path="/admin/category" element={
-              <PrivateRoute roles={['admin']}>
-                <CategoryManagementPage />
-              </PrivateRoute>
-            } />
-            <Route path="/admin/discounts" element={
-              <PrivateRoute roles={['admin']}>
-                <AdminDiscountsPage />
-              </PrivateRoute>
-            } />
+                {/* Admin routes */}
+                <Route path="/admin/dashboard" element={
+                  <PrivateRoute roles={['admin']}>
+                    <AdminDashboardPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/admin/products" element={
+                  <PrivateRoute roles={['admin']}>
+                    <ProductsManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/admin/category" element={
+                  <PrivateRoute roles={['admin']}>
+                    <CategoryManagementPage />
+                  </PrivateRoute>
+                } />
+                <Route path="/admin/discounts" element={
+                  <PrivateRoute roles={['admin']}>
+                    <AdminDiscountsPage />
+                  </PrivateRoute>
+                } />
 
-            <Route path="/admin/stores" element={
-              <PrivateRoute roles={['admin']}>
-                <AdminStoresPage />
-              </PrivateRoute>
-            } />
+                <Route path="/admin/stores" element={
+                  <PrivateRoute roles={['admin']}>
+                    <AdminStoresPage />
+                  </PrivateRoute>
+                } />
 
-            <Route exact path="/blog" element={<BlogPage />} />
-            <Route exact path="/blog-details" element={<BlogDetailsPage />} />
-            <Route exact path="/contact" element={<ContactPage />} />
-          </Routes>
-        </main>
+                <Route exact path="/blog" element={<BlogPage />} />
+                <Route exact path="/blog-details" element={<BlogDetailsPage />} />
+                <Route exact path="/contact" element={<ContactPage />} />
+              </Routes>
+            </main>
 
-        {/* Footer được đặt ở đây - sẽ hiển thị trên tất cả các trang */}
-        <FooterTwo />
-        <BottomFooter />
+            {/* Footer được đặt ở đây - sẽ hiển thị trên tất cả các trang */}
+            <FooterTwo />
+            <BottomFooter />
 
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
+          </NotificationProvider>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );
