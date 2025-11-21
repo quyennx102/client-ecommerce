@@ -56,7 +56,7 @@ const ManageProducts = () => {
                 setPagination(response.pagination);
             }
         } catch (error) {
-            toast.error('Failed to load products');
+            toast.error(error.response.data.message);
         } finally {
             setLoading(false);
         }
