@@ -164,16 +164,16 @@ const TrendingOne = () => {
                     </div>
                     <div className="trending-products-box rounded-16 overflow-hidden flex-between position-relative mb-24">
                         <div className="d-md-block d-none ps-xxl-5 ps-md-4">
-                            <img src="assets/images/thumbs/trending-products-img1.png" alt="" />
+                            <img src="assets/images/thumbs/feature-img5.png" alt="" />
                         </div>
                         <div className="trending-products-box__content px-4 d-block w-100 text-center py-32">
                             <h6 className="mb-0 trending-products-box__title">
-                                Laptop Pro <span className="h4 mb-0 fw-semibold">20%</span> off All
-                                Time On Order Now $980
+                                Animals Food and Yummy Candy <span className="h4 mb-0 fw-semibold">20%</span> off All
+                                Time On Order Now $8
                             </h6>
                         </div>
                         <div className="d-md-block d-none pe-xxl-5 me-xxl-5 pe-md-4">
-                            <img src="assets/images/thumbs/trending-products-img2.png" alt="" />
+                            <img src="assets/images/thumbs/feature-img7.png" alt="" />
                         </div>
                     </div>
                     <div className="tab-content" id="pills-tabContent">

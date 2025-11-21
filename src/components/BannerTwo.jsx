@@ -546,12 +546,12 @@ const BannerTwo = () => {
                             <Slider {...settings}>
                                 <div className="banner-item-two">
                                     <div className="banner-item-two__content">
-                                        <span className="text-white mb-8 h6">Starting at only $50</span>
+                                        {/* <span className="text-white mb-8 h6">Starting at only $50</span> */}
                                         <h2 className="banner-item-two__title bounce text-white">
-                                            Get The Sound You Love For Less
+                                            Daily Grocery Order and Get Express Delivery
                                         </h2>
                                         <Link
-                                            to="/shop"
+                                            to="/"
                                             className="btn btn-outline-white d-inline-flex align-items-center rounded-pill gap-8 mt-48"
                                         >
                                             Shop Now
@@ -566,13 +566,12 @@ const BannerTwo = () => {
                                 </div>
                                 <div className="banner-item-two">
                                     <div className="banner-item-two__content">
-                                        <span className="text-white mb-8 h6">Starting at only $5</span>
+                                        {/* <span className="text-white mb-8 h6">Starting at only $5</span> */}
                                         <h2 className="banner-item-two__title bounce text-white">
-                                            Summer offer
-                                            Get 85% Off
+                                            Daily Grocery Order and Get Express Delivery
                                         </h2>
                                         <Link
-                                            to="/shop"
+                                            to="/"
                                             className="btn btn-outline-white d-inline-flex align-items-center rounded-pill gap-8 mt-48"
                                         >
                                             Shop Now

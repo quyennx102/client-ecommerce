@@ -122,7 +122,7 @@ const TopSellingOne = () => {
                                     className="position-absolute inset-block-start-0 inset-inline-start-0 z-n1 w-100 h-100"
                                 />
                                 <div className="py-xl-4">
-                                    <h6 className="mb-4 fw-semibold">Polaroid Now+ Gen 2 - White</h6>
+                                    <h6 className="mb-4 fw-semibold">PTaylor Farms Broccoli Florets Vegetables</h6>
                                     <h5 className="mb-40 fw-semibold">Fresh Vegetables</h5>
                                     <Link
                                         to="/cart"
@@ -133,7 +133,7 @@ const TopSellingOne = () => {
                                     </Link>
                                 </div>
                                 <div className="d-md-block d-none mt-36">
-                                    <img src="assets/images/thumbs/deal-img.png" alt="" />
+                                    <img src="assets/images/thumbs/best-sell3.png" alt="" />
                                 </div>
                             </div>
                         </div>

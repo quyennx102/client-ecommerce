@@ -16,10 +16,10 @@ const DiscountOne = () => {
                             <div className="w-100 flex-between gap-20">
                                 <div className="discount-item__content">
                                     <span className="fw-semibold text-tertiary-600 mb-20">
-                                        UP TO 30% OFF
+                                        Delivery by 6:15am expired Dec 15
                                     </span>
                                     <h6 className="mb-20">
-                                        57" Odyssey Neo G9 Dual 4K UHD Quantum Mini-LED
+                                        $5 off your first order
                                     </h6>
                                     <Link
                                         to="/shop"
@@ -30,7 +30,7 @@ const DiscountOne = () => {
                                     </Link>
                                 </div>
                                 <img
-                                    src="assets/images/thumbs/discount-img1.png"
+                                    src="assets/images/thumbs/offer-img1.png"
                                     alt=""
                                     className="d-sm-block d-none"
                                 />
@@ -47,10 +47,10 @@ const DiscountOne = () => {
                             <div className="w-100 flex-between gap-20">
                                 <div className="discount-item__content">
                                     <span className="fw-semibold text-tertiary-600 mb-20">
-                                        UP TO 30% OFF
+                                        Delivery by 6:15am expired Dec 15
                                     </span>
                                     <h6 className="mb-20">
-                                        57" Odyssey Neo G9 Dual 4K UHD Quantum Mini-LED
+                                        $5 off your first order
                                     </h6>
                                     <Link
                                         to="/shop"
@@ -61,7 +61,7 @@ const DiscountOne = () => {
                                     </Link>
                                 </div>
                                 <img
-                                    src="assets/images/thumbs/discount-img2.png"
+                                    src="assets/images/thumbs/offer-img2.png"
                                     alt=""
                                     className="d-sm-block d-none"
                                 />

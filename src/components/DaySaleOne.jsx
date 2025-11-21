@@ -12,13 +12,13 @@ const DaySaleOne = () => {
                         className="position-absolute inset-block-start-0 inset-inline-start-0 z-n1 w-100 h-100 cover-img"
                     />
                     <div className="d-xl-block d-none">
-                        <img src="assets/images/thumbs/day-sale-img1.png" alt="" />
+                        <img src="assets/images/thumbs/delivery-man.png" alt="" />
                     </div>
                     <div className="day-sale-box__content d-block w-100 text-start py-32 ps-lg-0 ps-24">
-                        <h3 className="text-white fw-medium mb-24">CYBER MONDAY SALE</h3>
-                        <h6 className="text-white fw-medium mb-8">UP TO 30% OFF</h6>
+                        <h3 className="text-white fw-medium mb-24">We Delivery on Next Day from 10:00 AM to 08:00 PM</h3>
+                        {/* <h6 className="text-white fw-medium mb-8">UP TO 30% OFF</h6> */}
                         <h6 className="text-white fw-medium mb-0">
-                            COMPUTER &amp; MOBILE ACCESSORIES
+                            For Orders starts from $100
                         </h6>
                         <Link
                             to="/shop"
@@ -29,7 +29,7 @@ const DaySaleOne = () => {
                         </Link>
                     </div>
                     <div className="d-md-block d-none pe-xxl-5 pe-md-4">
-                        <img src="assets/images/thumbs/day-sale-img2.png" alt="" />
+                        <img src="assets/images/thumbs/special-snacks-img.png" alt="" />
                     </div>
                 </div>
             </div>

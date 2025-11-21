@@ -127,7 +127,7 @@ const DealsOne = () => {
                 <div className="border border-gray-100 p-24 rounded-16">
                     <div className="section-heading mb-24">
                         <div className="flex-between flex-wrap gap-8">
-                            <h5 className="mb-0">Deal of The Week</h5>
+                            <h5 className="mb-0">Flash Sales Today</h5>
                             <div className="flex-align mr-point gap-16">
                                 <Link
                                     to="/products"
@@ -145,7 +145,7 @@ const DealsOne = () => {
                             className="position-absolute inset-block-start-0 inset-block-start-0 w-100 h-100 z-n1 object-fit-cover"
                         />
                         <div className="d-lg-block d-none ps-32 flex-shrink-0">
-                            <img src="assets/images/thumbs/week-deal-img1.png" alt="" />
+                            <img src="assets/images/thumbs/flash-sale-img1.png" alt="" />
                         </div>
                         <div className="deal-week-box__content px-sm-4 d-block w-100 text-center">
                             <h6 className="mb-20">Apple AirPods Max, Over Ear Headphones</h6>
@@ -172,7 +172,7 @@ const DealsOne = () => {
                         </div>
                         <div className="d-lg-block d-none flex-shrink-0 pe-xl-5">
                             <div className="me-xxl-5">
-                                <img src="assets/images/thumbs/week-deal-img2.png" alt="" />
+                                <img src="assets/images/thumbs/flash-sale-img2.png" alt="" />
                             </div>
                         </div>
                     </div>
