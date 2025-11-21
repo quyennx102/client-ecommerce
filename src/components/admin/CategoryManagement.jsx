@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import categoryService from '../../services/categoryService';
 import { toast } from 'react-toastify';
 import sweetAlert from '../../utils/sweetAlert';
+
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,6 +11,12 @@ const CategoryManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [pagination, setPagination] = useState({});
+  
+  // Image upload states
+  const [selectedIcon, setSelectedIcon] = useState(null);
+  const [iconPreview, setIconPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
   const [formData, setFormData] = useState({
     category_name: '',
     description: '',
@@ -53,6 +60,44 @@ const CategoryManagement = () => {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
+  // Handle icon file selection
+  const handleIconChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please select a valid image file (JPG, PNG, GIF, WebP, SVG)');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      toast.error('Image size should not exceed 2MB');
+      return;
+    }
+
+    setSelectedIcon(file);
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setIconPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Clear icon selection
+  const clearIconSelection = () => {
+    setSelectedIcon(null);
+    setIconPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = async () => {
     if (!formData.category_name) {
       toast.error('Please fill in category name');
@@ -61,10 +106,27 @@ const CategoryManagement = () => {
 
     try {
       setLoading(true);
+
+      // Create FormData for multipart upload
+      const submitData = new FormData();
+      submitData.append('category_name', formData.category_name);
+      submitData.append('description', formData.description || '');
+      submitData.append('display_order', formData.display_order);
+      submitData.append('status', formData.status);
+      
+      if (formData.parent_id) {
+        submitData.append('parent_id', formData.parent_id);
+      }
+
+      // Append icon file if selected
+      if (selectedIcon) {
+        submitData.append('icon', selectedIcon);
+      }
+
       if (editingCategory) {
-        await categoryService.updateCategory(editingCategory.category_id, formData);
+        await categoryService.updateCategory(editingCategory.category_id, submitData);
       } else {
-        await categoryService.createCategory(formData);
+        await categoryService.createCategory(submitData);
       }
 
       await fetchCategories(searchTerm);
@@ -86,6 +148,12 @@ const CategoryManagement = () => {
       display_order: category.display_order || 0,
       status: category.status
     });
+
+    // Set existing icon preview
+    if (category.icon_url) {
+      setIconPreview(`${process.env.REACT_APP_IMAGE_URL}${category.icon_url}`);
+    }
+
     setIsModalOpen(true);
   };
 
@@ -130,6 +198,7 @@ const CategoryManagement = () => {
     });
     setEditingCategory(null);
     setIsModalOpen(false);
+    clearIconSelection();
   };
 
   if (loading && categories.length === 0) {
@@ -282,7 +351,6 @@ const CategoryManagement = () => {
               </div>
             ))}
           </div>
-
         )}
 
         {/* Pagination Info */}
@@ -294,7 +362,7 @@ const CategoryManagement = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal with Icon Upload */}
       {isModalOpen && (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered modal-lg">
@@ -311,6 +379,69 @@ const CategoryManagement = () => {
               </div>
               <div className="modal-body">
                 <div className="row g-24">
+                  {/* Category Icon Upload */}
+                  <div className="col-12">
+                    <label className="form-label">Category Icon</label>
+                    <div className="icon-upload-wrapper">
+                      {/* Preview Area */}
+                      <div className="icon-preview-container mb-16 p-24 border border-gray-200 rounded-8 bg-gray-50">
+                        <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '150px' }}>
+                          {iconPreview ? (
+                            <div className="position-relative">
+                              <img
+                                src={iconPreview}
+                                alt="Category icon preview"
+                                className="img-fluid rounded-8"
+                                style={{ maxHeight: '150px', maxWidth: '200px', objectFit: 'contain' }}
+                              />
+                              <button
+                                type="button"
+                                className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle"
+                                style={{ width: '32px', height: '32px', padding: 0 }}
+                                onClick={clearIconSelection}
+                                title="Remove icon"
+                              >
+                                <i className="ph ph-x"></i>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="text-center text-gray-500">
+                              <i className="ph ph-image" style={{ fontSize: '48px' }}></i>
+                              <p className="mt-8 mb-0">No icon selected</p>
+                              <small className="text-gray-400">JPG, PNG, GIF, WebP, SVG (Max 2MB)</small>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Upload Button */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleIconChange}
+                        className="d-none"
+                        id="categoryIconInput"
+                      />
+                      <label
+                        htmlFor="categoryIconInput"
+                        className="btn btn-outline-main w-100 py-12"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <i className="ph ph-upload-simple me-8"></i>
+                        {iconPreview ? 'Change Icon' : 'Upload Icon'}
+                      </label>
+
+                      {/* Info Text */}
+                      <div className="mt-12">
+                        <small className="text-gray-600">
+                          <i className="ph ph-info me-4"></i>
+                          Recommended size: 200x200px. Max file size: 2MB
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Category Name */}
                   <div className="col-12">
                     <label className="form-label">Category Name <span className="text-danger">*</span></label>
@@ -392,7 +523,14 @@ const CategoryManagement = () => {
                   disabled={loading}
                   className="btn btn-main py-18 px-40 rounded-8"
                 >
-                  {loading ? 'Saving...' : (editingCategory ? 'Update Category' : 'Add Category')}
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-8"></span>
+                      Saving...
+                    </>
+                  ) : (
+                    editingCategory ? 'Update Category' : 'Add Category'
+                  )}
                 </button>
               </div>
             </div>
