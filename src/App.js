@@ -44,6 +44,7 @@ import SellerDashboardPage from "./pages/SellerDashboardPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './contexts/NotificationContext';
+import MyOrdersPage from "./pages/MyOrdersPage";
 function App() {
   return (
     <BrowserRouter>
@@ -91,6 +92,12 @@ function App() {
                 <Route exact path="/orders/:orderId" element={
                   <PrivateRoute>
                     <OrderDetailPage />
+                  </PrivateRoute>
+                } />
+
+                <Route exact path="/orders/my-orders" element={
+                  <PrivateRoute>
+                    <MyOrdersPage />
                   </PrivateRoute>
                 } />
 

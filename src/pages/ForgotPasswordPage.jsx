@@ -27,7 +27,7 @@ const ForgotPasswordPage = () => {
             <Preloader />
 
             {/* HeaderTwo */}
-            <HeaderTwo category={true} />
+            {/* <HeaderTwo category={true} /> */}
 
             {/* Breadcrumb */}
             <Breadcrumb
@@ -41,13 +41,13 @@ const ForgotPasswordPage = () => {
             <ForgotPassword />
 
             {/* ShippingOne */}
-            <ShippingOne />
+            {/* <ShippingOne /> */}
 
             {/* FooterTwo */}
-            <FooterTwo />
+            {/* <FooterTwo /> */}
 
             {/* BottomFooter */}
-            <BottomFooter />
+            {/* <BottomFooter /> */}
 
 
         </>

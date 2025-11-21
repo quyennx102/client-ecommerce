@@ -73,7 +73,7 @@ const FlashSalesOne = () => {
                         <h5 className="mb-0">Flash Sales Today</h5>
                         <div className="flex-align gap-16 mr-point">
                             <Link
-                                to="/shop"
+                                to="/products"
                                 className="text-sm fw-medium text-gray-700 hover-text-main-600 hover-text-decoration-underline"
                             >
                                 View All Deals

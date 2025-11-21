@@ -532,6 +532,12 @@ const HeaderTwo = ({ category }) => {
                                                     My Cart
                                                 </Link>
                                             </li>
+                                            <li>
+                                                <Link className="dropdown-item" to="/orders/my-orders">
+                                                    <i className="ph ph-shopping-bag"></i>
+                                                    My Orders
+                                                </Link>
+                                            </li>
 
                                             {/* Become a Seller trong dropdown - CHỈ khi CHƯA phải seller */}
                                             {!isSeller() && !isAdmin() && (
@@ -563,16 +569,16 @@ const HeaderTwo = ({ category }) => {
                                                             My Stores
                                                         </Link>
                                                     </li>
-                                                    <li>
+                                                    {/* <li>
                                                         <Link className="dropdown-item" to="/seller/products">
                                                             <i className="ph ph-package me-2"></i>
                                                             My Products
                                                         </Link>
-                                                    </li>
+                                                    </li> */}
                                                     <li>
                                                         <Link className="dropdown-item" to="/seller/orders">
                                                             <i className="ph ph-shopping-cart me-2"></i>
-                                                            Orders
+                                                            Order Management
                                                         </Link>
                                                     </li>
                                                     <li>
@@ -688,20 +694,20 @@ const HeaderTwo = ({ category }) => {
                                                     Stores
                                                 </NavLink>
                                             </li>
-                                            <li className="nav-menu__item">
+                                            {/* <li className="nav-menu__item">
                                                 <NavLink to="/seller/products" className={({ isActive }) =>
                                                     isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
                                                 }>
                                                     <i className="ph ph-package me-1"></i>
                                                     Products
                                                 </NavLink>
-                                            </li>
+                                            </li> */}
                                             <li className="nav-menu__item">
                                                 <NavLink to="/seller/orders" className={({ isActive }) =>
                                                     isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
                                                 }>
                                                     <i className="ph ph-shopping-cart me-1"></i>
-                                                    Orders
+                                                    Order Management
                                                 </NavLink>
                                             </li>
                                             <li className="nav-menu__item">

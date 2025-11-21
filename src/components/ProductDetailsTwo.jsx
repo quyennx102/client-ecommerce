@@ -244,7 +244,7 @@ const ProductDetailsTwo = () => {
         dots: false,
         infinite: true,
         speed: 500,
-        slidesToShow: 4,
+        slidesToShow: productImages.length,
         slidesToScroll: 1,
         focusOnSelect: true,
         responsive: [
@@ -309,7 +309,7 @@ const ProductDetailsTwo = () => {
                                             <div className="product-details__images-slider">
                                                 <Slider {...settingsThumbs}>
                                                     {productImages.map((image, index) => (
-                                                        <div className="center max-w-120 max-h-120 h-100 flex-center border border-gray-100 rounded-16 p-8" key={index} onClick={() => setMainImage(image)}>
+                                                        <div className="center max-w-120 max-h-120 h-100 flex-center border border-gray-100 rounded-16 p-8" key={index} onClick={() => setMainImage(image.image_url)}>
                                                             <img className='thum' src={`${process.env.REACT_APP_IMAGE_URL}${image.image_url}`} alt={`${product.product_name} ${index + 1}`} />
                                                         </div>
                                                     ))}
@@ -389,7 +389,7 @@ const ProductDetailsTwo = () => {
                                     <span className="mt-32 pt-32 text-gray-700 border-top border-gray-100 d-block" />
 
                                     {/* Description */}
-                                    <p className="text-gray-700">{product.description}</p>
+                                    {/* <p className="text-gray-700">{product.description}</p> */}
 
                                     {/* Price */}
                                     <div className="my-32 flex-align gap-16 flex-wrap">

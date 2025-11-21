@@ -61,7 +61,7 @@ const FeaturedOne = () => {
                                     <h5 className="mb-0">Featured Products </h5>
                                     <div className="flex-align mr-point gap-16">
                                         <Link
-                                            to="/shop"
+                                            to="/products"
                                             className="text-sm fw-medium text-gray-700 hover-text-main-600 hover-text-decoration-underline"
                                         >
                                             View All Deals

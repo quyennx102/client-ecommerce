@@ -187,9 +187,7 @@ const TrendingOne = () => {
                             <div className="row g-12">
 
                                 {products.map(product => (
-                                    <div key={product.product_id}>
-                                        <ProductCardTwo product={product} />
-                                    </div>
+                                    <ProductCardTwo key={product.product_id} product={product} />
                                 ))}
                                 {/* <div className="col-xxl-2 col-xl-3 col-lg-4 col-sm-6">
                                     <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
