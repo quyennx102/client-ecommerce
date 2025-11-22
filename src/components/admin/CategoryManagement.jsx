@@ -133,7 +133,7 @@ const CategoryManagement = () => {
       resetForm();
       toast.success(editingCategory ? 'Category updated successfully' : 'Category created successfully');
     } catch (err) {
-      toast.error(`Error: ${err.message}`);
+      toast.error(`Error: ${err.response.data.message}`);
     } finally {
       setLoading(false);
     }
