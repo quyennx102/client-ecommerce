@@ -45,6 +45,7 @@ import NotificationsPage from "./pages/NotificationsPage";
 import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import MyOrdersPage from "./pages/MyOrdersPage";
+import './styles/category-styles.css'
 function App() {
   return (
     <BrowserRouter>

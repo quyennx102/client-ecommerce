@@ -1,24 +1,20 @@
-import ReactSlider from 'react-slider'
+import ReactSlider from 'react-slider';
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import productService from '../services/productService';
 import categoryService from '../services/categoryService';
 
 const ProductList = () => {
-
-    let [grid, setGrid] = useState(true)
-
-    let [active, setActive] = useState(false)
-    let sidebarController = () => {
-        setActive(!active)
-    }
-
-    const navigate = useNavigate();
+    const [grid, setGrid] = useState(true);
+    const [active, setActive] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [stores, setStores] = useState([]);
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+    const [ratingDistribution, setRatingDistribution] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState(null);
 
@@ -27,17 +23,36 @@ const ProductList = () => {
         page: parseInt(searchParams.get('page')) || 1,
         limit: 20,
         category_id: searchParams.get('category') || '',
+        store_id: searchParams.get('store') || '',
         search: searchParams.get('search') || '',
         min_price: searchParams.get('min_price') || '',
         max_price: searchParams.get('max_price') || '',
+        min_rating: searchParams.get('min_rating') || '',
         sort_by: searchParams.get('sort_by') || 'created_at',
         order: searchParams.get('order') || 'DESC'
     });
 
-    // View mode
-    const [viewMode, setViewMode] = useState('grid'); // grid or list
+    // Lắng nghe thay đổi URL params
+    useEffect(() => {
+        const categoryFromUrl = searchParams.get('category');
+        if (categoryFromUrl && categoryFromUrl !== filters.category_id) {
+            setFilters(prev => ({
+                ...prev,
+                category_id: categoryFromUrl,
+                page: 1
+            }));
+        }
+    }, [searchParams]);
+
+    // Slider values
+    const [priceSliderValues, setPriceSliderValues] = useState([0, 1000]);
+
+    const sidebarController = () => {
+        setActive(!active);
+    };
 
     useEffect(() => {
+        fetchFilterOptions();
         fetchCategories();
     }, []);
 
@@ -45,6 +60,25 @@ const ProductList = () => {
         fetchProducts();
         updateURLParams();
     }, [filters]);
+
+    const fetchFilterOptions = async () => {
+        try {
+            const response = await productService.getFilterOptions();
+            if (response.success) {
+                setStores(response.data.stores);
+                setPriceRange(response.data.priceRange);
+                setRatingDistribution(response.data.ratingDistribution);
+
+                // Initialize slider values
+                setPriceSliderValues([
+                    filters.min_price || response.data.priceRange.min,
+                    filters.max_price || response.data.priceRange.max
+                ]);
+            }
+        } catch (error) {
+            console.error('Failed to load filter options');
+        }
+    };
 
     const fetchCategories = async () => {
         try {
@@ -79,7 +113,9 @@ const ProductList = () => {
         const params = new URLSearchParams();
         Object.keys(filters).forEach(key => {
             if (filters[key] && filters[key] !== '') {
-                params.set(key === 'category_id' ? 'category' : key, filters[key]);
+                const paramKey = key === 'category_id' ? 'category' :
+                    key === 'store_id' ? 'store' : key;
+                params.set(paramKey, filters[key]);
             }
         });
         setSearchParams(params);
@@ -93,10 +129,21 @@ const ProductList = () => {
         }));
     };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        const searchValue = e.target.search.value;
-        handleFilterChange('search', searchValue);
+    const handlePriceSliderChange = (values) => {
+        setPriceSliderValues(values);
+    };
+
+    const applyPriceFilter = () => {
+        setFilters(prev => ({
+            ...prev,
+            min_price: priceSliderValues[0],
+            max_price: priceSliderValues[1],
+            page: 1
+        }));
+    };
+
+    const handleRatingFilter = (rating) => {
+        handleFilterChange('min_rating', rating);
     };
 
     const resetFilters = () => {
@@ -104,33 +151,59 @@ const ProductList = () => {
             page: 1,
             limit: 20,
             category_id: '',
+            store_id: '',
             search: '',
             min_price: '',
             max_price: '',
+            min_rating: '',
             sort_by: 'created_at',
             order: 'DESC'
         });
+        setPriceSliderValues([priceRange.min, priceRange.max]);
+    };
+
+    // Helper functions to get names for active filters
+    const getCategoryName = (categoryId) => {
+        const findCategory = (cats) => {
+            for (const cat of cats) {
+                if (cat.category_id == categoryId) return cat.category_name;
+                if (cat.subcategories) {
+                    const found = findCategory(cat.subcategories);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        return findCategory(categories) || `Category #${categoryId}`;
+    };
+
+    const getStoreName = (storeId) => {
+        const store = stores.find(s => s.store_id == storeId);
+        return store ? store.store_name : `Store #${storeId}`;
     };
 
     const renderCategoryTree = (cats, level = 0) => {
         return cats.map(cat => (
-            <div key={cat.category_id}>
+            <div key={cat.category_id} style={{ paddingLeft: `${level * 15}px` }}>
                 <Link
-                    className="text-gray-900 hover-text-main-600"
-                    onClick={() => handleFilterChange('category_id', cat.category_id)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleFilterChange('category_id', cat.category_id);
+                    }}
+                    className={`text-gray-900 hover-text-main-600 d-block mb-2 ${filters.category_id == cat.category_id ? 'text-main-600 fw-semibold' : ''
+                        }`}
                 >
                     {cat.category_name}
                     {cat.products_count && (
-                        <span className="badge bg-gray-200 text-dark ms-2">{cat.products_count}</span>
+                        <span className="badge bg-gray-200 text-dark ms-2">
+                            {cat.products_count}
+                        </span>
                     )}
                 </Link>
                 {cat.subcategories?.length > 0 && renderCategoryTree(cat.subcategories, level + 1)}
             </div>
         ));
     };
-
-
-
 
     return (
         <section className="shop py-80">
@@ -140,12 +213,15 @@ const ProductList = () => {
                     {/* Sidebar Start */}
                     <div className="col-lg-3">
                         <div className={`shop-sidebar ${active && "active"}`}>
-                            <button onClick={sidebarController}
+                            <button
+                                onClick={sidebarController}
                                 type="button"
                                 className="shop-sidebar__close d-lg-none d-flex w-32 h-32 flex-center border border-gray-100 rounded-circle hover-bg-main-600 position-absolute inset-inline-end-0 me-10 mt-8 hover-text-white hover-border-main-600"
                             >
                                 <i className="ph ph-x" />
                             </button>
+
+                            {/* Category Filter */}
                             <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
                                 <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
                                     Product Category
@@ -153,21 +229,23 @@ const ProductList = () => {
                                 <ul className="max-h-540 overflow-y-auto scroll-sm">
                                     <li className="mb-24">
                                         <Link
-                                            onClick={() => handleFilterChange('category_id', '')}
-                                            className="text-gray-900 hover-text-main-600"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleFilterChange('category_id', '');
+                                            }}
+                                            className={`text-gray-900 hover-text-main-600 d-block ${!filters.category_id ? 'text-main-600 fw-semibold' : ''
+                                                }`}
                                         >
                                             All Categories
                                         </Link>
-                                        {/* <button
-                                            className={`list-group-item list-group-item-action ${!filters.category_id ? 'active' : ''}`}
-                                            onClick={() => handleFilterChange('category_id', '')}
-                                        >
-                                            All Categories
-                                        </button> */}
-                                        {renderCategoryTree(categories)}
+                                        <div className="mt-16">
+                                            {renderCategoryTree(categories)}
+                                        </div>
                                     </li>
                                 </ul>
                             </div>
+
+                            {/* Price Filter */}
                             <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
                                 <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
                                     Filter by Price
@@ -177,21 +255,29 @@ const ProductList = () => {
                                         className="horizontal-slider"
                                         thumbClassName="example-thumb"
                                         trackClassName="example-track"
-                                        defaultValue={[filters.min_price, filters.max_price]}
+                                        defaultValue={[priceRange.min, priceRange.max]}
+                                        value={priceSliderValues}
+                                        min={priceRange.min}
+                                        max={priceRange.max}
+                                        onChange={handlePriceSliderChange}
                                         ariaLabel={['Lower thumb', 'Upper thumb']}
                                         ariaValuetext={state => `Thumb value ${state.valueNow}`}
                                         renderThumb={(props, state) => {
                                             const { key, ...restProps } = props;
-                                            return <div {...restProps} key={state.index}>{state.valueNow}</div>;
+                                            return (
+                                                <div {...restProps} key={state.index}>
+                                                    ${state.valueNow}
+                                                </div>
+                                            );
                                         }}
                                         pearling
-                                        minDistance={filters.min_price}
+                                        minDistance={1}
                                     />
 
                                     <br />
                                     <br />
                                     <div className="flex-between flex-wrap-reverse gap-8 mt-24 ">
-                                        <button type="button" className="btn btn-main h-40 flex-align">
+                                        <button type="button" className="btn btn-main h-40 flex-align" onClick={applyPriceFilter}>
                                             Filter{" "}
                                         </button>
 
@@ -199,292 +285,62 @@ const ProductList = () => {
                                 </div>
                             </div>
 
+                            {/* Rating Filter */}
                             <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
                                 <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
                                     Filter by Rating
                                 </h6>
-                                <div className="flex-align gap-8 position-relative mb-20">
-                                    <label
-                                        className="position-absolute w-100 h-100 cursor-pointer"
-                                        htmlFor="rating5"
-                                    >
-                                        {" "}
-                                    </label>
-                                    <div className="common-check common-radio mb-0">
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="rating5"
-                                        />
-                                    </div>
-                                    <div
-                                        className="progress w-100 bg-gray-100 rounded-pill h-8"
-                                        role="progressbar"
-                                        aria-label="Basic example"
-                                        aria-valuenow={70}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    >
-                                        <div
-                                            className="progress-bar bg-main-600 rounded-pill"
-                                            style={{ width: "70%" }}
-                                        />
-                                    </div>
-                                    <div className="flex-align gap-4">
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                    </div>
-                                    <span className="text-gray-900 flex-shrink-0">124</span>
-                                </div>
-                                <div className="flex-align gap-8 position-relative mb-20">
-                                    <label
-                                        className="position-absolute w-100 h-100 cursor-pointer"
-                                        htmlFor="rating4"
-                                    >
-                                        {" "}
-                                    </label>
-                                    <div className="common-check common-radio mb-0">
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="rating4"
-                                        />
-                                    </div>
-                                    <div
-                                        className="progress w-100 bg-gray-100 rounded-pill h-8"
-                                        role="progressbar"
-                                        aria-label="Basic example"
-                                        aria-valuenow={50}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    >
-                                        <div
-                                            className="progress-bar bg-main-600 rounded-pill"
-                                            style={{ width: "50%" }}
-                                        />
-                                    </div>
-                                    <div className="flex-align gap-4">
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                    </div>
-                                    <span className="text-gray-900 flex-shrink-0">52</span>
-                                </div>
-                                <div className="flex-align gap-8 position-relative mb-20">
-                                    <label
-                                        className="position-absolute w-100 h-100 cursor-pointer"
-                                        htmlFor="rating3"
-                                    >
-                                        {" "}
-                                    </label>
-                                    <div className="common-check common-radio mb-0">
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="rating3"
-                                        />
-                                    </div>
-                                    <div
-                                        className="progress w-100 bg-gray-100 rounded-pill h-8"
-                                        role="progressbar"
-                                        aria-label="Basic example"
-                                        aria-valuenow={35}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    >
-                                        <div
-                                            className="progress-bar bg-main-600 rounded-pill"
-                                            style={{ width: "35%" }}
-                                        />
-                                    </div>
-                                    <div className="flex-align gap-4">
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                    </div>
-                                    <span className="text-gray-900 flex-shrink-0">12</span>
-                                </div>
-                                <div className="flex-align gap-8 position-relative mb-20">
-                                    <label
-                                        className="position-absolute w-100 h-100 cursor-pointer"
-                                        htmlFor="rating2"
-                                    >
-                                        {" "}
-                                    </label>
-                                    <div className="common-check common-radio mb-0">
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="rating2"
-                                        />
-                                    </div>
-                                    <div
-                                        className="progress w-100 bg-gray-100 rounded-pill h-8"
-                                        role="progressbar"
-                                        aria-label="Basic example"
-                                        aria-valuenow={20}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    >
-                                        <div
-                                            className="progress-bar bg-main-600 rounded-pill"
-                                            style={{ width: "20%" }}
-                                        />
-                                    </div>
-                                    <div className="flex-align gap-4">
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                    </div>
-                                    <span className="text-gray-900 flex-shrink-0">5</span>
-                                </div>
-                                <div className="flex-align gap-8 position-relative mb-0">
-                                    <label
-                                        className="position-absolute w-100 h-100 cursor-pointer"
-                                        htmlFor="rating1"
-                                    >
-                                        {" "}
-                                    </label>
-                                    <div className="common-check common-radio mb-0">
-                                        <input
-                                            className="form-check-input"
-                                            type="radio"
-                                            name="flexRadioDefault"
-                                            id="rating1"
-                                        />
-                                    </div>
-                                    <div
-                                        className="progress w-100 bg-gray-100 rounded-pill h-8"
-                                        role="progressbar"
-                                        aria-label="Basic example"
-                                        aria-valuenow={5}
-                                        aria-valuemin={0}
-                                        aria-valuemax={100}
-                                    >
-                                        <div
-                                            className="progress-bar bg-main-600 rounded-pill"
-                                            style={{ width: "5%" }}
-                                        />
-                                    </div>
-                                    <div className="flex-align gap-4">
-                                        <span className="text-xs fw-medium text-warning-600 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                        <span className="text-xs fw-medium text-gray-400 d-flex">
-                                            <i className="ph-fill ph-star" />
-                                        </span>
-                                    </div>
-                                    <span className="text-gray-900 flex-shrink-0">2</span>
-                                </div>
+                                {[5, 4, 3, 2, 1].map((rating) => {
+                                    const ratingData = ratingDistribution.find(r => r.rating === rating);
+                                    const percentage = ratingData
+                                        ? (ratingData.count / ratingDistribution.reduce((sum, r) => sum + parseInt(r.count), 0)) * 100
+                                        : 0;
+
+                                    return (
+                                        <div key={rating} className="flex-align gap-8 position-relative mb-20">
+                                            <label
+                                                className="position-absolute w-100 h-100 cursor-pointer"
+                                                htmlFor={`rating${rating}`}
+                                            />
+                                            <div className="common-check common-radio mb-0">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="rating"
+                                                    id={`rating${rating}`}
+                                                    checked={filters.min_rating == rating}
+                                                    onChange={() => handleRatingFilter(rating)}
+                                                />
+                                            </div>
+                                            <div
+                                                className="progress w-100 bg-gray-100 rounded-pill h-8"
+                                                role="progressbar"
+                                            >
+                                                <div
+                                                    className="progress-bar bg-main-600 rounded-pill"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex-align gap-4">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <span
+                                                        key={i}
+                                                        className={`text-xs fw-medium d-flex ${i < rating ? 'text-warning-600' : 'text-gray-400'
+                                                            }`}
+                                                    >
+                                                        <i className="ph-fill ph-star" />
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <span className="text-gray-900 flex-shrink-0">
+                                                {ratingData?.count || 0}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                            <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
-                                <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
-                                    Filter by Color
-                                </h6>
-                                <ul className="max-h-540 overflow-y-auto scroll-sm">
-                                    <li className="mb-24">
-                                        <div className="form-check common-check common-radio checked-black">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="color"
-                                                id="color1"
-                                            />
-                                            <label className="form-check-label" htmlFor="color1">
-                                                Black(12)
-                                            </label>
-                                        </div>
-                                    </li>
-                                    <li className="mb-24">
-                                        <div className="form-check common-check common-radio checked-primary">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="color"
-                                                id="color2"
-                                            />
-                                            <label className="form-check-label" htmlFor="color2">
-                                                Blue (12)
-                                            </label>
-                                        </div>
-                                    </li>
-                                    <li className="mb-0">
-                                        <div className="form-check common-check common-radio checked-purple">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="color"
-                                                id="color7"
-                                            />
-                                            <label className="form-check-label" htmlFor="color7">
-                                                Purple (12)
-                                            </label>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
+
+                            {/* Brand/Store Filter */}
                             <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
                                 <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
                                     Filter by Brand
@@ -495,76 +351,83 @@ const ProductList = () => {
                                             <input
                                                 className="form-check-input"
                                                 type="radio"
-                                                name="color"
-                                                id="brand1"
+                                                name="store"
+                                                id="store-all"
+                                                checked={!filters.store_id}
+                                                onChange={() => handleFilterChange('store_id', '')}
                                             />
-                                            <label className="form-check-label" htmlFor="brand1">
-                                                Apple
+                                            <label className="form-check-label" htmlFor="store-all">
+                                                All Brands
                                             </label>
                                         </div>
                                     </li>
-                                    <li className="mb-24">
-                                        <div className="form-check common-check common-radio">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="color"
-                                                id="brand2"
-                                            />
-                                            <label className="form-check-label" htmlFor="brand2">
-                                                Samsung
-                                            </label>
-                                        </div>
-                                    </li>
-                                    <li className="mb-0">
-                                        <div className="form-check common-check common-radio">
-                                            <input
-                                                className="form-check-input"
-                                                type="radio"
-                                                name="color"
-                                                id="Redmi"
-                                            />
-                                            <label className="form-check-label" htmlFor="Redmi">
-                                                Redmi
-                                            </label>
-                                        </div>
-                                    </li>
+                                    {stores.map((store) => (
+                                        <li key={store.store_id} className="mb-24">
+                                            <div className="form-check common-check common-radio">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="store"
+                                                    id={`store${store.store_id}`}
+                                                    checked={filters.store_id == store.store_id}
+                                                    onChange={() => handleFilterChange('store_id', store.store_id)}
+                                                />
+                                                <label
+                                                    className="form-check-label"
+                                                    htmlFor={`store${store.store_id}`}
+                                                >
+                                                    {store.store_name}
+                                                    <span className="badge bg-gray-200 text-dark ms-2">
+                                                        {store.product_count}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
+
                             <div className="shop-sidebar__box rounded-8">
                                 <img src="assets/images/thumbs/advertise-img1.png" alt="" />
                             </div>
                         </div>
                     </div>
                     {/* Sidebar End */}
+
                     {/* Content Start */}
                     <div className="col-lg-9">
-                        {/* Top Start */}
-                        <div className="flex-between gap-16 flex-wrap mb-40 ">
-                            <span className="text-gray-900">Showing 1-20 of result</span>
+                        {/* Top Controls */}
+                        <div className="flex-between gap-16 flex-wrap mb-40">
+                            <span className="text-gray-900">
+                                Showing {products.length > 0 ? ((pagination?.currentPage - 1) * pagination?.itemsPerPage + 1) : 0}-
+                                {Math.min(pagination?.currentPage * pagination?.itemsPerPage, pagination?.totalItems)} of {pagination?.totalItems} results
+                            </span>
                             <div className="position-relative flex-align gap-16 flex-wrap">
                                 <div className="list-grid-btns flex-align gap-16">
-                                    <button onClick={() => setGrid(true)}
+                                    <button
+                                        onClick={() => setGrid(true)}
                                         type="button"
-                                        className={`w-44 h-44 flex-center border rounded-6 text-2xl list-btn border-gray-100 ${grid === true && "border-main-600 text-white bg-main-600"}`}
+                                        className={`w-44 h-44 flex-center border rounded-6 text-2xl border-gray-100 ${grid === true && "border-main-600 text-white bg-main-600"
+                                            }`}
                                     >
                                         <i className="ph-bold ph-list-dashes" />
                                     </button>
-                                    <button onClick={() => setGrid(false)}
+                                    <button
+                                        onClick={() => setGrid(false)}
                                         type="button"
-                                        className={`w-44 h-44 flex-center border rounded-6 text-2xl grid-btn border-gray-100 ${grid === false && "border-main-600 text-white bg-main-600"}`}
+                                        className={`w-44 h-44 flex-center border rounded-6 text-2xl border-gray-100 ${grid === false && "border-main-600 text-white bg-main-600"
+                                            }`}
                                     >
                                         <i className="ph ph-squares-four" />
                                     </button>
                                 </div>
                                 <div className="position-relative text-gray-500 flex-align gap-4 text-14">
                                     <label htmlFor="sorting" className="text-inherit flex-shrink-0">
-                                        Sort by:{" "}
+                                        Sort by:
                                     </label>
                                     <select
-                                        className="form-control common-input px-14 py-14 text-inherit rounded-6 w-auto"
+                                        className="form-control common-input px-14 py-14 text-inherit rounded-6"
                                         id="sorting"
-                                        style={{ width: 'auto' }}
                                         value={`${filters.sort_by}_${filters.order}`}
                                         onChange={(e) => {
                                             const [sort_by, order] = e.target.value.split('_');
@@ -580,16 +443,77 @@ const ProductList = () => {
                                         <option value="product_name_DESC">Name: Z to A</option>
                                     </select>
                                 </div>
-                                <button onClick={sidebarController}
+                                <button
+                                    onClick={sidebarController}
                                     type="button"
-                                    className="w-44 h-44 d-lg-none d-flex flex-center border border-gray-100 rounded-6 text-2xl sidebar-btn"
+                                    className="w-44 h-44 d-lg-none d-flex flex-center border border-gray-100 rounded-6 text-2xl"
                                 >
                                     <i className="ph-bold ph-funnel" />
                                 </button>
                             </div>
                         </div>
-                        {/* Top End */}
-                        {/* Loading State */}
+
+                        {/* Active Filters Display */}
+                        {(filters.category_id || filters.store_id || filters.min_price || filters.min_rating) && (
+                            <div className="flex-align gap-8 flex-wrap mb-24">
+                                <span className="text-sm text-gray-600">Active Filters:</span>
+                                {filters.category_id && (
+                                    <span className="badge bg-main-50 text-main-600 px-16 py-8">
+                                        Category: {getCategoryName(filters.category_id)}
+                                        <button
+                                            className="ms-8"
+                                            onClick={() => handleFilterChange('category_id', '')}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+                                {filters.store_id && (
+                                    <span className="badge bg-info-50 text-info-600 px-16 py-8">
+                                        Store: {getStoreName(filters.store_id)}
+                                        <button
+                                            className="ms-8"
+                                            onClick={() => handleFilterChange('store_id', '')}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+                                {filters.min_price && (
+                                    <span className="badge bg-success-50 text-success-600 px-16 py-8">
+                                        Price: ${filters.min_price} - ${filters.max_price}
+                                        <button
+                                            className="ms-8"
+                                            onClick={() => {
+                                                handleFilterChange('min_price', '');
+                                                handleFilterChange('max_price', '');
+                                            }}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+                                {filters.min_rating && (
+                                    <span className="badge bg-warning-50 text-warning-600 px-16 py-8">
+                                        {filters.min_rating}+ Stars
+                                        <button
+                                            className="ms-8"
+                                            onClick={() => handleFilterChange('min_rating', '')}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+                                <button
+                                    className="btn btn-outline-main px-16 py-8 text-sm"
+                                    onClick={resetFilters}
+                                >
+                                    Clear All
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Products Display */}
                         {loading ? (
                             <div className="text-center py-80">
                                 <div className="spinner-border text-main-600" style={{ width: '3rem', height: '3rem' }}></div>
@@ -608,199 +532,43 @@ const ProductList = () => {
                             </div>
                         ) : (
                             <>
-                                {/* Products Grid View */}
-                                {grid && (
-                                    <div className={`list-grid-wrapper ${grid && "list-view"}`}>
-                                        {products.map(product => (
+                                <div className={`list-grid-wrapper ${grid && "list-view"}`}>
+                                    {products.map(product => (
+                                        grid ? (
                                             <div key={product.product_id} className="col-lg-4 col-md-6">
                                                 <ProductCard product={product} />
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Products List View */}
-                                {!grid && (
-                                    <div className={`list-grid-wrapper ${grid && "list-view"}`}>
-                                        {products.map(product => (
+                                        ) : (
                                             <ProductListItem key={product.product_id} product={product} />
-                                        ))}
-                                    </div>
-                                )}
-                                {/* <div className={`list-grid-wrapper ${grid && "list-view"}`}>
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <img
-                                                src="assets/images/thumbs/product-two-img1.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                            <span className="product-card__badge bg-primary-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                                                Best Sale{" "}
-                                            </span>
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <h6 className="title text-lg fw-semibold mt-12 mb-8">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Taylor Farms Broccoli Florets Vegetables
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align mb-20 mt-16 gap-6">
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                    <i className="ph-fill ph-star" />
-                                                </span>
-                                                <span className="text-xs fw-medium text-gray-500">(17k)</span>
-                                            </div>
-                                            <div className="mt-8">
-                                                <div
-                                                    className="progress w-100 bg-color-three rounded-pill h-4"
-                                                    role="progressbar"
-                                                    aria-label="Basic example"
-                                                    aria-valuenow={35}
-                                                    aria-valuemin={0}
-                                                    aria-valuemax={100}
-                                                >
-                                                    <div
-                                                        className="progress-bar bg-main-two-600 rounded-pill"
-                                                        style={{ width: "35%" }}
-                                                    />
-                                                </div>
-                                                <span className="text-gray-900 text-xs fw-medium mt-8">
-                                                    Sold: 18/35
-                                                </span>
-                                            </div>
-                                            <div className="product-card__price my-20">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99 <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <Link
-                                                to="/cart"
-                                                className="product-card__cart btn bg-gray-50 text-heading hover-bg-main-600 hover-text-white py-11 px-24 rounded-8 flex-center gap-8 fw-medium"
-                                                tabIndex={0}
-                                            >
-                                                Add To Cart <i className="ph ph-shopping-cart" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                    <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
-                                        <Link
-                                            to="/product-details-two"
-                                            className="product-card__thumb flex-center rounded-8 bg-gray-50 position-relative"
-                                        >
-                                            <img
-                                                src="assets/images/thumbs/product-two-img2.png"
-                                                alt=""
-                                                className="w-auto max-w-unset"
-                                            />
-                                        </Link>
-                                        <div className="product-card__content mt-16">
-                                            <h6 className="title text-lg fw-semibold mt-12 mb-8">
-                                                <Link
-                                                    to="/product-details-two"
-                                                    className="link text-line-2"
-                                                    tabIndex={0}
-                                                >
-                                                    Taylor Farms Broccoli Florets Vegetables
-                                                </Link>
-                                            </h6>
-                                            <div className="flex-align mb-20 mt-16 gap-6">
-                                                <span className="text-xs fw-medium text-gray-500">4.8</span>
-                                                <span className="text-15 fw-medium text-warning-600 d-flex">
-                                                    <i className="ph-fill ph-star" />
-                                                </span>
-                                                <span className="text-xs fw-medium text-gray-500">(17k)</span>
-                                            </div>
-                                            <div className="mt-8">
-                                                <div
-                                                    className="progress w-100 bg-color-three rounded-pill h-4"
-                                                    role="progressbar"
-                                                    aria-label="Basic example"
-                                                    aria-valuenow={35}
-                                                    aria-valuemin={0}
-                                                    aria-valuemax={100}
-                                                >
-                                                    <div
-                                                        className="progress-bar bg-main-two-600 rounded-pill"
-                                                        style={{ width: "35%" }}
-                                                    />
-                                                </div>
-                                                <span className="text-gray-900 text-xs fw-medium mt-8">
-                                                    Sold: 18/35
-                                                </span>
-                                            </div>
-                                            <div className="product-card__price my-20">
-                                                <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                                                    $28.99
-                                                </span>
-                                                <span className="text-heading text-md fw-semibold ">
-                                                    $14.99 <span className="text-gray-500 fw-normal">/Qty</span>{" "}
-                                                </span>
-                                            </div>
-                                            <Link
-                                                to="/cart"
-                                                className="product-card__cart btn bg-gray-50 text-heading hover-bg-main-600 hover-text-white py-11 px-24 rounded-8 flex-center gap-8 fw-medium"
-                                                tabIndex={0}
-                                            >
-                                                Add To Cart <i className="ph ph-shopping-cart" />
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </div> */}
-                                {/* Pagination Start */}
+                                        )
+                                    ))}
+                                </div>
+
+                                {/* Pagination */}
                                 {pagination && pagination.totalPages > 1 && (
                                     <div className="flex-center mt-48">
                                         <ul className="pagination flex-center flex-wrap gap-16">
                                             <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
                                                 <Link
-                                                    onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
+                                                    onClick={() => pagination.currentPage > 1 && handleFilterChange('page', pagination.currentPage - 1)}
                                                     className="page-link h-64 w-64 flex-center text-xxl rounded-8 fw-medium text-neutral-600 border border-gray-100"
                                                 >
                                                     <i className="ph-bold ph-arrow-left" />
                                                 </Link>
                                             </li>
-                                            <li className="page-item active">
-                                                <Link
-                                                    className="page-link h-64 w-64 flex-center text-md rounded-8 fw-medium text-neutral-600 border border-gray-100"
-                                                >
-                                                    01
-                                                </Link>
-                                            </li>
                                             {[...Array(pagination.totalPages)].map((_, i) => {
                                                 const page = i + 1;
-                                                // Show first, last, current, and adjacent pages
                                                 if (
                                                     page === 1 ||
                                                     page === pagination.totalPages ||
                                                     (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)
                                                 ) {
                                                     return (
-                                                        // <li
-                                                        //     key={page}
-                                                        //     className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}
-                                                        // >
-                                                        //     <button
-                                                        //         className="page-link"
-                                                        //         onClick={() => handleFilterChange('page', page)}
-                                                        //     >
-                                                        //         {page}
-                                                        //     </button>
-                                                        // </li>
-
-                                                        <li className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
+                                                        <li
+                                                            key={page}
+                                                            className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}
+                                                        >
                                                             <Link
-                                                                key={page}
                                                                 onClick={() => handleFilterChange('page', page)}
                                                                 className="page-link h-64 w-64 flex-center text-md rounded-8 fw-medium text-neutral-600 border border-gray-100"
                                                             >
@@ -822,7 +590,7 @@ const ProductList = () => {
                                             })}
                                             <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
                                                 <Link
-                                                    onClick={() => handleFilterChange('page', pagination.currentPage + 1)}
+                                                    onClick={() => pagination.currentPage < pagination.totalPages && handleFilterChange('page', pagination.currentPage + 1)}
                                                     className="page-link h-64 w-64 flex-center text-xxl rounded-8 fw-medium text-neutral-600 border border-gray-100"
                                                 >
                                                     <i className="ph-bold ph-arrow-right" />
@@ -830,97 +598,22 @@ const ProductList = () => {
                                             </li>
                                         </ul>
                                         <div className="ms-32 text-sm text-gray-500">
-                                            Page {pagination.currentPage} of {pagination.totalPages}
+                                            Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalItems} items)
                                         </div>
                                     </div>
                                 )}
-                                {/* Pagination End */}
                             </>
                         )}
                     </div>
-                    {/* Content End */}
                 </div>
             </div>
         </section>
+    );
+};
 
-    )
-}
-
-// Product Card Component (Grid View)
+// Product Card Component
 const ProductCard = ({ product }) => {
     return (
-        // <Link to={`/products/${product.product_id}`}>
-        //     <div className="product-card__thumb position-relative">
-        //         <img
-        //             src={product.images?.[0]?.image_url ? `${process.env.REACT_APP_API_URL}${product.images[0].image_url}` : '/placeholder.jpg'}
-        //             alt={product.product_name}
-        //             className="w-100"
-        //             style={{ height: '250px', objectFit: 'cover' }}
-        //         />
-
-        //         {/* Badges */}
-        //         <div className="position-absolute top-0 start-0 m-12">
-        //             {product.stock_quantity === 0 && (
-        //                 <span className="badge bg-danger">Out of Stock</span>
-        //             )}
-        //             {product.stock_quantity > 0 && product.stock_quantity < 10 && (
-        //                 <span className="badge bg-warning">Low Stock</span>
-        //             )}
-        //         </div>
-
-        //         {/* Quick Actions */}
-        //         <div className="position-absolute top-0 end-0 m-12">
-        //             <button className="btn btn-sm btn-light rounded-circle mb-8">
-        //                 <i className="ph ph-heart"></i>
-        //             </button>
-        //         </div>
-        //     </div>
-
-        //     <div className="p-16">
-        //         {/* Category */}
-        //         {product.category && (
-        //             <div className="text-xs text-gray-500 mb-8">
-        //                 {product.category.category_name}
-        //             </div>
-        //         )}
-
-        //         {/* Title */}
-        //         <h6 className="product-card__title text-line-2 mb-12">
-        //             {product.product_name}
-        //         </h6>
-
-        //         {/* Store */}
-        //         {product.store && (
-        //             <div className="flex-align gap-8 mb-12">
-        //                 {product.store.logo_url && (
-        //                     <img
-        //                         src={`${process.env.REACT_APP_API_URL}${product.store.logo_url}`}
-        //                         alt={product.store.store_name}
-        //                         className="rounded-circle"
-        //                         style={{ width: '20px', height: '20px', objectFit: 'cover' }}
-        //                     />
-        //                 )}
-        //                 <span className="text-sm text-gray-600">{product.store.store_name}</span>
-        //             </div>
-        //         )}
-
-        //         {/* Price & Stats */}
-        //         <div className="flex-between align-items-end">
-        //             <div>
-        //                 <div className="text-main-600 fw-bold text-xl">
-        //                     {parseInt(product.price).toLocaleString('vi-VN')}đ
-        //                 </div>
-        //                 <div className="text-xs text-gray-500">
-        //                     <i className="ph ph-shopping-bag-open me-4"></i>
-        //                     Sold: {product.sold_quantity || 0}
-        //                 </div>
-        //             </div>
-        //             <button className="btn btn-sm btn-main">
-        //                 <i className="ph ph-shopping-cart"></i>
-        //             </button>
-        //         </div>
-        //     </div>
-        // </Link>
         <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
             <Link
                 to={`/products/${product.product_id}`}
@@ -932,16 +625,12 @@ const ProductCard = ({ product }) => {
                     className="w-auto max-w-unset"
                     style={{ height: '150px', objectFit: 'cover' }}
                 />
-                {/* <span className="product-card__badge bg-primary-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                    Best Sale{" "}
-                </span> */}
             </Link>
             <div className="product-card__content mt-16">
                 <h6 className="title text-lg fw-semibold mt-12 mb-8">
                     <Link
                         to={`/products/${product.product_id}`}
                         className="link text-line-2"
-                        tabIndex={0}
                     >
                         {product.product_name}
                     </Link>
@@ -957,14 +646,10 @@ const ProductCard = ({ product }) => {
                     <div
                         className="progress w-100 bg-color-three rounded-pill h-4"
                         role="progressbar"
-                        aria-label="Basic example"
-                        aria-valuenow={35}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
                     >
                         <div
                             className="progress-bar bg-main-two-600 rounded-pill"
-                            style={{ width: "35%" }}
+                            style={{ width: `${(product.sold_quantity / product.stock_quantity) * 100}%` }}
                         />
                     </div>
                     <span className="text-gray-900 text-xs fw-medium mt-8">
@@ -972,17 +657,13 @@ const ProductCard = ({ product }) => {
                     </span>
                 </div>
                 <div className="product-card__price my-20">
-                    {/* <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                        $28.99
-                    </span> */}
-                    <span className="text-heading text-md fw-semibold ">
-                        ${product.price} <span className="text-gray-500 fw-normal">/Qty</span>{" "}
+                    <span className="text-heading text-md fw-semibold">
+                        ${product.price} <span className="text-gray-500 fw-normal">/Qty</span>
                     </span>
                 </div>
                 <Link
                     to="/cart"
                     className="product-card__cart btn bg-gray-50 text-heading hover-bg-main-600 hover-text-white py-11 px-24 rounded-8 flex-center gap-8 fw-medium"
-                    tabIndex={0}
                 >
                     Add To Cart <i className="ph ph-shopping-cart" />
                 </Link>
@@ -991,53 +672,9 @@ const ProductCard = ({ product }) => {
     );
 };
 
-// Product List Item Component (List View)
+// Product List Item Component
 const ProductListItem = ({ product }) => {
     return (
-        // <div className="border border-gray-100 rounded-16 p-24 hover-border-main-600 transition-1">
-        //     <Link to={`/products/${product.product_id}`} className="row align-items-center">
-        //         <div className="col-lg-3 col-md-4">
-        //             <img
-        //                 src={product.images?.[0]?.image_url ? `${process.env.REACT_APP_API_URL}${product.images[0].image_url}` : '/placeholder.jpg'}
-        //                 alt={product.product_name}
-        //                 className="w-100 rounded-8"
-        //                 style={{ height: '150px', objectFit: 'cover' }}
-        //             />
-        //         </div>
-        //         <div className="col-lg-6 col-md-5">
-        //             <div className="text-xs text-gray-500 mb-8">
-        //                 {product.category?.category_name}
-        //             </div>
-        //             <h6 className="mb-8">{product.product_name}</h6>
-        //             <p className="text-gray-600 text-sm text-line-2 mb-12">
-        //                 {product.description || 'No description available'}
-        //             </p>
-        //             {product.store && (
-        //                 <div className="flex-align gap-8">
-        //                     <i className="ph ph-storefront text-gray-500"></i>
-        //                     <span className="text-sm">{product.store.store_name}</span>
-        //                 </div>
-        //             )}
-        //         </div>
-        //         <div className="col-lg-3 col-md-3 text-lg-end mt-24 mt-md-0">
-        //             <div className="text-main-600 fw-bold text-2xl mb-8">
-        //                 {parseInt(product.price).toLocaleString('vi-VN')}đ
-        //             </div>
-        //             <div className="text-sm text-gray-500 mb-16">
-        //                 <i className="ph ph-package me-4"></i>
-        //                 Stock: {product.stock_quantity}
-        //             </div>
-        //             <div className="text-sm text-gray-500 mb-16">
-        //                 <i className="ph ph-shopping-bag me-4"></i>
-        //                 Sold: {product.sold_quantity || 0}
-        //             </div>
-        //             <button className="btn btn-main w-100">
-        //                 <i className="ph ph-shopping-cart me-8"></i>
-        //                 Add to Cart
-        //             </button>
-        //         </div>
-        //     </Link>
-        // </div>
         <div className="product-card h-100 p-16 border border-gray-100 hover-border-main-600 rounded-16 position-relative transition-2">
             <Link
                 to={`/products/${product.product_id}`}
@@ -1049,16 +686,12 @@ const ProductListItem = ({ product }) => {
                     className="w-auto max-w-unset"
                     style={{ height: '150px', objectFit: 'cover' }}
                 />
-                {/* <span className="product-card__badge bg-primary-600 px-8 py-4 text-sm text-white position-absolute inset-inline-start-0 inset-block-start-0">
-                    Best Sale{" "}
-                </span> */}
             </Link>
             <div className="product-card__content mt-16">
                 <h6 className="title text-lg fw-semibold mt-12 mb-8">
                     <Link
                         to={`/products/${product.product_id}`}
                         className="link text-line-2"
-                        tabIndex={0}
                     >
                         {product.product_name}
                     </Link>
@@ -1074,14 +707,10 @@ const ProductListItem = ({ product }) => {
                     <div
                         className="progress w-100 bg-color-three rounded-pill h-4"
                         role="progressbar"
-                        aria-label="Basic example"
-                        aria-valuenow={35}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
                     >
                         <div
                             className="progress-bar bg-main-two-600 rounded-pill"
-                            style={{ width: "35%" }}
+                            style={{ width: `${(product.sold_quantity / product.stock_quantity) * 100}%` }}
                         />
                     </div>
                     <span className="text-gray-900 text-xs fw-medium mt-8">
@@ -1089,17 +718,13 @@ const ProductListItem = ({ product }) => {
                     </span>
                 </div>
                 <div className="product-card__price my-20">
-                    {/* <span className="text-gray-400 text-md fw-semibold text-decoration-line-through">
-                        $28.99
-                    </span> */}
-                    <span className="text-heading text-md fw-semibold ">
-                        ${product.price} <span className="text-gray-500 fw-normal">/Qty</span>{" "}
+                    <span className="text-heading text-md fw-semibold">
+                        ${product.price} <span className="text-gray-500 fw-normal">/Qty</span>
                     </span>
                 </div>
                 <Link
                     to="/cart"
                     className="product-card__cart btn bg-gray-50 text-heading hover-bg-main-600 hover-text-white py-11 px-24 rounded-8 flex-center gap-8 fw-medium"
-                    tabIndex={0}
                 >
                     Add To Cart <i className="ph ph-shopping-cart" />
                 </Link>

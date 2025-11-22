@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import userService from '../services/userService';
+import orderService from '../services/orderService';
 
 const Profile = () => {
     const { user, updateUser, isAdmin, isSeller } = useAuth();
@@ -18,7 +19,52 @@ const Profile = () => {
         date_of_birth: '',
         gender: ''
     });
+    const [stats, setStats] = useState({
+        total: 0,
+        pending: 0,
+        confirmed: 0,
+        shipping: 0,
+        delivered: 0,
+        cancelled: 0
+    });
 
+    const fetchOrders = async () => {
+        try {
+
+            const response = await orderService.getMyOrders({});
+
+            if (response.success) {
+                calculateStats(response.data);
+            }
+        } catch (error) {
+            toast.error('Failed to load orders');
+            console.error('Fetch orders error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const calculateStats = (ordersList) => {
+        const stats = {
+            total: ordersList.length,
+            pending: 0,
+            confirmed: 0,
+            shipping: 0,
+            delivered: 0,
+            cancelled: 0
+        };
+
+        ordersList.forEach(order => {
+            if (stats[order.order_status] !== undefined) {
+                stats[order.order_status]++;
+            }
+        });
+
+        setStats(stats);
+    };
+    useEffect(() => {
+        fetchOrders();
+    }, []);
     const [passwordData, setPasswordData] = useState({
         current_password: '',
         new_password: '',
@@ -267,11 +313,11 @@ const Profile = () => {
                                         <button
                                             className={`nav-link text-start w-100 py-3 px-3 rounded-8 border-0 bg-transparent ${activeTab === 'orders' ? 'bg-main-50 text-main-600' : 'text-gray-600 hover-bg-gray-50'
                                                 }`}
-                                            onClick={() => setActiveTab('orders')}
+                                            onClick={() =>  navigate('/orders/my-orders')}
                                         >
                                             <i className="ph ph-shopping-cart me-2"></i>
                                             My Orders
-                                            <span className="badge bg-main-600 ms-2">{mockOrders.length}</span>
+                                            <span className="badge bg-main-600 ms-2">{stats.total}</span>
                                         </button>
                                     </li>
 

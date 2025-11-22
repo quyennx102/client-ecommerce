@@ -1,8 +1,15 @@
 import axiosInstance from '../utils/axios';
+
 const productService = {
   // Get all products
   getProducts: async (params = {}) => {
     const response = await axiosInstance.get('/products', { params });
+    return response.data;
+  },
+
+  // Get filter options (NEW)
+  getFilterOptions: async () => {
+    const response = await axiosInstance.get('/products/filter-options');
     return response.data;
   },
 
@@ -43,10 +50,12 @@ const productService = {
     const response = await axiosInstance.get('/products/popular');
     return response.data;
   },
+
   getTrendingProducts: async () => {
     const response = await axiosInstance.get('/products/trending');
     return response.data;
   },
+
   getDealProducts: async () => {
     const response = await axiosInstance.get('/products/deals');
     return response.data;
