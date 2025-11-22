@@ -18,6 +18,7 @@ const ProductDetailsTwo = () => {
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [ratingDistribution, setRatingDistribution] = useState([]);
     const { fetchCartCount } = useAuth();
+    const [description, setDescription] = useState("");
 
     // Quantity state
     const [quantity, setQuantity] = useState(1);
@@ -43,6 +44,10 @@ const ProductDetailsTwo = () => {
         return () => clearInterval(interval);
     }, []);
 
+    const decodeDescription = (encoded) => {
+        return decodeURIComponent(escape(atob(encoded)));
+    };
+
     // Fetch product details
     useEffect(() => {
         const fetchProductDetails = async () => {
@@ -52,6 +57,8 @@ const ProductDetailsTwo = () => {
 
                 if (response.success) {
                     setProduct(response.data);
+                    const htmlDescription = decodeDescription(response.data.description);
+                    setDescription(htmlDescription);
 
                     // Set images
                     if (response.data.images && response.data.images.length > 0) {
@@ -640,7 +647,7 @@ const ProductDetailsTwo = () => {
                                     <div className="mb-40">
                                         <h6 className="mb-24">Product Description</h6>
                                         {/* <p>{product.description}</p> */}
-                                        <div dangerouslySetInnerHTML={{ __html: product.description }} />
+                                        <div dangerouslySetInnerHTML={{ __html: description }} />
                                     </div>
 
                                     {/* Product Specifications */}

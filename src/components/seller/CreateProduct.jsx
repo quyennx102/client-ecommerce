@@ -3,18 +3,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import productService from '../../services/productService';
 import categoryService from '../../services/categoryService';
+import ReactQuill from "react-quill";
+import 'react-quill/dist/quill.snow.css';  // style mặc định
 
 const CreateProduct = () => {
   const { storeId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [isHtmlMode, setIsHtmlMode] = useState(false);
+  const [description, setDescription] = useState(""); // lưu HTMLs
 
   const [formData, setFormData] = useState({
     store_id: storeId,
     category_id: '',
     product_name: '',
-    description: '',
     price: '',
     stock_quantity: ''
   });
@@ -53,7 +56,7 @@ const CreateProduct = () => {
     }
 
     setImages(prev => [...prev, ...files]);
-    
+
     const previews = files.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...previews]);
   };
@@ -83,6 +86,7 @@ const CreateProduct = () => {
       Object.keys(formData).forEach(key => {
         data.append(key, formData[key]);
       });
+      data.append('description', btoa(unescape(encodeURIComponent(description))))
 
       images.forEach(image => {
         data.append('images', image);
@@ -92,6 +96,7 @@ const CreateProduct = () => {
 
       if (response.success) {
         toast.success('Product created successfully!');
+        setIsHtmlMode(false);
         setTimeout(() => {
           navigate(`/seller/stores/${storeId}/products`);
         }, 1500);
@@ -134,14 +139,49 @@ const CreateProduct = () => {
                   <label className="text-neutral-900 text-lg mb-8 fw-medium">
                     Description
                   </label>
-                  <textarea
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setIsHtmlMode(!isHtmlMode)}
+                      style={{ padding: "5px 10px", border: "1px solid #ccc" }}
+                    >
+                      {isHtmlMode ? "Quill mode" : "HTML mode"}
+                    </button>
+                  </div>
+
+                  {/* <textarea
                     className="common-input"
                     name="description"
                     rows="6"
                     placeholder="Describe your product..."
                     value={formData.description}
                     onChange={handleChange}
-                  />
+                  /> */}
+                  {isHtmlMode ? (
+                    <textarea
+                      className="common-input"
+                      value={description}
+                      name="description"
+                      placeholder="Describe your product..."
+                      onChange={(e) => setDescription(e.target.value)}
+                      style={{ width: "100%", height: "200px", padding: "10px" }}
+                    />
+                  ) : (
+                    <ReactQuill
+                      theme="snow"
+                      value={description}
+                      onChange={setDescription}
+                      modules={{
+                        toolbar: [
+                          [{ header: [1, 2, 3, false] }],
+                          ["bold", "italic", "underline", "strike"],
+                          [{ list: "ordered" }, { list: "bullet" }],
+                          ["link", "image"],
+                          ["clean"],
+                        ],
+                      }}
+                    />
+                  )}
                 </div>
 
                 {/* Images */}
@@ -150,7 +190,7 @@ const CreateProduct = () => {
                     Product Images <span className="text-danger">*</span>
                     <span className="text-sm text-gray-500 ms-8">(Max 5 images)</span>
                   </label>
-                  
+
                   {imagePreviews.length > 0 && (
                     <div className="row g-3 mb-16">
                       {imagePreviews.map((preview, index) => (
