@@ -140,10 +140,10 @@ const BannerTwo = () => {
                                     <li>
                                         <Link
                                             to="/products"
-                                            className="text-gray-500 text-15 py-12 px-16 flex-align gap-8 rounded-0"
+                                            className="text-gray-500 text-15 py-12 px-16 flex-align gap-8 rounded-0 bg-main-two-600"
                                         >
-                                            <i className="ph ph-squares-four text-xl"></i>
-                                            <span className="fw-semibold">All Products</span>
+                                            <i className="ph ph-squares-four text-xl" style={{color: "white"}}></i>
+                                            <span className="fw-semibold" style={{color: "white"}}>All Products</span>
                                         </Link>
                                     </li>
                                     

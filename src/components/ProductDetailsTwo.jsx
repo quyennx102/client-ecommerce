@@ -329,37 +329,37 @@ const ProductDetailsTwo = () => {
                             <div className="col-xl-6">
                                 <div className="product-details__content">
                                     {/* Special Offer */}
-                                    {discountPercent > 0 && (
-                                        <div className="flex-center mb-24 flex-wrap gap-16 bg-color-one rounded-8 py-16 px-24 position-relative z-1">
-                                            <img
-                                                src="/assets/images/bg/details-offer-bg.png"
-                                                alt=""
-                                                className="position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100 z-n1"
-                                            />
-                                            <div className="flex-align gap-16">
-                                                <span className="text-white text-sm">Special Offer:</span>
-                                            </div>
-                                            <div className="countdown" id="countdown11">
-                                                <ul className="countdown-list flex-align flex-wrap">
-                                                    <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
-                                                        {timeLeft.days}<span className="days" />
-                                                    </li>
-                                                    <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
-                                                        {timeLeft.hours}<span className="hours" />
-                                                    </li>
-                                                    <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
-                                                        {timeLeft.minutes}<span className="minutes" />
-                                                    </li>
-                                                    <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
-                                                        {timeLeft.seconds}<span className="seconds" />
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <span className="text-white text-xs">
-                                                Remains until the end of the offer
-                                            </span>
+                                    {/* {discountPercent > 0 && ( */}
+                                    <div className="flex-center mb-24 flex-wrap gap-16 bg-color-one rounded-8 py-16 px-24 position-relative z-1">
+                                        <img
+                                            src="/assets/images/bg/details-offer-bg.png"
+                                            alt=""
+                                            className="position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100 z-n1"
+                                        />
+                                        <div className="flex-align gap-16">
+                                            <span className="text-white text-sm">Special Offer:</span>
                                         </div>
-                                    )}
+                                        <div className="countdown" id="countdown11">
+                                            <ul className="countdown-list flex-align flex-wrap">
+                                                <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
+                                                    {timeLeft.days}<span className="days" />
+                                                </li>
+                                                <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
+                                                    {timeLeft.hours}<span className="hours" />
+                                                </li>
+                                                <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
+                                                    {timeLeft.minutes}<span className="minutes" />
+                                                </li>
+                                                <li className="countdown-list__item text-heading flex-align gap-4 text-xs fw-medium w-28 h-28 rounded-4 border border-main-600 p-0 flex-center">
+                                                    {timeLeft.seconds}<span className="seconds" />
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <span className="text-white text-xs">
+                                            Remains until the end of the offer
+                                        </span>
+                                    </div>
+                                    {/* )} */}
 
                                     {/* Product Name */}
                                     <h5 className="mb-12">{product.product_name}</h5>
@@ -400,14 +400,20 @@ const ProductDetailsTwo = () => {
 
                                     {/* Price */}
                                     <div className="my-32 flex-align gap-16 flex-wrap">
-                                        {discountPercent > 0 && (
+                                        {/* {discountPercent > 0 && (
                                             <div className="flex-align gap-8">
                                                 <div className="flex-align gap-8 text-main-two-600">
                                                     <i className="ph-fill ph-seal-percent text-xl" />
                                                     -{discountPercent}%
                                                 </div>
                                             </div>
-                                        )}
+                                        )} */}
+                                        <div className="flex-align gap-8">
+                                            <div className="flex-align gap-8 text-main-two-600">
+                                                <i className="ph-fill ph-seal-percent text-xl" />
+                                                -30%
+                                            </div>
+                                        </div>
                                         <h6 className="mb-0">USD {product.price ? Number(product.price).toFixed(2) : undefined}</h6>
                                         {product.original_price && product.original_price > product.price && (
                                             <div className="flex-align gap-8">
@@ -418,10 +424,33 @@ const ProductDetailsTwo = () => {
                                             </div>
                                         )}
                                     </div>
-
+                                    <div className="my-32 flex-align flex-wrap gap-12">
+                                        <Link
+                                            to="#"
+                                            className="px-12 py-8 text-sm rounded-8 flex-align gap-8 text-gray-900 border border-gray-200 hover-border-main-600 hover-text-main-600"
+                                        >
+                                            Monthyly EMI USD 5.00
+                                            <i className="ph ph-caret-right" />
+                                        </Link>
+                                        <Link
+                                            to="#"
+                                            className="px-12 py-8 text-sm rounded-8 flex-align gap-8 text-gray-900 border border-gray-200 hover-border-main-600 hover-text-main-600"
+                                        >
+                                            Shipping Charge
+                                            <i className="ph ph-caret-right" />
+                                        </Link>
+                                        <Link
+                                            to="#"
+                                            className="px-12 py-8 text-sm rounded-8 flex-align gap-8 text-gray-900 border border-gray-200 hover-border-main-600 hover-text-main-600"
+                                        >
+                                            Security &amp; Privacy
+                                            <i className="ph ph-caret-right" />
+                                        </Link>
+                                    </div>
                                     {/* Category & Store */}
                                     <span className="mt-32 pt-32 text-gray-700 border-top border-gray-100 d-block" />
                                     <div className="mt-32">
+                                        <h6 className="mb-16">Quick Overview</h6>
                                         {product.category && (
                                             <div className="mb-16">
                                                 <span className="text-gray-700">Category: </span>
@@ -452,6 +481,22 @@ const ProductDetailsTwo = () => {
                                                     : 'Out of Stock'
                                                 }
                                             </span>
+                                        </div>
+                                    </div>
+                                    <span className="mt-32 pt-32 text-gray-700 border-top border-gray-100 d-block" />
+                                    <Link
+                                        to="#"
+                                        className="btn btn-black flex-center gap-8 rounded-8 py-16"
+                                    >
+                                        <i className="ph ph-whatsapp-logo text-lg" />
+                                        Request More Information
+                                    </Link>
+                                    <div className="mt-32">
+                                        <span className="fw-medium text-gray-900">
+                                            100% Guarantee Safe Checkout
+                                        </span>
+                                        <div className="mt-10">
+                                            <img src="/assets/images/thumbs/gateway-img.png" alt="" />
                                         </div>
                                     </div>
                                 </div>
@@ -538,6 +583,14 @@ const ProductDetailsTwo = () => {
                             {/* Store Info */}
                             {product.store && (
                                 <div className="mt-32">
+                                    <div className="px-16 py-8 bg-main-50 rounded-8 flex-between gap-24 mb-14">
+                                        <span className="w-32 h-32 bg-white text-main-600 rounded-circle flex-center text-xl flex-shrink-0">
+                                            <i className="ph-fill ph-truck" />
+                                        </span>
+                                        <span className="text-sm text-neutral-600">
+                                            Ship from <span className="fw-semibold">MarketPro</span>{" "}
+                                        </span>
+                                    </div>
                                     <div className="px-16 py-8 bg-main-50 rounded-8 flex-between gap-24 mb-0">
                                         <span className="w-32 h-32 bg-white text-main-600 rounded-circle flex-center text-xl flex-shrink-0">
                                             <i className="ph-fill ph-storefront" />
