@@ -1,6 +1,6 @@
 import ReactSlider from 'react-slider';
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import productService from '../services/productService';
 import categoryService from '../services/categoryService';
@@ -9,6 +9,7 @@ const ProductList = () => {
     const [grid, setGrid] = useState(true);
     const [active, setActive] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -18,8 +19,8 @@ const ProductList = () => {
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState(null);
 
-    // Filters từ URL
-    const [filters, setFilters] = useState({
+    // ✅ Khởi tạo filters từ URL params
+    const getFiltersFromURL = () => ({
         page: parseInt(searchParams.get('page')) || 1,
         limit: 20,
         category_id: searchParams.get('category') || '',
@@ -32,17 +33,7 @@ const ProductList = () => {
         order: searchParams.get('order') || 'DESC'
     });
 
-    // Lắng nghe thay đổi URL params
-    useEffect(() => {
-        const categoryFromUrl = searchParams.get('category');
-        if (categoryFromUrl && categoryFromUrl !== filters.category_id) {
-            setFilters(prev => ({
-                ...prev,
-                category_id: categoryFromUrl,
-                page: 1
-            }));
-        }
-    }, [searchParams]);
+    const [filters, setFilters] = useState(getFiltersFromURL());
 
     // Slider values
     const [priceSliderValues, setPriceSliderValues] = useState([0, 1000]);
@@ -51,11 +42,18 @@ const ProductList = () => {
         setActive(!active);
     };
 
+    // ✅ Lắng nghe thay đổi URL và update filters
+    useEffect(() => {
+        const newFilters = getFiltersFromURL();
+        setFilters(newFilters);
+    }, [searchParams]);
+
     useEffect(() => {
         fetchFilterOptions();
         fetchCategories();
     }, []);
 
+    // ✅ Fetch products khi filters thay đổi
     useEffect(() => {
         fetchProducts();
         updateURLParams();
@@ -143,7 +141,12 @@ const ProductList = () => {
     };
 
     const handleRatingFilter = (rating) => {
-        handleFilterChange('min_rating', rating);
+        // ✅ Toggle rating - nếu đang chọn rating đó thì bỏ chọn
+        if (filters.min_rating == rating) {
+            handleFilterChange('min_rating', '');
+        } else {
+            handleFilterChange('min_rating', rating);
+        }
     };
 
     const resetFilters = () => {
@@ -160,10 +163,13 @@ const ProductList = () => {
             order: 'DESC'
         });
         setPriceSliderValues([priceRange.min, priceRange.max]);
+        navigate('/products'); // Reset URL
     };
 
-    // Helper functions to get names for active filters
+    // ✅ Helper để lấy tên category (bao gồm cả subcategories)
     const getCategoryName = (categoryId) => {
+        if (!categoryId) return null;
+
         const findCategory = (cats) => {
             for (const cat of cats) {
                 if (cat.category_id == categoryId) return cat.category_name;
@@ -182,16 +188,23 @@ const ProductList = () => {
         return store ? store.store_name : `Store #${storeId}`;
     };
 
+    // ✅ Render category tree với highlight
     const renderCategoryTree = (cats, level = 0) => {
         return cats.map(cat => (
             <div key={cat.category_id} style={{ paddingLeft: `${level * 15}px` }}>
                 <Link
                     onClick={(e) => {
                         e.preventDefault();
-                        handleFilterChange('category_id', cat.category_id);
+                        // Toggle category - nếu đang chọn thì bỏ chọn (chọn All)
+                        if (filters.category_id == cat.category_id) {
+                            handleFilterChange('category_id', '');
+                        } else {
+                            handleFilterChange('category_id', cat.category_id);
+                        }
                     }}
                     className={`text-gray-900 hover-text-main-600 d-block mb-2 ${filters.category_id == cat.category_id ? 'text-main-600 fw-semibold' : ''
                         }`}
+                    style={{ cursor: 'pointer' }}
                 >
                     {cat.category_name}
                     {cat.products_count && (
@@ -205,9 +218,21 @@ const ProductList = () => {
         ));
     };
 
+    // ✅ Check xem có filter nào active không
+    const hasActiveFilters = () => {
+        return !!(
+            filters.category_id ||
+            filters.store_id ||
+            filters.min_price ||
+            filters.max_price ||
+            filters.min_rating ||
+            filters.search
+        );
+    };
+
     return (
         <section className="shop py-80">
-            <div className={`side-overlay ${active && "show"}`}></div>
+            <div className={`side-overlay ${active && "show"}`} onClick={sidebarController}></div>
             <div className="container container-lg">
                 <div className="row">
                     {/* Sidebar Start */}
@@ -235,6 +260,7 @@ const ProductList = () => {
                                             }}
                                             className={`text-gray-900 hover-text-main-600 d-block ${!filters.category_id ? 'text-main-600 fw-semibold' : ''
                                                 }`}
+                                            style={{ cursor: 'pointer' }}
                                         >
                                             All Categories
                                         </Link>
@@ -255,7 +281,6 @@ const ProductList = () => {
                                         className="horizontal-slider"
                                         thumbClassName="example-thumb"
                                         trackClassName="example-track"
-                                        defaultValue={[priceRange.min, priceRange.max]}
                                         value={priceSliderValues}
                                         min={priceRange.min}
                                         max={priceRange.max}
@@ -276,11 +301,14 @@ const ProductList = () => {
 
                                     <br />
                                     <br />
-                                    <div className="flex-between flex-wrap-reverse gap-8 mt-24 ">
-                                        <button type="button" className="btn btn-main h-40 flex-align" onClick={applyPriceFilter}>
-                                            Filter{" "}
+                                    <div className="flex-between flex-wrap-reverse gap-8 mt-24">
+                                        <button
+                                            type="button"
+                                            className="btn btn-main h-40 flex-align"
+                                            onClick={applyPriceFilter}
+                                        >
+                                            Filter
                                         </button>
-
                                     </div>
                                 </div>
                             </div>
@@ -453,66 +481,103 @@ const ProductList = () => {
                             </div>
                         </div>
 
-                        {/* Active Filters Display */}
-                        {(filters.category_id || filters.store_id || filters.min_price || filters.min_rating) && (
-                            <div className="flex-align gap-8 flex-wrap mb-24">
-                                <span className="text-sm text-gray-600">Active Filters:</span>
-                                {filters.category_id && (
-                                    <span className="badge bg-main-50 text-main-600 px-16 py-8">
-                                        Category: {getCategoryName(filters.category_id)}
+                        {/* ✅ Active Filters Display */}
+                        {hasActiveFilters() && (
+                            <div className="flex-align gap-8 flex-wrap mb-24 p-16 bg-gray-50 rounded-8">
+                                {(filters.search || filters.category_id || filters.store_id || filters.min_price || filters.max_price || filters.min_rating) && (
+                                    <div className="flex-align gap-8 flex-wrap mb-24 p-16 bg-gray-50 rounded-8">
+                                        <span className="text-sm text-gray-600 fw-medium">
+                                            <i className="ph ph-funnel me-2"></i>
+                                            Active Filters:
+                                        </span>
+
+                                        {filters.search && (
+                                            <span className="badge bg-primary text-white px-16 py-8 d-flex align-items-center gap-8">
+                                                <i className="ph ph-magnifying-glass"></i>
+                                                Search: "{filters.search}"
+                                                <button
+                                                    className="ms-4 bg-transparent border-0 text-white"
+                                                    onClick={() => handleFilterChange('search', '')}
+                                                    style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        )}
+
+                                        {filters.category_id && (
+                                            <span className="badge bg-main-600 text-white px-16 py-8 d-flex align-items-center gap-8">
+                                                <i className="ph ph-tag"></i>
+                                                {getCategoryName(filters.category_id)}
+                                                <button
+                                                    className="ms-4 bg-transparent border-0 text-white"
+                                                    onClick={() => handleFilterChange('category_id', '')}
+                                                    style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        )}
+
+                                        {filters.store_id && (
+                                            <span className="badge bg-info text-white px-16 py-8 d-flex align-items-center gap-8">
+                                                <i className="ph ph-storefront"></i>
+                                                {getStoreName(filters.store_id)}
+                                                <button
+                                                    className="ms-4 bg-transparent border-0 text-white"
+                                                    onClick={() => handleFilterChange('store_id', '')}
+                                                    style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        )}
+
+                                        {(filters.min_price || filters.max_price) && (
+                                            <span className="badge bg-success text-white px-16 py-8 d-flex align-items-center gap-8">
+                                                <i className="ph ph-currency-dollar"></i>
+                                                ${filters.min_price || priceRange.min} - ${filters.max_price || priceRange.max}
+                                                <button
+                                                    className="ms-4 bg-transparent border-0 text-white"
+                                                    onClick={() => {
+                                                        setFilters(prev => ({
+                                                            ...prev,
+                                                            min_price: '',
+                                                            max_price: '',
+                                                            page: 1
+                                                        }));
+                                                        setPriceSliderValues([priceRange.min, priceRange.max]);
+                                                    }}
+                                                    style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        )}
+
+                                        {filters.min_rating && (
+                                            <span className="badge bg-warning text-dark px-16 py-8 d-flex align-items-center gap-8">
+                                                <i className="ph-fill ph-star"></i>
+                                                {filters.min_rating}+ Stars
+                                                <button
+                                                    className="ms-4 bg-transparent border-0 text-dark"
+                                                    onClick={() => handleFilterChange('min_rating', '')}
+                                                    style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        )}
                                         <button
-                                            className="ms-8"
-                                            onClick={() => handleFilterChange('category_id', '')}
+                                            className="btn btn-outline-main px-16 py-8 text-sm"
+                                            onClick={resetFilters}
                                         >
-                                            ×
+                                            Clear All
                                         </button>
-                                    </span>
+                                    </div>
                                 )}
-                                {filters.store_id && (
-                                    <span className="badge bg-info-50 text-info-600 px-16 py-8">
-                                        Store: {getStoreName(filters.store_id)}
-                                        <button
-                                            className="ms-8"
-                                            onClick={() => handleFilterChange('store_id', '')}
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                )}
-                                {filters.min_price && (
-                                    <span className="badge bg-success-50 text-success-600 px-16 py-8">
-                                        Price: ${filters.min_price} - ${filters.max_price}
-                                        <button
-                                            className="ms-8"
-                                            onClick={() => {
-                                                handleFilterChange('min_price', '');
-                                                handleFilterChange('max_price', '');
-                                            }}
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                )}
-                                {filters.min_rating && (
-                                    <span className="badge bg-warning-50 text-warning-600 px-16 py-8">
-                                        {filters.min_rating}+ Stars
-                                        <button
-                                            className="ms-8"
-                                            onClick={() => handleFilterChange('min_rating', '')}
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                )}
-                                <button
-                                    className="btn btn-outline-main px-16 py-8 text-sm"
-                                    onClick={resetFilters}
-                                >
-                                    Clear All
-                                </button>
                             </div>
                         )}
-
                         {/* Products Display */}
                         {loading ? (
                             <div className="text-center py-80">
@@ -546,12 +611,18 @@ const ProductList = () => {
 
                                 {/* Pagination */}
                                 {pagination && pagination.totalPages > 1 && (
-                                    <div className="flex-center mt-48">
+                                    <div className="flex-between flex-wrap gap-16 mt-48">
                                         <ul className="pagination flex-center flex-wrap gap-16">
                                             <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
                                                 <Link
-                                                    onClick={() => pagination.currentPage > 1 && handleFilterChange('page', pagination.currentPage - 1)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        if (pagination.currentPage > 1) {
+                                                            handleFilterChange('page', pagination.currentPage - 1);
+                                                        }
+                                                    }}
                                                     className="page-link h-64 w-64 flex-center text-xxl rounded-8 fw-medium text-neutral-600 border border-gray-100"
+                                                    style={{ cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer' }}
                                                 >
                                                     <i className="ph-bold ph-arrow-left" />
                                                 </Link>
@@ -569,8 +640,15 @@ const ProductList = () => {
                                                             className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}
                                                         >
                                                             <Link
-                                                                onClick={() => handleFilterChange('page', page)}
-                                                                className="page-link h-64 w-64 flex-center text-md rounded-8 fw-medium text-neutral-600 border border-gray-100"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    handleFilterChange('page', page);
+                                                                }}
+                                                                className={`page-link h-64 w-64 flex-center text-md rounded-8 fw-medium border border-gray-100 ${pagination.currentPage === page
+                                                                    ? 'bg-main-600 text-white border-main-600'
+                                                                    : 'text-neutral-600'
+                                                                    }`}
+                                                                style={{ cursor: 'pointer' }}
                                                             >
                                                                 {page}
                                                             </Link>
@@ -590,14 +668,20 @@ const ProductList = () => {
                                             })}
                                             <li className={`page-item ${pagination.currentPage === pagination.totalPages ? 'disabled' : ''}`}>
                                                 <Link
-                                                    onClick={() => pagination.currentPage < pagination.totalPages && handleFilterChange('page', pagination.currentPage + 1)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        if (pagination.currentPage < pagination.totalPages) {
+                                                            handleFilterChange('page', pagination.currentPage + 1);
+                                                        }
+                                                    }}
                                                     className="page-link h-64 w-64 flex-center text-xxl rounded-8 fw-medium text-neutral-600 border border-gray-100"
+                                                    style={{ cursor: pagination.currentPage === pagination.totalPages ? 'not-allowed' : 'pointer' }}
                                                 >
                                                     <i className="ph-bold ph-arrow-right" />
                                                 </Link>
                                             </li>
                                         </ul>
-                                        <div className="ms-32 text-sm text-gray-500">
+                                        <div className="text-sm text-gray-500">
                                             Page {pagination.currentPage} of {pagination.totalPages} ({pagination.totalItems} items)
                                         </div>
                                     </div>

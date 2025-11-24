@@ -1,15 +1,47 @@
 import React, { useEffect, useState } from 'react'
 import query from 'jquery';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import ProductSection from "../components/home/ProductSection";
 import './HeaderTwo.css';
 import NotificationBell from './NotificationBell';
+import categoryService from '../services/categoryService';
 
 const HeaderTwo = ({ category }) => {
     const { user, isAuthenticated, logout, isAdmin, isSeller, updateTrigger, cartCount } = useAuth();
-    const [scroll, setScroll] = useState(false)
+    const [scroll, setScroll] = useState(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    // State cho Categories và Search
+    const [categories, setCategories] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
+
+    // Sync search state từ URL params
+    useEffect(() => {
+        const categoryFromUrl = searchParams.get('category');
+        const searchFromUrl = searchParams.get('search');
+
+        setSelectedCategory(categoryFromUrl || '');
+        setSearchTerm(searchFromUrl || '');
+    }, [searchParams]);
+
+    // Fetch categories khi component mount
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await categoryService.getCategories({
+                    status: 'active'
+                });
+                if (response.success) {
+                    setCategories(response.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch categories", error);
+            }
+        };
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         window.onscroll = () => {
@@ -20,15 +52,48 @@ const HeaderTwo = ({ category }) => {
             }
             return () => (window.onscroll = null);
         };
-        const selectElement = query('.js-example-basic-single');
-        selectElement.select2();
+
+        // CHỈ apply select2 cho các select KHÔNG phải category search
+        const selectElement = query('.js-example-basic-single').not('.category-search-select');
+        if (selectElement.length > 0) {
+            selectElement.select2();
+        }
 
         return () => {
-            if (selectElement.data('select2')) {
+            if (selectElement.length && selectElement.data('select2')) {
                 selectElement.select2('destroy');
             }
         };
     }, [updateTrigger, isAuthenticated, user]);
+
+    // useEffect(() => {
+    //     window.onscroll = () => {
+    //         if (window.pageYOffset < 150) {
+    //             setScroll(false);
+    //         } else if (window.pageYOffset > 150) {
+    //             setScroll(true);
+    //         }
+    //         return () => (window.onscroll = null);
+    //     };
+    //     const selectElement = query('.js-example-basic-single');
+    //     selectElement.select2();
+
+    //     return () => {
+    //         if (selectElement.data('select2')) {
+    //             selectElement.select2('destroy');
+    //         }
+    //     };
+    // }, [updateTrigger, isAuthenticated, user]);
+
+
+    // ✅ Thêm useEffect riêng để sync category select khi state thay đổi
+    useEffect(() => {
+        // Update select2 value nếu đang dùng select2
+        const categorySelect = query('.category-search-select');
+        if (categorySelect.length && categorySelect.data('select2')) {
+            categorySelect.val(selectedCategory).trigger('change.select2');
+        }
+    }, [selectedCategory]);
 
     // Set the default language
     const [selectedLanguage, setSelectedLanguage] = useState("Eng");
@@ -75,6 +140,33 @@ const HeaderTwo = ({ category }) => {
         navigate('/');
     };
 
+    // Handle Search Submit
+    const handleSearch = (e) => {
+        if (e) e.preventDefault();
+
+        const params = new URLSearchParams();
+
+        if (searchTerm.trim()) {
+            params.append('search', searchTerm.trim());
+        }
+
+        if (selectedCategory && selectedCategory !== '') {
+            params.append('category', selectedCategory);
+        }
+
+        navigate(`/products?${params.toString()}`);
+
+        // Reset search box trên mobile nếu đang mở
+        setActiveSearch(false);
+    };
+
+    // Xử lý khi nhấn Enter
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     // Hàm xác định class active cho NavLink
     const getNavLinkClass = ({ isActive }) => {
         return isActive ? "nav-menu__link activePage" : "nav-menu__link";
@@ -86,19 +178,37 @@ const HeaderTwo = ({ category }) => {
             <div className={`side-overlay ${(menuActive || activeCategory) && "show"}`} />
 
             {/* ==================== Search Box Start Here ==================== */}
-            <form action="#" className={`search-box ${activeSearch && "active"}`}>
-                <button onClick={handleSearchToggle}
+            <form onSubmit={handleSearch} className={`search-box ${activeSearch && "active"}`}>
+                <button
+                    onClick={handleSearchToggle}
                     type="button"
                     className="search-box__close position-absolute inset-block-start-0 inset-inline-end-0 m-16 w-48 h-48 border border-gray-100 rounded-circle flex-center text-white hover-text-gray-800 hover-bg-white text-2xl transition-1"
                 >
                     <i className="ph ph-x" />
                 </button>
                 <div className="container">
+                    <div className="position-relative mb-16">
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="form-control py-16 px-24 text-xl rounded-pill mb-16"
+                        >
+                            <option value="">All Categories</option>
+                            {categories.map((cat) => (
+                                <option key={cat.category_id} value={cat.category_id}>
+                                    {cat.category_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="position-relative">
                         <input
                             type="text"
                             className="form-control py-16 px-24 text-xl rounded-pill pe-64"
                             placeholder="Search for a product or brand"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onKeyDown={handleKeyDown}
                         />
                         <button
                             type="submit"
@@ -408,29 +518,29 @@ const HeaderTwo = ({ category }) => {
                             <div className="select-dropdown-for-home-two d-lg-none d-block">
                                 {/* Language & Currency Dropdown */}
                             </div>
-                            <form action="#" className="flex-align flex-wrap form-location-wrapper">
+                            <form onSubmit={handleSearch} className="flex-align flex-wrap form-location-wrapper">
                                 <div className="search-category style-two d-flex h-48 search-form d-sm-flex d-none">
-                                    <select defaultValue={1}
-                                        className="js-example-basic-single border border-gray-200 border-end-0 rounded-0 border-0"
-                                        name="state"
+                                    <select
+                                        value={selectedCategory}
+                                        onChange={(e) => setSelectedCategory(e.target.value)}
+                                        className="js-example-basic-single category-search-select border border-gray-200 border-end-0 rounded-0 border-0"
+                                        name="category"
                                     >
-                                        <option value={1}>All Categories</option>
-                                        <option value={1}>Grocery</option>
-                                        <option value={1}>Breakfast &amp; Dairy</option>
-                                        <option value={1}>Vegetables</option>
-                                        <option value={1}>Milks and Dairies</option>
-                                        <option value={1}>Pet Foods &amp; Toy</option>
-                                        <option value={1}>Breads &amp; Bakery</option>
-                                        <option value={1}>Fresh Seafood</option>
-                                        <option value={1}>Fronzen Foods</option>
-                                        <option value={1}>Noodles &amp; Rice</option>
-                                        <option value={1}>Ice Cream</option>
+                                        <option value="">All Categories</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.category_id} value={cat.category_id}>
+                                                {cat.category_name}
+                                            </option>
+                                        ))}
                                     </select>
                                     <div className="search-form__wrapper position-relative">
                                         <input
                                             type="text"
                                             className="search-form__input common-input py-13 ps-16 pe-18 rounded-0 border-0"
                                             placeholder="Search for a product or brand"
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            onKeyDown={handleKeyDown}
                                         />
                                     </div>
                                     <button
