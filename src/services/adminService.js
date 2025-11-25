@@ -41,8 +41,43 @@ const adminService = {
   },
 
   /**
-   * Approve discount code
+   * Get user by ID
    */
+  getUserById: async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/admin/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Get user by ID error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update user role
+   */
+  updateUserRole: async (userId, role) => {
+    try {
+      const response = await axiosInstance.put(`/admin/users/${userId}/role`, { role });
+      return response.data;
+    } catch (error) {
+      console.error('Update user role error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Delete user
+   */
+  deleteUser: async (userId) => {
+    try {
+      const response = await axiosInstance.delete(`/admin/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
+  },
   approveDiscountCode: async (discountId, status) => {
     try {
       const response = await axiosInstance.put(`/admin/discount-codes/${discountId}/approve`, { status });

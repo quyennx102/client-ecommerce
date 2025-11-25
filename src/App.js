@@ -46,6 +46,7 @@ import { SocketProvider } from './contexts/SocketContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import MyOrdersPage from "./pages/MyOrdersPage";
 import './styles/category-styles.css'
+import ManageUsersPage from "./pages/ManageUsersPage";
 function App() {
   return (
     <BrowserRouter>
@@ -174,16 +175,25 @@ function App() {
                     <AdminDashboardPage />
                   </PrivateRoute>
                 } />
+
+                <Route path="/admin/users" element={
+                  <PrivateRoute roles={['admin']}>
+                    <ManageUsersPage />
+                  </PrivateRoute>
+                } />
+
                 <Route path="/admin/products" element={
                   <PrivateRoute roles={['admin']}>
                     <ProductsManagementPage />
                   </PrivateRoute>
                 } />
+
                 <Route path="/admin/category" element={
                   <PrivateRoute roles={['admin']}>
                     <CategoryManagementPage />
                   </PrivateRoute>
                 } />
+
                 <Route path="/admin/discounts" element={
                   <PrivateRoute roles={['admin']}>
                     <AdminDiscountsPage />
