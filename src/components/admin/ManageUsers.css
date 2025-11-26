@@ -1,0 +1,21 @@
+.btn-outline-danger {
+    color: #dc3545 !important;
+    border: 1px solid #dc3545 !important;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+}
+
+.btn-outline-danger i,
+.btn-danger i {
+    color: #dc3545 !important;
+    /* màu đỏ */
+}
+
+.btn-outline-danger:hover i,
+.btn-danger:hover i {
+    color: #fff !important;
+    /* icon trắng khi hover */
+}
