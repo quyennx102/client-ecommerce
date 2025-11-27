@@ -15,6 +15,8 @@ const ProductDetailsTwo = () => {
     const [loading, setLoading] = useState(true);
     const [product, setProduct] = useState(null);
     const [reviews, setReviews] = useState([]);
+    const [averageRating, setAverageRating] = useState(null);
+    const [totalReviews, setTotalReviews] = useState(null);
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [ratingDistribution, setRatingDistribution] = useState([]);
     const { fetchCartCount } = useAuth();
@@ -89,8 +91,9 @@ const ProductDetailsTwo = () => {
                 const response = await reviewService.getProductReviews(id);
 
                 if (response.success) {
-                    setReviews(response.data);
-
+                    setReviews(response.data.reviews);
+                    setAverageRating(response.data.average_rating)
+                    setTotalReviews(response.data.total_reviews)
                     // Calculate rating distribution
                     const distribution = calculateRatingDistribution(response.data);
                     setRatingDistribution(distribution);
@@ -157,6 +160,7 @@ const ProductDetailsTwo = () => {
             if (response.success) {
                 toast.success('Product added to cart successfully!');
                 await fetchCartCount();
+                setQuantity(1)
                 // Dispatch event để update cart count
                 window.dispatchEvent(new Event('cartUpdated'));
             } else {
@@ -172,10 +176,44 @@ const ProductDetailsTwo = () => {
 
     // Buy now handler
     const handleBuyNow = async () => {
-        await handleAddToCart();
-        setTimeout(() => {
+        if (!product) return;
+
+        // Bật trạng thái loading để chặn người dùng click nhiều lần
+        setAddingToCart(true);
+
+        try {
+            // 1. Gọi API lấy thông tin giỏ hàng hiện tại
+            const cartResponse = await cartService.getCart();
+
+            let isAlreadyInCart = false;
+
+            if (cartResponse.success) {
+                // Kiểm tra danh sách items (cần điều chỉnh 'cartResponse.data.items')
+                const cartItems = cartResponse.data.items || cartResponse.data || [];
+
+                // Kiểm tra xem product_id hiện tại đã có trong mảng items chưa
+                isAlreadyInCart = cartItems.some(item => item.product_id === product.product_id);
+            }
+
+            if (isAlreadyInCart) {
+                // TRƯỜNG HỢP 1: Đã có trong giỏ -> Tắt loading và chuyển trang luôn
+                setAddingToCart(false);
+                navigate('/cart');
+            } else {
+                // TRƯỜNG HỢP 2: Chưa có -> Gọi hàm handleAddToCart để thêm mới
+                // Hàm handleAddToCart đã có logic setAddingToCart(true/false) bên trong nên ta không cần set false ở đây
+                await handleAddToCart();
+                setTimeout(() => {
+                    navigate('/cart');
+                }, 1000);
+            }
+
+        } catch (error) {
+            console.error('Error inside Buy Now logic:', error);
+            setAddingToCart(false);
+            // Fallback: Nếu lỗi API check thì cứ chuyển trang
             navigate('/cart');
-        }, 1000);
+        }
     };
 
     // Submit review handler
@@ -371,7 +409,7 @@ const ProductDetailsTwo = () => {
                                                 {[...Array(5)].map((_, index) => (
                                                     <span
                                                         key={index}
-                                                        className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
+                                                        className={`text-15 fw-medium d-flex ${index < Math.round(averageRating || 0)
                                                             ? 'text-warning-600'
                                                             : 'text-gray-400'
                                                             }`}
@@ -381,10 +419,10 @@ const ProductDetailsTwo = () => {
                                                 ))}
                                             </div>
                                             <span className="text-sm fw-medium text-neutral-600">
-                                                {product.average_rating || 0} Star Rating
+                                                {averageRating || 0} Star Rating
                                             </span>
                                             <span className="text-sm fw-medium text-gray-500">
-                                                ({product.review_count || 0})
+                                                ({totalReviews || 0})
                                             </span>
                                         </div>
                                         <span className="text-sm fw-medium text-gray-500">|</span>
@@ -753,14 +791,14 @@ const ProductDetailsTwo = () => {
                                                             }`}
                                                     >
                                                         <img
-                                                            src={review.user?.avatar_url || "/assets/images/thumbs/comment-img1.png"}
-                                                            alt={review.user?.full_name}
+                                                            src={review.reviewer?.avatar_url || "/assets/images/thumbs/comment-user-icon-vector.jpg"}
+                                                            alt={review.reviewer?.full_name}
                                                             className="w-52 h-52 object-fit-cover rounded-circle flex-shrink-0"
                                                         />
                                                         <div className="flex-grow-1">
                                                             <div className="flex-between align-items-start gap-8">
                                                                 <div>
-                                                                    <h6 className="mb-12 text-md">{review.user?.full_name || 'Anonymous'}</h6>
+                                                                    <h6 className="mb-12 text-md">{review.reviewer?.full_name || 'Anonymous'}</h6>
                                                                     <div className="flex-align gap-8">
                                                                         {[...Array(5)].map((_, starIndex) => (
                                                                             <span
@@ -780,7 +818,7 @@ const ProductDetailsTwo = () => {
                                                                 </span>
                                                             </div>
                                                             <h6 className="mb-14 text-md mt-24">{review.title}</h6>
-                                                            <p className="text-gray-700">{review.content}</p>
+                                                            <p className="text-gray-700">{review.comment}</p>
                                                             <div className="flex-align gap-20 mt-44">
                                                                 <button
                                                                     className="flex-align gap-12 text-gray-700 hover-text-main-600"
@@ -883,13 +921,13 @@ const ProductDetailsTwo = () => {
                                                 <div className="d-flex flex-wrap gap-44">
                                                     <div className="border border-gray-100 rounded-8 px-40 py-52 flex-center flex-column flex-shrink-0 text-center">
                                                         <h2 className="mb-6 text-main-600">
-                                                            {product.average_rating?.toFixed(1) || '0.0'}
+                                                            {averageRating || '0.0'}
                                                         </h2>
                                                         <div className="flex-center gap-8">
                                                             {[...Array(5)].map((_, index) => (
                                                                 <span
                                                                     key={index}
-                                                                    className={`text-15 fw-medium d-flex ${index < Math.round(product.average_rating || 0)
+                                                                    className={`text-15 fw-medium d-flex ${index < Math.round(averageRating || 0)
                                                                         ? 'text-warning-600'
                                                                         : 'text-gray-400'
                                                                         }`}

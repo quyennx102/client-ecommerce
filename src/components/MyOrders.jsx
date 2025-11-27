@@ -8,12 +8,12 @@ const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
-    
+
     // Filters
     const [statusFilter, setStatusFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    
+
     // Stats
     const [stats, setStats] = useState({
         total: 0,
@@ -47,12 +47,12 @@ const MyOrders = () => {
                 page: currentPage,
                 limit: 10
             };
-            
+
             if (statusFilter) params.status = statusFilter;
             if (searchTerm) params.search = searchTerm;
 
             const response = await orderService.getMyOrders(params);
-            
+
             if (response.success) {
                 setOrders(response.data);
                 setPagination(response.pagination || {});
@@ -156,7 +156,7 @@ const MyOrders = () => {
                 {/* Stats Cards */}
                 <div className="row g-16 mb-40">
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${!statusFilter ? 'active' : ''}`}
                             onClick={() => setStatusFilter('')}
                             style={{ cursor: 'pointer' }}
@@ -165,14 +165,14 @@ const MyOrders = () => {
                                 <i className="ph ph-shopping-bag"></i>
                             </div>
                             <div className="stats-card__content">
-                                <h6 className="stats-card__number">{pagination.total_items || 0}</h6>
+                                <h6 className="stats-card__number">{pagination.totalItems || 0}</h6>
                                 <span className="stats-card__label">Total Orders</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${statusFilter === 'pending' ? 'active' : ''}`}
                             onClick={() => setStatusFilter('pending')}
                             style={{ cursor: 'pointer' }}
@@ -188,7 +188,7 @@ const MyOrders = () => {
                     </div>
 
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${statusFilter === 'confirmed' ? 'active' : ''}`}
                             onClick={() => setStatusFilter('confirmed')}
                             style={{ cursor: 'pointer' }}
@@ -204,7 +204,7 @@ const MyOrders = () => {
                     </div>
 
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${statusFilter === 'shipping' ? 'active' : ''}`}
                             onClick={() => setStatusFilter('shipping')}
                             style={{ cursor: 'pointer' }}
@@ -220,7 +220,7 @@ const MyOrders = () => {
                     </div>
 
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${statusFilter === 'delivered' ? 'active' : ''}`}
                             onClick={() => setStatusFilter('delivered')}
                             style={{ cursor: 'pointer' }}
@@ -236,7 +236,7 @@ const MyOrders = () => {
                     </div>
 
                     <div className="col-lg-2 col-md-4 col-sm-6">
-                        <div 
+                        <div
                             className={`stats-card ${statusFilter === 'cancelled' ? 'active' : ''}`}
                             onClick={() => setStatusFilter('cancelled')}
                             style={{ cursor: 'pointer' }}
@@ -303,7 +303,7 @@ const MyOrders = () => {
                         <i className="ph ph-shopping-bag text-gray-300" style={{ fontSize: '80px' }}></i>
                         <h5 className="mt-24 mb-8">No orders found</h5>
                         <p className="text-gray-600 mb-24">
-                            {statusFilter 
+                            {statusFilter
                                 ? `You don't have any ${statusFilter} orders`
                                 : "You haven't placed any orders yet"}
                         </p>
@@ -429,7 +429,7 @@ const MyOrders = () => {
                                                 onClick={() => handleCancelOrder(order.order_id)}
                                                 disabled={loading}
                                             >
-                                                <i className="ph ph-x me-8" style={{color:'#fff'}}></i>
+                                                <i className="ph ph-x me-8" style={{ color: '#fff' }}></i>
                                                 Cancel Order
                                             </button>
                                         )}
@@ -449,8 +449,8 @@ const MyOrders = () => {
 
                                         {order.order_status === 'delivered' && (
                                             <Link
-                                                to={`/products?review=true`}
-                                                className="btn btn-outline-success"
+                                                to={`/orders/${order.order_id}`}
+                                                className="btn btn-success"
                                             >
                                                 <i className="ph ph-star me-8"></i>
                                                 Write Review
@@ -462,7 +462,7 @@ const MyOrders = () => {
                         })}
 
                         {/* Pagination */}
-                        {pagination.total_pages > 1 && (
+                        {pagination.totalPages > 1 && (
                             <div className="d-flex justify-content-center mt-40">
                                 <ul className="pagination">
                                     <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -475,11 +475,11 @@ const MyOrders = () => {
                                         </button>
                                     </li>
 
-                                    {[...Array(pagination.total_pages)].map((_, index) => {
+                                    {[...Array(pagination.totalPages)].map((_, index) => {
                                         const page = index + 1;
                                         if (
                                             page === 1 ||
-                                            page === pagination.total_pages ||
+                                            page === pagination.totalPages ||
                                             (page >= currentPage - 1 && page <= currentPage + 1)
                                         ) {
                                             return (
@@ -501,11 +501,11 @@ const MyOrders = () => {
                                         return null;
                                     })}
 
-                                    <li className={`page-item ${currentPage === pagination.total_pages ? 'disabled' : ''}`}>
+                                    <li className={`page-item ${currentPage === pagination.totalPages ? 'disabled' : ''}`}>
                                         <button
                                             className="page-link"
                                             onClick={() => setCurrentPage(currentPage + 1)}
-                                            disabled={currentPage === pagination.total_pages}
+                                            disabled={currentPage === pagination.totalPages}
                                         >
                                             <i className="ph ph-caret-right"></i>
                                         </button>
