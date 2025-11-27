@@ -1,33 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams, useParams } from 'react-router-dom';
+import { Link, useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import ReactSlider from 'react-slider';
 import storeService from '../../services/storeService';
 import categoryService from '../../services/categoryService';
+import followService from '../../services/followService';
 
 const StoreProducts = () => {
+    const navigate = useNavigate();
     const { storeId } = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const [grid, setGrid] = useState(true);
+    const [grid, setGrid] = useState(false);
     const [active, setActive] = useState(false);
     const [store, setStore] = useState(null);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState(null);
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
+    const [ratingDistribution, setRatingDistribution] = useState([]);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [followLoading, setFollowLoading] = useState(false);
 
     // Filters từ URL
-    const [filters, setFilters] = useState({
+    const getFiltersFromURL = () => ({
         page: parseInt(searchParams.get('page')) || 1,
         limit: 20,
         category_id: searchParams.get('category') || '',
-        search: searchParams.get('search') || '',
         min_price: searchParams.get('min_price') || '',
         max_price: searchParams.get('max_price') || '',
+        min_rating: searchParams.get('min_rating') || '',
         sort_by: searchParams.get('sort_by') || 'created_at',
         order: searchParams.get('order') || 'DESC'
     });
+
+    const [filters, setFilters] = useState(getFiltersFromURL());
+    const [priceSliderValues, setPriceSliderValues] = useState([0, 1000]);
 
     const sidebarController = () => {
         setActive(!active);
@@ -35,7 +45,14 @@ const StoreProducts = () => {
 
     useEffect(() => {
         fetchCategories();
-    }, []);
+        fetchFollowStatus();
+        fetchFollowersCount();
+    }, [storeId]);
+
+    useEffect(() => {
+        const newFilters = getFiltersFromURL();
+        setFilters(newFilters);
+    }, [searchParams]);
 
     useEffect(() => {
         fetchStoreProducts();
@@ -56,6 +73,71 @@ const StoreProducts = () => {
         }
     };
 
+    const fetchFollowStatus = async () => {
+        // Kiểm tra xem có token trong localStorage không (hoặc cookie tùy logic auth của bạn)
+        const token = localStorage.getItem('token');
+
+        // Nếu không có token -> Coi như chưa login -> Không gọi API, giữ mặc định là chưa follow
+        if (!token) {
+            setIsFollowing(false);
+            return;
+        }
+
+        try {
+            const response = await followService.checkFollowStatus(storeId);
+            if (response.success) {
+                setIsFollowing(response.isFollowing);
+            }
+        } catch (error) {
+            console.error('Failed to check follow status:', error);
+        }
+    };
+
+    const fetchFollowersCount = async () => {
+        try {
+            const response = await followService.getStoreFollowersCount(storeId);
+            if (response.success) {
+                setFollowersCount(response.data.followers_count);
+            }
+        } catch (error) {
+            console.error('Failed to get followers count');
+        }
+    };
+
+    const handleFollowToggle = async () => {
+        // Kiểm tra đăng nhập
+        const token = localStorage.getItem('token');
+        if (!token) {
+            toast.info('Please login to follow this store');
+            // Chuyển hướng sang trang login
+            navigate('/auth');
+            return;
+        }
+
+        setFollowLoading(true);
+        try {
+            if (isFollowing) {
+                const response = await followService.unfollowStore(storeId);
+                if (response.success) {
+                    setIsFollowing(false);
+                    setFollowersCount(prev => prev - 1);
+                    toast.success('Unfollowed store successfully');
+                }
+            } else {
+                const response = await followService.followStore(storeId);
+                if (response.success) {
+                    setIsFollowing(true);
+                    setFollowersCount(prev => prev + 1);
+                    toast.success('Followed store successfully');
+                }
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to update follow status');
+        } finally {
+            setFollowLoading(false);
+        }
+    };
+
     const fetchStoreProducts = async () => {
         setLoading(true);
         try {
@@ -64,6 +146,30 @@ const StoreProducts = () => {
                 setStore(response.data.store);
                 setProducts(response.data.products);
                 setPagination(response.pagination);
+
+                // Set price range and rating distribution từ products
+                if (response.data.products.length > 0) {
+                    const prices = response.data.products.map(p => parseFloat(p.price));
+                    const minPrice = Math.floor(Math.min(...prices));
+                    const maxPrice = Math.ceil(Math.max(...prices));
+                    setPriceRange({ min: minPrice, max: maxPrice });
+
+                    if (!filters.min_price && !filters.max_price) {
+                        setPriceSliderValues([minPrice, maxPrice]);
+                    }
+
+                    // Calculate rating distribution
+                    const ratings = {};
+                    response.data.products.forEach(p => {
+                        const rating = Math.floor(p.average_rating || 0);
+                        ratings[rating] = (ratings[rating] || 0) + 1;
+                    });
+                    const ratingDist = Object.entries(ratings).map(([rating, count]) => ({
+                        rating: parseInt(rating),
+                        count: count
+                    }));
+                    setRatingDistribution(ratingDist);
+                }
             }
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to load store products');
@@ -90,10 +196,25 @@ const StoreProducts = () => {
         }));
     };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        const searchValue = e.target.search.value;
-        handleFilterChange('search', searchValue);
+    const handlePriceSliderChange = (values) => {
+        setPriceSliderValues(values);
+    };
+
+    const applyPriceFilter = () => {
+        setFilters(prev => ({
+            ...prev,
+            min_price: priceSliderValues[0],
+            max_price: priceSliderValues[1],
+            page: 1
+        }));
+    };
+
+    const handleRatingFilter = (rating) => {
+        if (filters.min_rating == rating) {
+            handleFilterChange('min_rating', '');
+        } else {
+            handleFilterChange('min_rating', rating);
+        }
     };
 
     const resetFilters = () => {
@@ -101,20 +222,45 @@ const StoreProducts = () => {
             page: 1,
             limit: 20,
             category_id: '',
-            search: '',
             min_price: '',
             max_price: '',
+            min_rating: '',
             sort_by: 'created_at',
             order: 'DESC'
         });
+        setPriceSliderValues([priceRange.min, priceRange.max]);
+    };
+
+    const getCategoryName = (categoryId) => {
+        if (!categoryId) return null;
+        const findCategory = (cats) => {
+            for (const cat of cats) {
+                if (cat.category_id == categoryId) return cat.category_name;
+                if (cat.subcategories) {
+                    const found = findCategory(cat.subcategories);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        return findCategory(categories) || `Category #${categoryId}`;
     };
 
     const renderCategoryTree = (cats, level = 0) => {
         return cats.map(cat => (
-            <div key={cat.category_id} style={{ paddingLeft: `${level * 16}px` }}>
+            <div key={cat.category_id} style={{ paddingLeft: `${level * 15}px` }}>
                 <Link
-                    className="text-gray-900 hover-text-main-600 d-block mb-16"
-                    onClick={() => handleFilterChange('category_id', cat.category_id)}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        if (filters.category_id == cat.category_id) {
+                            handleFilterChange('category_id', '');
+                        } else {
+                            handleFilterChange('category_id', cat.category_id);
+                        }
+                    }}
+                    className={`text-gray-900 hover-text-main-600 d-block mb-2 ${filters.category_id == cat.category_id ? 'text-main-600 fw-semibold' : ''
+                        }`}
+                    style={{ cursor: 'pointer' }}
                 >
                     {cat.category_name}
                     {cat.products_count && (
@@ -126,9 +272,18 @@ const StoreProducts = () => {
         ));
     };
 
+    const hasActiveFilters = () => {
+        return !!(
+            filters.category_id ||
+            filters.min_price ||
+            filters.max_price ||
+            filters.min_rating
+        );
+    };
+
     return (
         <section className="shop py-80">
-            <div className={`side-overlay ${active && "show"}`}></div>
+            <div className={`side-overlay ${active && "show"}`} onClick={sidebarController}></div>
             <div className="container container-lg">
                 {/* Store Header */}
                 {store && (
@@ -140,17 +295,41 @@ const StoreProducts = () => {
                                         src={`${process.env.REACT_APP_IMAGE_URL}${store.logo_url}`}
                                         alt={store.store_name}
                                         className="rounded-circle"
-                                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                                        style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                                     />
                                 ) : (
                                     <div className="bg-main-50 rounded-circle d-flex align-items-center justify-content-center"
-                                        style={{ width: '80px', height: '80px' }}>
-                                        <i className="ph ph-storefront text-main-600" style={{ fontSize: '40px' }}></i>
+                                        style={{ width: '100px', height: '100px' }}>
+                                        <i className="ph ph-storefront text-main-600" style={{ fontSize: '50px' }}></i>
                                     </div>
                                 )}
                             </div>
                             <div className="col">
-                                <h3 className="mb-8">{store.store_name}</h3>
+                                <div className="d-flex align-items-center gap-16 mb-12">
+                                    <h3 className="mb-0">{store.store_name}</h3>
+                                    <button
+                                        className={`btn ${isFollowing ? 'btn-outline-main' : 'btn-main'} px-24 py-8`}
+                                        onClick={handleFollowToggle}
+                                        disabled={followLoading}
+                                    >
+                                        {followLoading ? (
+                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                        ) : (
+                                            <i className={`ph ${isFollowing ? 'ph-check' : 'ph-plus'} me-2`}></i>
+                                        )}
+                                        {isFollowing ? 'Following' : 'Follow'}
+                                    </button>
+                                </div>
+                                <div className="d-flex align-items-center gap-24 mb-12">
+                                    <span className="text-gray-600">
+                                        <i className="ph ph-users me-2"></i>
+                                        {followersCount} Followers
+                                    </span>
+                                    <span className="text-gray-600">
+                                        <i className="ph ph-package me-2"></i>
+                                        {pagination?.totalItems || 0} Products
+                                    </span>
+                                </div>
                                 {store.description && (
                                     <p className="text-gray-600 mb-0">{store.description}</p>
                                 )}
@@ -179,12 +358,19 @@ const StoreProducts = () => {
                                 <ul className="max-h-540 overflow-y-auto scroll-sm">
                                     <li className="mb-24">
                                         <Link
-                                            onClick={() => handleFilterChange('category_id', '')}
-                                            className="text-gray-900 hover-text-main-600"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleFilterChange('category_id', '');
+                                            }}
+                                            className={`text-gray-900 hover-text-main-600 d-block ${!filters.category_id ? 'text-main-600 fw-semibold' : ''
+                                                }`}
+                                            style={{ cursor: 'pointer' }}
                                         >
                                             All Categories
                                         </Link>
-                                        {renderCategoryTree(categories)}
+                                        <div className="mt-16">
+                                            {renderCategoryTree(categories)}
+                                        </div>
                                     </li>
                                 </ul>
                             </div>
@@ -199,22 +385,22 @@ const StoreProducts = () => {
                                         className="horizontal-slider"
                                         thumbClassName="example-thumb"
                                         trackClassName="example-track"
-                                        defaultValue={[filters.min_price || 0, filters.max_price || 1000]}
+                                        value={priceSliderValues}
+                                        min={priceRange.min}
+                                        max={priceRange.max}
+                                        onChange={handlePriceSliderChange}
                                         ariaLabel={['Lower thumb', 'Upper thumb']}
                                         ariaValuetext={state => `Thumb value ${state.valueNow}`}
                                         renderThumb={(props, state) => {
                                             const { key, ...restProps } = props;
-                                            return <div {...restProps} key={state.index}>{state.valueNow}</div>;
+                                            return (
+                                                <div {...restProps} key={state.index}>
+                                                    ${state.valueNow}
+                                                </div>
+                                            );
                                         }}
                                         pearling
-                                        minDistance={10}
-                                        onChange={(values) => {
-                                            setFilters(prev => ({
-                                                ...prev,
-                                                min_price: values[0],
-                                                max_price: values[1]
-                                            }));
-                                        }}
+                                        minDistance={1}
                                     />
                                     <br />
                                     <br />
@@ -222,12 +408,68 @@ const StoreProducts = () => {
                                         <button
                                             type="button"
                                             className="btn btn-main h-40 flex-align"
-                                            onClick={() => fetchStoreProducts()}
+                                            onClick={applyPriceFilter}
                                         >
                                             Filter
                                         </button>
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Rating Filter */}
+                            <div className="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
+                                <h6 className="text-xl border-bottom border-gray-100 pb-24 mb-24">
+                                    Filter by Rating
+                                </h6>
+                                {[5, 4, 3, 2, 1].map((rating) => {
+                                    const ratingData = ratingDistribution.find(r => r.rating === rating);
+                                    const totalCount = ratingDistribution.reduce((sum, r) => sum + parseInt(r.count), 0);
+                                    const percentage = ratingData && totalCount > 0
+                                        ? (ratingData.count / totalCount) * 100
+                                        : 0;
+
+                                    return (
+                                        <div key={rating} className="flex-align gap-8 position-relative mb-20">
+                                            <label
+                                                className="position-absolute w-100 h-100 cursor-pointer"
+                                                htmlFor={`rating${rating}`}
+                                            />
+                                            <div className="common-check common-radio mb-0">
+                                                <input
+                                                    className="form-check-input"
+                                                    type="radio"
+                                                    name="rating"
+                                                    id={`rating${rating}`}
+                                                    checked={filters.min_rating == rating}
+                                                    onChange={() => handleRatingFilter(rating)}
+                                                />
+                                            </div>
+                                            <div
+                                                className="progress w-100 bg-gray-100 rounded-pill h-8"
+                                                role="progressbar"
+                                            >
+                                                <div
+                                                    className="progress-bar bg-main-600 rounded-pill"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                            <div className="flex-align gap-4">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <span
+                                                        key={i}
+                                                        className={`text-xs fw-medium d-flex ${i < rating ? 'text-warning-600' : 'text-gray-400'
+                                                            }`}
+                                                    >
+                                                        <i className="ph-fill ph-star" />
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <span className="text-gray-900 flex-shrink-0">
+                                                {ratingData?.count || 0}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -238,7 +480,8 @@ const StoreProducts = () => {
                         {/* Top Start */}
                         <div className="flex-between gap-16 flex-wrap mb-40">
                             <span className="text-gray-900">
-                                Showing {products.length} of {pagination?.totalItems[0].count || 0} products
+                                Showing {products.length > 0 ? ((pagination?.currentPage - 1) * pagination?.itemsPerPage + 1) : 0}-
+                                {Math.min(pagination?.currentPage * pagination?.itemsPerPage, pagination?.totalItems)} of {pagination?.totalItems} results
                             </span>
                             <div className="position-relative flex-align gap-16 flex-wrap">
                                 {/* Grid/List Toggle */}
@@ -295,6 +538,73 @@ const StoreProducts = () => {
                         </div>
                         {/* Top End */}
 
+                        {/* Active Filters Display */}
+                        {hasActiveFilters() && (
+                            <div className="flex-align gap-8 flex-wrap mb-24 p-16 bg-gray-50 rounded-8">
+                                <span className="text-sm text-gray-600 fw-medium">
+                                    <i className="ph ph-funnel me-2"></i>
+                                    Active Filters:
+                                </span>
+
+                                {filters.category_id && (
+                                    <span className="badge bg-main-600 text-white px-16 py-8 d-flex align-items-center gap-8">
+                                        <i className="ph ph-tag"></i>
+                                        {getCategoryName(filters.category_id)}
+                                        <button
+                                            className="ms-4 bg-transparent border-0 text-white"
+                                            onClick={() => handleFilterChange('category_id', '')}
+                                            style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+
+                                {(filters.min_price || filters.max_price) && (
+                                    <span className="badge bg-success text-white px-16 py-8 d-flex align-items-center gap-8">
+                                        <i className="ph ph-currency-dollar"></i>
+                                        ${filters.min_price || priceRange.min} - ${filters.max_price || priceRange.max}
+                                        <button
+                                            className="ms-4 bg-transparent border-0 text-white"
+                                            onClick={() => {
+                                                setFilters(prev => ({
+                                                    ...prev,
+                                                    min_price: '',
+                                                    max_price: '',
+                                                    page: 1
+                                                }));
+                                                setPriceSliderValues([priceRange.min, priceRange.max]);
+                                            }}
+                                            style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+
+                                {filters.min_rating && (
+                                    <span className="badge bg-warning text-dark px-16 py-8 d-flex align-items-center gap-8">
+                                        <i className="ph-fill ph-star"></i>
+                                        {filters.min_rating}+ Stars
+                                        <button
+                                            className="ms-4 bg-transparent border-0 text-dark"
+                                            onClick={() => handleFilterChange('min_rating', '')}
+                                            style={{ fontSize: '18px', lineHeight: 1, cursor: 'pointer' }}
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                )}
+
+                                <button
+                                    className="btn btn-outline-main px-16 py-8 text-sm"
+                                    onClick={resetFilters}
+                                >
+                                    Clear All
+                                </button>
+                            </div>
+                        )}
+
                         {/* Loading State */}
                         {loading ? (
                             <div className="text-center py-80">
@@ -329,12 +639,18 @@ const StoreProducts = () => {
 
                                 {/* Pagination */}
                                 {pagination && pagination.totalPages > 1 && (
-                                    <div className="flex-center mt-48">
+                                    <div className="flex-between flex-wrap gap-16 mt-48">
                                         <ul className="pagination flex-center flex-wrap gap-16">
                                             <li className={`page-item ${pagination.currentPage === 1 ? 'disabled' : ''}`}>
                                                 <Link
-                                                    onClick={() => handleFilterChange('page', pagination.currentPage - 1)}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        if (pagination.currentPage > 1) {
+                                                            handleFilterChange('page', pagination.currentPage - 1);
+                                                        }
+                                                    }}
                                                     className="page-link h-64 w-64 flex-center text-xxl rounded-8 fw-medium text-neutral-600 border border-gray-100"
+                                                    style={{ cursor: pagination.currentPage === 1 ? 'not-allowed' : 'pointer' }}
                                                 >
                                                     <i className="ph-bold ph-arrow-left" />
                                                 </Link>
@@ -347,10 +663,20 @@ const StoreProducts = () => {
                                                     (page >= pagination.currentPage - 1 && page <= pagination.currentPage + 1)
                                                 ) {
                                                     return (
-                                                        <li key={page} className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}>
+                                                        <li
+                                                            key={page}
+                                                            className={`page-item ${pagination.currentPage === page ? 'active' : ''}`}
+                                                        >
                                                             <Link
-                                                                onClick={() => handleFilterChange('page', page)}
-                                                                className="page-link h-64 w-64 flex-center text-md rounded-8 fw-medium text-neutral-600 border border-gray-100"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    handleFilterChange('page', page);
+                                                                }}
+                                                                className={`page-link h-64 w-64 flex-center text-md rounded-8 fw-medium border border-gray-100 ${pagination.currentPage === page
+                                                                    ? 'bg-main-600 text-white border-main-600'
+                                                                    : 'text-neutral-600'
+                                                                    }`}
+                                                                style={{ cursor: 'pointer' }}
                                                             >
                                                                 {page}
                                                             </Link>

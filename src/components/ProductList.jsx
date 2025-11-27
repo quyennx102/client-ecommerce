@@ -6,7 +6,7 @@ import productService from '../services/productService';
 import categoryService from '../services/categoryService';
 
 const ProductList = () => {
-    const [grid, setGrid] = useState(true);
+    const [grid, setGrid] = useState(false);
     const [active, setActive] = useState(false);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
