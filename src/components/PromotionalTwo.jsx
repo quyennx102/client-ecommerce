@@ -18,7 +18,7 @@ const PromotionalTwo = () => {
                                     <span className="text-heading text-sm mb-8">Latest Deal</span>
                                     <h6 className="mb-0">Drinks & Juice</h6>
                                     <Link
-                                        to="/shop"
+                                        to="/products"
                                         className="d-inline-flex align-items-center gap-8 mt-16 text-heading text-md fw-medium border border-top-0 border-end-0 border-start-0 border-gray-900 hover-text-main-two-600 hover-border-main-two-600"
                                     >
                                         Shop Now
@@ -45,7 +45,7 @@ const PromotionalTwo = () => {
                                     <span className="text-heading text-sm mb-8">Get 50% Off</span>
                                     <h6 className="mb-0">Fish & Meats</h6>
                                     <Link
-                                        to="/shop"
+                                        to="/products"
                                         className="d-inline-flex align-items-center gap-8 mt-16 text-heading text-md fw-medium border border-top-0 border-end-0 border-start-0 border-gray-900 hover-text-main-two-600 hover-border-main-two-600"
                                     >
                                         Shop Now
@@ -72,7 +72,7 @@ const PromotionalTwo = () => {
                                     <span className="text-heading text-sm mb-8">Start From $2</span>
                                     <h6 className="mb-0">Vegetables</h6>
                                     <Link
-                                        to="/shop"
+                                        to="/products"
                                         className="d-inline-flex align-items-center gap-8 mt-16 text-heading text-md fw-medium border border-top-0 border-end-0 border-start-0 border-gray-900 hover-text-main-two-600 hover-border-main-two-600"
                                     >
                                         Shop Now

@@ -425,7 +425,7 @@ const MyOrders = () => {
 
                                         {['pending', 'confirmed'].includes(order.order_status) && (
                                             <button
-                                                className="btn btn-outline-danger"
+                                                className="btn btn-danger"
                                                 onClick={() => handleCancelOrder(order.order_id)}
                                                 disabled={loading}
                                             >

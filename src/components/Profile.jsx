@@ -43,6 +43,10 @@ const Profile = () => {
             setLoading(false);
         }
     };
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        return dateString.split("T")[0]; // Lấy YYYY-MM-DD
+    };
 
     const calculateStats = (ordersList) => {
         const stats = {
@@ -128,7 +132,7 @@ const Profile = () => {
         try {
             const response = await userService.updateProfile(formData);
             if (response.success) {
-                updateUser(response.data.user); // Giả sử API trả về user data
+                updateUser(response.data);
                 toast.success('Profile updated successfully!');
             }
         } catch (error) {
@@ -210,11 +214,10 @@ const Profile = () => {
         setLoading(true);
 
         try {
-            const response = await userService.uploadImage(file);
+            const response = await userService.uploadAvatar(file);
             if (response.success) {
-                // Reload user data to get updated image
-                const userResponse = await userService.getProfile();
-                updateUser(userResponse.data);
+                // Update user in context
+                updateUser(response.data);
                 toast.success('Profile image updated successfully!');
             }
         } catch (error) {
@@ -276,8 +279,53 @@ const Profile = () => {
                         <div className="border border-gray-200 rounded-16 p-24 bg-white">
                             {/* User Info Card */}
                             <div className="text-center mb-24">
-                                <div className="w-80 h-80 bg-main-100 rounded-circle flex-center mx-auto mb-3">
-                                    <i className="ph ph-user text-main-600 text-2xl"></i>
+                                <div
+                                    className="position-relative mx-auto"
+                                    style={{
+                                        width: "120px",
+                                        height: "120px",
+                                    }}
+                                >
+                                    {/* Avatar */}
+                                    <img
+                                        src={
+                                            user?.avatar_url
+                                                ? `${process.env.REACT_APP_IMAGE_URL}${user.avatar_url}`
+                                                : "/default-avatar.png"
+                                        }
+                                        alt="avatar"
+                                        className="rounded-circle border"
+                                        style={{
+                                            width: "120px",
+                                            height: "120px",
+                                            objectFit: "cover",
+                                        }}
+                                    />
+
+                                    {/* Camera Button Overlay */}
+                                    <label
+                                        htmlFor="avatarUpload"
+                                        className="position-absolute bg-main-600 text-white rounded-circle d-flex align-items-center justify-content-center"
+                                        style={{
+                                            width: "34px",
+                                            height: "34px",
+                                            bottom: "0",
+                                            right: "0",
+                                            cursor: "pointer",
+                                            boxShadow: "0 2px 6px rgba(0,0,0,0.25)"
+                                        }}
+                                    >
+                                        <i className="ph ph-camera"></i>
+                                    </label>
+
+                                    {/* Hidden File Input */}
+                                    <input
+                                        id="avatarUpload"
+                                        type="file"
+                                        accept="image/*"
+                                        className="d-none"
+                                        onChange={handleImageUpload}
+                                    />
                                 </div>
                                 <h5 className="mb-2">{user?.full_name}</h5>
                                 <span className={`badge ${getRoleBadge()} px-3 py-2`}>
@@ -313,7 +361,7 @@ const Profile = () => {
                                         <button
                                             className={`nav-link text-start w-100 py-3 px-3 rounded-8 border-0 bg-transparent ${activeTab === 'orders' ? 'bg-main-50 text-main-600' : 'text-gray-600 hover-bg-gray-50'
                                                 }`}
-                                            onClick={() =>  navigate('/orders/my-orders')}
+                                            onClick={() => navigate('/orders/my-orders')}
                                         >
                                             <i className="ph ph-shopping-cart me-2"></i>
                                             My Orders
@@ -414,7 +462,7 @@ const Profile = () => {
                                                     type="date"
                                                     className="common-input"
                                                     name="date_of_birth"
-                                                    value={formData.date_of_birth}
+                                                    value={formatDate(formData.date_of_birth)}
                                                     onChange={handleInputChange}
                                                 />
                                             </div>
