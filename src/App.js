@@ -39,6 +39,7 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import OrderDetailPage from "./pages/OrderDetailPage";
 import { PaymentFailurePage } from "./pages/PaymentFailurePage";
 import SellerRegisterPage from "./pages/SellerRegisterPage";
+import SellerOrdersPage from "./pages/SellerOrdersPage";
 // import AdminDashboard from "./pages/admin/AdminDashboard"; // Thêm admin dashboard
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import NotificationsPage from "./pages/NotificationsPage";
@@ -166,6 +167,12 @@ function App() {
                 <Route path="/seller/register" element={
                   <PrivateRoute>
                     <SellerRegisterPage />
+                  </PrivateRoute>
+                } />
+
+                <Route path="/seller/orders" element={
+                  <PrivateRoute roles={['seller', 'admin']}>
+                    <SellerOrdersPage />
                   </PrivateRoute>
                 } />
 
