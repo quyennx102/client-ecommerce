@@ -429,7 +429,7 @@ const MyOrders = () => {
                                                 onClick={() => handleCancelOrder(order.order_id)}
                                                 disabled={loading}
                                             >
-                                                <i className="ph ph-x me-8"></i>
+                                                <i className="ph ph-x me-8" style={{color:'#fff'}}></i>
                                                 Cancel Order
                                             </button>
                                         )}

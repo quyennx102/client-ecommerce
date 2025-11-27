@@ -151,7 +151,22 @@ export const sweetAlert = {
       ...defaultConfig,
       ...options
     });
-  }
+  },
+
+  confirm: (title, text, icon = 'question', options = {}) => {
+    return MySwal.fire({
+      title,
+      text,
+      icon,
+      showCancelButton: true,
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#dc3545',
+      reverseButtons: true,
+      // ...defaultConfig,
+      ...options
+    });
+  },
 };
 
 // Export mặc định
