@@ -48,6 +48,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import MyOrdersPage from "./pages/MyOrdersPage";
 import './styles/category-styles.css'
 import ManageUsersPage from "./pages/ManageUsersPage";
+import SellerRevenuePage from "./pages/SellerRevenuePage,";
 function App() {
   return (
     <BrowserRouter>
@@ -167,6 +168,12 @@ function App() {
                 <Route path="/seller/register" element={
                   <PrivateRoute>
                     <SellerRegisterPage />
+                  </PrivateRoute>
+                } />
+
+                 <Route path="/seller/revenue" element={
+                  <PrivateRoute>
+                    <SellerRevenuePage />
                   </PrivateRoute>
                 } />
 

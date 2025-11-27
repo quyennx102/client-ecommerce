@@ -2,14 +2,12 @@ import React from "react";
 import Preloader from "../helper/Preloader";
 import ColorInit from "../helper/ColorInit";
 import Breadcrumb from "../components/Breadcrumb";
-import FooterTwo from "../components/FooterTwo";
-import BottomFooter from "../components/BottomFooter";
-import ShippingOne from "../components/ShippingOne";
 import ScrollToTop from "react-scroll-to-top";
 import SellerDashboard from "../components/seller/SellerDashboard";
+import SellerRevenue from "../components/seller/SellerRevenue";
 
 
-const SellerDashboardPage = () => {
+const SellerRevenuePage = () => {
 
 
 
@@ -31,20 +29,10 @@ const SellerDashboardPage = () => {
       <Breadcrumb title={"Checkout"} />
 
       {/* Checkout */}
-      <SellerDashboard />
-
-      {/* ShippingOne */}
-      {/* <ShippingOne /> */}
-
-      {/* FooterTwo */}
-      {/* <FooterTwo /> */}
-
-      {/* BottomFooter */}
-      {/* <BottomFooter /> */}
-
+      <SellerRevenue />
 
     </>
   );
 };
 
-export default SellerDashboardPage;
+export default SellerRevenuePage;

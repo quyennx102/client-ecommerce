@@ -693,8 +693,8 @@ const HeaderTwo = ({ category }) => {
                                                     </li>
                                                     <li>
                                                         <Link className="dropdown-item" to="/seller/revenue">
-                                                            <i className="ph ph-currency-dollar me-2"></i>
-                                                            Revenue
+                                                            <i className="ph ph-chart-line me-8"></i>
+                                                            Revenue Analytics
                                                         </Link>
                                                     </li>
                                                 </>
@@ -824,8 +824,8 @@ const HeaderTwo = ({ category }) => {
                                                 <NavLink to="/seller/revenue" className={({ isActive }) =>
                                                     isActive ? "nav-menu__link activePage text-warning" : "nav-menu__link text-warning"
                                                 }>
-                                                    <i className="ph ph-currency-dollar me-1"></i>
-                                                    Revenue
+                                                    <i className="ph ph-chart-line me-8"></i>
+                                                    Revenue Analytics
                                                 </NavLink>
                                             </li>
                                         </>
