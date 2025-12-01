@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../contexts/AuthContext';
 import userService from '../services/userService';
 import orderService from '../services/orderService';
+import storeService from '../services/storeService';
 
 const Profile = () => {
     const { user, updateUser, isAdmin, isSeller } = useAuth();
@@ -34,7 +35,7 @@ const Profile = () => {
             const response = await orderService.getMyOrders({});
 
             if (response.success) {
-                calculateStats(response.data);
+                calculateStats(response.data, response.pagination);
             }
         } catch (error) {
             toast.error('Failed to load orders');
@@ -48,9 +49,9 @@ const Profile = () => {
         return dateString.split("T")[0]; // Lấy YYYY-MM-DD
     };
 
-    const calculateStats = (ordersList) => {
+    const calculateStats = (ordersList, pagination) => {
         const stats = {
-            total: ordersList.length,
+            total: pagination.totalItems,
             pending: 0,
             confirmed: 0,
             shipping: 0,
@@ -68,6 +69,7 @@ const Profile = () => {
     };
     useEffect(() => {
         fetchOrders();
+        fetchMyStores();
     }, []);
     const [passwordData, setPasswordData] = useState({
         current_password: '',
@@ -92,6 +94,20 @@ const Profile = () => {
         }
         loadUserData();
     }, [user]);
+
+    const fetchMyStores = async () => {
+        try {
+            const response = await storeService.getMyStores();
+            if (response.success) {
+                setStores(response.data);
+            }
+        } catch (error) {
+            toast.error('Failed to load stores');
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const loadUserData = async () => {
         try {
@@ -373,14 +389,19 @@ const Profile = () => {
                                     {isSeller() && (
                                         <>
                                             <li className="nav-item">
-                                                <button
+                                                {/* <button
                                                     className={`nav-link text-start w-100 py-3 px-3 rounded-8 border-0 bg-transparent ${activeTab === 'stores' ? 'bg-warning bg-opacity-10 text-warning' : 'text-gray-600 hover-bg-gray-50'
                                                         }`}
                                                     onClick={() => setActiveTab('stores')}
+                                                > */}
+                                                <button
+                                                    className={`nav-link text-start w-100 py-3 px-3 rounded-8 border-0 bg-transparent ${activeTab === 'stores' ? 'bg-warning bg-opacity-10 text-warning' : 'text-gray-600 hover-bg-gray-50'
+                                                        }`}
+                                                    onClick={() => navigate('/seller/stores')}
                                                 >
                                                     <i className="ph ph-storefront me-2"></i>
                                                     My Stores
-                                                    <span className="badge bg-warning ms-2">{mockStores.length}</span>
+                                                    <span className="badge bg-warning ms-2">{stores.length}</span>
                                                 </button>
                                             </li>
                                             <li className="nav-item">

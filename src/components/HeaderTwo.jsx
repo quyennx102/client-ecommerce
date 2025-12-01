@@ -728,12 +728,12 @@ const HeaderTwo = ({ category }) => {
                                                             Manage Categories
                                                         </Link>
                                                     </li>
-                                                    <li>
+                                                    {/* <li>
                                                         <Link className="dropdown-item" to="/admin/transactions">
                                                             <i className="ph ph-currency-dollar me-2"></i>
                                                             Transactions
                                                         </Link>
-                                                    </li>
+                                                    </li> */}
                                                     <li>
                                                         <Link className="dropdown-item" to="/admin/discounts">
                                                             <i className="ph ph-ticket me-2"></i>
@@ -874,14 +874,14 @@ const HeaderTwo = ({ category }) => {
                                                     Categories
                                                 </NavLink>
                                             </li>
-                                            <li className="nav-menu__item">
+                                            {/* <li className="nav-menu__item">
                                                 <NavLink to="/admin/transactions" className={({ isActive }) =>
                                                     isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"
                                                 }>
                                                     <i className="ph ph-currency-dollar me-1"></i>
                                                     Transactions
                                                 </NavLink>
-                                            </li>
+                                            </li> */}
                                             <li className="nav-menu__item">
                                                 <NavLink to="/admin/discounts" className={({ isActive }) =>
                                                     isActive ? "nav-menu__link activePage text-danger" : "nav-menu__link text-danger"

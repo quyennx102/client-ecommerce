@@ -148,7 +148,7 @@ const DealsOne = () => {
                             <img src="assets/images/thumbs/flash-sale-img1.png" alt="" />
                         </div>
                         <div className="deal-week-box__content px-sm-4 d-block w-100 text-center">
-                            <h6 className="mb-20">Apple AirPods Max, Over Ear Headphones</h6>
+                            <h6 className="mb-20">Fresh Vegetables, Daily Snacks</h6>
                             <div className="countdown mt-20" id="countdown4">
                                 <ul className="countdown-list style-four flex-center flex-wrap">
                                     <li className="countdown-list__item flex-align flex-column text-sm fw-medium text-white rounded-circle bg-neutral-600">

@@ -308,14 +308,14 @@ const StoreProducts = () => {
                                 <div className="d-flex align-items-center gap-16 mb-12">
                                     <h3 className="mb-0">{store.store_name}</h3>
                                     <button
-                                        className={`btn ${isFollowing ? 'btn-outline-main' : 'btn-main'} px-24 py-8`}
+                                        className={`btn ${isFollowing ? 'btn-outline-main' : 'btn-main'} px-32`}
                                         onClick={handleFollowToggle}
                                         disabled={followLoading}
                                     >
                                         {followLoading ? (
-                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            <span className="spinner-border spinner-border-sm me-8"></span>
                                         ) : (
-                                            <i className={`ph ${isFollowing ? 'ph-check' : 'ph-plus'} me-2`}></i>
+                                            <i className={`ph ${isFollowing ? 'ph-check' : 'ph-heart'} me-8`}></i>
                                         )}
                                         {isFollowing ? 'Following' : 'Follow'}
                                     </button>

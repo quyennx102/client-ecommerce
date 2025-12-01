@@ -256,23 +256,41 @@ const ProductDetailsTwo = () => {
         }
     };
 
-    // Like review handler
+    // Like review handler - UPDATE THIS
     const handleLikeReview = async (reviewId) => {
         try {
-            const response = await reviewService.likeReview(reviewId);
+            // Kiểm tra đăng nhập
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.info('Please login to like this review');
+                // Chuyển hướng sang trang login
+                navigate('/auth');
+                return;
+            }
+            const response = await reviewService.toggleReviewLike(reviewId);
 
             if (response.success) {
                 // Update local state
                 setReviews(reviews.map(review =>
                     review.review_id === reviewId
-                        ? { ...review, likes: (review.likes || 0) + 1 }
+                        ? {
+                            ...review,
+                            likes_count: response.data.likes_count,
+                            is_liked_by_me: response.data.is_liked
+                        }
                         : review
                 ));
-                toast.success('Thank you for your feedback!');
+
+                toast.success(response.data.is_liked ? 'Review liked!' : 'Review unliked!');
             }
         } catch (error) {
             console.error('Error liking review:', error);
-            toast.error('Failed to like review');
+
+            if (error.response?.status === 401) {
+                toast.error('Please login to like reviews');
+            } else {
+                toast.error('Failed to like review');
+            }
         }
     };
 
@@ -635,7 +653,7 @@ const ProductDetailsTwo = () => {
                                         </span>
                                         <span className="text-sm text-neutral-600">
                                             Sold by:{" "}
-                                            <span className="fw-semibold">{product.store.store_name}</span>
+                                            <a href={`/stores/${product.store.store_id}/products`} className="fw-semibold">{product.store.store_name}</a>
                                         </span>
                                     </div>
                                 </div>
@@ -821,11 +839,13 @@ const ProductDetailsTwo = () => {
                                                             <p className="text-gray-700">{review.comment}</p>
                                                             <div className="flex-align gap-20 mt-44">
                                                                 <button
-                                                                    className="flex-align gap-12 text-gray-700 hover-text-main-600"
+                                                                    className={`flex-align gap-12 hover-text-main-600 ${review.is_liked_by_me ? 'text-main-600' : 'text-gray-700'
+                                                                        }`}
                                                                     onClick={() => handleLikeReview(review.review_id)}
                                                                 >
-                                                                    <i className="ph-bold ph-thumbs-up" />
-                                                                    Like {review.likes > 0 && `(${review.likes})`}
+                                                                    <i className={`ph-bold ${review.is_liked_by_me ? 'ph-thumbs-up-fill' : 'ph-thumbs-up'}`} />
+                                                                    {review.is_liked_by_me ? 'Liked' : 'Like'}
+                                                                    {review.likes_count > 0 && ` (${review.likes_count})`}
                                                                 </button>
                                                             </div>
                                                         </div>

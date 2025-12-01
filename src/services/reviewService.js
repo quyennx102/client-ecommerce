@@ -20,7 +20,7 @@ const reviewService = {
   createReview: async (reviewData) => {
     try {
       const formData = new FormData();
-      
+
       // Add text fields
       formData.append('product_id', reviewData.product_id);
       formData.append('order_id', reviewData.order_id);
@@ -28,14 +28,14 @@ const reviewService = {
       if (reviewData.comment) {
         formData.append('comment', reviewData.comment);
       }
-      
+
       // Add images if any
       if (reviewData.images && reviewData.images.length > 0) {
         reviewData.images.forEach(image => {
           formData.append('images', image);
         });
       }
-      
+
       const response = await axiosInstance.post('/reviews', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -54,21 +54,21 @@ const reviewService = {
   updateReview: async (reviewId, reviewData) => {
     try {
       const formData = new FormData();
-      
+
       if (reviewData.rating) {
         formData.append('rating', reviewData.rating);
       }
       if (reviewData.comment !== undefined) {
         formData.append('comment', reviewData.comment);
       }
-      
+
       // Add new images if any
       if (reviewData.images && reviewData.images.length > 0) {
         reviewData.images.forEach(image => {
           formData.append('images', image);
         });
       }
-      
+
       const response = await axiosInstance.put(`/reviews/${reviewId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -129,6 +129,32 @@ const reviewService = {
       return response.data;
     } catch (error) {
       console.error('Can review product error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Toggle like/unlike review
+   */
+  toggleReviewLike: async (reviewId) => {
+    try {
+      const response = await axiosInstance.post(`/reviews/${reviewId}/like`);
+      return response.data;
+    } catch (error) {
+      console.error('Toggle review like error:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get users who liked a review
+   */
+  getReviewLikes: async (reviewId, params = {}) => {
+    try {
+      const response = await axiosInstance.get(`/reviews/${reviewId}/likes`, { params });
+      return response.data;
+    } catch (error) {
+      console.error('Get review likes error:', error);
       throw error;
     }
   }
