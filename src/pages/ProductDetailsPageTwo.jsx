@@ -10,10 +10,12 @@ import NewsletterOne from "../components/NewsletterOne";
 import FooterTwo from "../components/FooterTwo";
 import BottomFooter from "../components/BottomFooter";
 import ScrollToTop from "react-scroll-to-top";
+import RelatedProducts from "../components/RelatedProducts";
+import { useParams } from "react-router-dom";
 
 
 const ProductDetailsPageTwo = () => {
-
+  const { id } = useParams();
 
 
   return (
@@ -37,7 +39,9 @@ const ProductDetailsPageTwo = () => {
       <ProductDetailsTwo />
 
       {/* NewArrivalTwo */}
-      <NewArrivalTwo />
+      {/* <NewArrivalTwo /> */}
+
+      <RelatedProducts currentProductId={id} />
 
       {/* ShippingOne */}
       <ShippingOne />

@@ -60,6 +60,14 @@ const productService = {
     const response = await axiosInstance.get('/products/deals');
     return response.data;
   },
+  
+  // Get related products
+  getRelatedProducts: async (productId, limit = 12) => {
+    const response = await axiosInstance.get(`/products/${productId}/related`, {
+      params: { limit }
+    });
+    return response.data;
+  },
 };
 
 export default productService;

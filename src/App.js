@@ -49,6 +49,7 @@ import MyOrdersPage from "./pages/MyOrdersPage";
 import './styles/category-styles.css'
 import ManageUsersPage from "./pages/ManageUsersPage";
 import SellerRevenuePage from "./pages/SellerRevenuePage,";
+import MyFollowedStoresPage from "./pages/MyFollowedStoresPage";
 function App() {
   return (
     <BrowserRouter>
@@ -122,6 +123,13 @@ function App() {
                   </PrivateRoute>
                 } />
 
+                {/* My Followed Stores */}
+                <Route path="/my-followed-stores" element={
+                  <PrivateRoute>
+                    <MyFollowedStoresPage />
+                  </PrivateRoute>
+                } />
+
                 {/* Seller routes */}
                 <Route path="/seller/dashboard" element={
                   <PrivateRoute roles={['seller', 'admin']}>
@@ -171,7 +179,7 @@ function App() {
                   </PrivateRoute>
                 } />
 
-                 <Route path="/seller/revenue" element={
+                <Route path="/seller/revenue" element={
                   <PrivateRoute>
                     <SellerRevenuePage />
                   </PrivateRoute>

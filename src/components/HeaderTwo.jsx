@@ -648,6 +648,12 @@ const HeaderTwo = ({ category }) => {
                                                     My Orders
                                                 </Link>
                                             </li>
+                                            <li>
+                                                <Link className="dropdown-item" to="/my-followed-stores">
+                                                    <i className="ph ph-heart me-2"></i>
+                                                    Followed Stores
+                                                </Link>
+                                            </li>
 
                                             {/* Become a Seller trong dropdown - CHỈ khi CHƯA phải seller */}
                                             {!isSeller() && !isAdmin() && (

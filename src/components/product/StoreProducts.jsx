@@ -86,7 +86,7 @@ const StoreProducts = () => {
         try {
             const response = await followService.checkFollowStatus(storeId);
             if (response.success) {
-                setIsFollowing(response.isFollowing);
+                setIsFollowing(response.data.isFollowing);
             }
         } catch (error) {
             console.error('Failed to check follow status:', error);
