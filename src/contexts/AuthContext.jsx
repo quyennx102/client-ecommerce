@@ -124,9 +124,10 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Hàm updateUser để cập nhật từ bên ngoài
-    const updateUser = useCallback((updatedUser) => {
+    const updateUser = useCallback(async (updatedUser) => {
         setUser(updatedUser);
         setIsAuthenticated(true);
+        await fetchCartCount();
         localStorage.setItem('user', JSON.stringify(updatedUser));
     }, []);
 

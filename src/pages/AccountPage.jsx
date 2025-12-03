@@ -39,7 +39,7 @@ const AccountPage = () => {
       <ShippingOne />
 
       {/* FooterTwo */}
-      <FooterTwo />
+      {/* <FooterTwo /> */}
 
       {/* BottomFooter */}
       {/* <BottomFooter /> */}

@@ -7,7 +7,7 @@ import sweetAlert from '../utils/sweetAlert';
 
 const CartSection = () => {
     const navigate = useNavigate();
-    const { user, loading: authLoading, fetchCartCount } = useAuth(); // Thêm authLoading
+    const { user, loading: authLoading, fetchCartCount } = useAuth();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState({});
@@ -23,20 +23,66 @@ const CartSection = () => {
 
     useEffect(() => {
         fetchCart();
-    }, []); // Không cần check user nữa vì PrivateRoute đã handle
+        // Load discount from sessionStorage when component mounts
+        loadDiscountFromSession();
+    }, []);
 
     useEffect(() => {
         calculateTotals();
     }, [cartItems, appliedDiscount]);
+
+    // ✅ Load discount from sessionStorage
+    const loadDiscountFromSession = () => {
+        const discountData = sessionStorage.getItem('appliedDiscount');
+        if (discountData) {
+            try {
+                const discount = JSON.parse(discountData);
+                setAppliedDiscount(discount);
+                setDiscountCode(discount.code);
+            } catch (error) {
+                // Clear invalid data
+                sessionStorage.removeItem('appliedDiscount');
+            }
+        }
+    };
+
+    // ✅ Save discount to sessionStorage
+    const saveDiscountToSession = (discount) => {
+        if (discount) {
+            sessionStorage.setItem('appliedDiscount', JSON.stringify(discount));
+        } else {
+            sessionStorage.removeItem('appliedDiscount');
+        }
+    };
 
     const fetchCart = async () => {
         setLoading(true);
         try {
             const response = await cartService.getCart();
             if (response.success) {
-                setCartItems(response.data.items || []);
+                const items = response.data.items || [];
+                setCartItems(items);
+                
+                // ✅ CRITICAL: Kiểm tra nếu cart trống hoặc thay đổi store, xóa discount
+                const currentStoreId = items[0]?.store?.store_id;
+                const savedDiscount = sessionStorage.getItem('appliedDiscount');
+                
+                if (savedDiscount) {
+                    const discount = JSON.parse(savedDiscount);
+                    
+                    // Xóa discount nếu:
+                    // 1. Cart trống
+                    // 2. Store ID thay đổi
+                    // 3. Subtotal thấp hơn minimum required
+                    if (items.length === 0 || 
+                        discount.store_id != currentStoreId) {
+                        setAppliedDiscount(null);
+                        setDiscountCode('');
+                        sessionStorage.removeItem('appliedDiscount');
+                    }
+                }
             }
-            await fetchCartCount(); // Update cart count in header
+            await fetchCartCount();
         } catch (error) {
             toast.error(error.response?.data?.message || 'Failed to load cart');
         } finally {
@@ -50,15 +96,22 @@ const CartSection = () => {
 
         let discount = 0;
         if (appliedDiscount) {
-            discount = parseFloat(appliedDiscount.discount_amount);
+            // ✅ Kiểm tra lại điều kiện minimum amount
+            if (appliedDiscount.min_order_amount && sub < appliedDiscount.min_order_amount) {
+                // Tự động remove discount nếu không đủ điều kiện
+                setAppliedDiscount(null);
+                setDiscountCode('');
+                saveDiscountToSession(null);
+                toast.warning(`Discount removed: Order must be at least $${appliedDiscount.min_order_amount}`);
+            } else {
+                discount = parseFloat(appliedDiscount.discount_amount);
+            }
         }
         setDiscountAmount(discount);
 
-        // Calculate tax (10%)
         const taxAmount = (sub - discount) * 0.1;
         setTax(taxAmount);
 
-        // Calculate total
         setTotal(sub - discount + taxAmount);
     };
 
@@ -88,9 +141,12 @@ const CartSection = () => {
             if (response.success) {
                 await fetchCart();
                 toast.success('Item removed from cart');
-                // Clear discount if cart becomes empty
+                
+                // ✅ Clear discount if cart becomes empty
                 if (cartItems.length <= 1) {
                     setAppliedDiscount(null);
+                    setDiscountCode('');
+                    saveDiscountToSession(null);
                 }
             }
         } catch (error) {
@@ -111,7 +167,6 @@ const CartSection = () => {
             return;
         }
 
-        // Get store_id from first item (assuming all items from same store)
         const storeId = cartItems[0]?.store?.store_id;
         if (!storeId) {
             toast.error('Cannot apply discount');
@@ -127,7 +182,13 @@ const CartSection = () => {
             );
 
             if (response.success) {
-                setAppliedDiscount(response.data);
+                const discountData = {
+                    ...response.data,
+                    store_id: storeId // ✅ Lưu store_id để check sau
+                };
+                
+                setAppliedDiscount(discountData);
+                saveDiscountToSession(discountData); // ✅ Save to session
                 toast.success(response.message);
             }
         } catch (error) {
@@ -140,6 +201,7 @@ const CartSection = () => {
     const handleRemoveDiscount = () => {
         setAppliedDiscount(null);
         setDiscountCode('');
+        saveDiscountToSession(null); // ✅ Remove from session
         toast.info('Discount removed');
     };
 
@@ -152,7 +214,9 @@ const CartSection = () => {
             if (response.success) {
                 setCartItems([]);
                 setAppliedDiscount(null);
-                await fetchCartCount(); // Update cart count in header
+                setDiscountCode('');
+                saveDiscountToSession(null); // ✅ Clear discount from session
+                await fetchCartCount();
                 toast.success('Cart cleared');
             }
         } catch (error) {
@@ -166,9 +230,22 @@ const CartSection = () => {
             return;
         }
 
-        // Store discount info in sessionStorage for checkout page
+        // ✅ Validate discount trước khi checkout
         if (appliedDiscount) {
-            sessionStorage.setItem('appliedDiscount', JSON.stringify(appliedDiscount));
+            // Kiểm tra minimum amount
+            if (appliedDiscount.min_order_amount && subtotal < appliedDiscount.min_order_amount) {
+                toast.error(`Order must be at least $${appliedDiscount.min_order_amount} to use this discount`);
+                setAppliedDiscount(null);
+                setDiscountCode('');
+                saveDiscountToSession(null);
+                return;
+            }
+            
+            // Discount hợp lệ, lưu vào session cho checkout page
+            saveDiscountToSession(appliedDiscount);
+        } else {
+            // Không có discount, clear session
+            saveDiscountToSession(null);
         }
 
         navigate('/checkout');
@@ -337,7 +414,7 @@ const CartSection = () => {
                                     {appliedDiscount ? (
                                         <button
                                             type="button"
-                                            className="btn btn-danger py-18 rounded-8"
+                                            className="btn btn-danger py-18 w-100 rounded-8"
                                             onClick={handleRemoveDiscount}
                                         >
                                             Remove Discount
@@ -375,6 +452,11 @@ const CartSection = () => {
                                     <i className="ph ph-check-circle me-8"></i>
                                     Discount code <strong>{appliedDiscount.code}</strong> applied!
                                     You save ${parseFloat(appliedDiscount.discount_amount).toFixed(2)}
+                                    {appliedDiscount.min_order_amount && (
+                                        <div className="text-sm mt-8">
+                                            Minimum order: ${parseFloat(appliedDiscount.min_order_amount).toFixed(2)}
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

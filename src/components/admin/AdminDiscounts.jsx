@@ -85,7 +85,7 @@ const AdminDiscounts = () => {
                                                 {code.description}
                                             </p>
                                         </td>
-                                        <td>{code.store?.name || 'N/A'}</td>
+                                        <td>{code.store?.store_name || 'N/A'}</td>
                                         <td>{code.discount_type}</td>
                                         <td>
                                             {code.discount_type === 'percentage'
@@ -114,7 +114,7 @@ const AdminDiscounts = () => {
                                                     className="btn btn-sm btn-danger"
                                                     title="Reject"
                                                 >
-                                                    <i className="ph ph-x"></i>
+                                                    <i className="ph ph-x" style={{ color: "#fff" }}></i>
                                                 </button>
                                             </div>
                                         </td>

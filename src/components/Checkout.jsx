@@ -34,6 +34,10 @@ const Checkout = () => {
         payment_method: 'cod'
     });
 
+    // Validation errors
+    const [errors, setErrors] = useState({});
+    const [touched, setTouched] = useState({});
+
     useEffect(() => {
         fetchCartData();
         loadDiscountFromSession();
@@ -87,11 +91,169 @@ const Checkout = () => {
         setTotal(sub - discount + taxAmount);
     };
 
+    // Validation functions
+    const validateField = (name, value) => {
+        let error = '';
+
+        switch (name) {
+            case 'shipping_name':
+                if (!value.trim()) {
+                    error = 'Full name is required';
+                } else if (value.trim().length < 2) {
+                    error = 'Name must be at least 2 characters';
+                } else if (value.trim().length > 100) {
+                    error = 'Name must not exceed 100 characters';
+                } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(value)) {
+                    error = 'Name can only contain letters and spaces';
+                }
+                break;
+
+            case 'shipping_phone':
+                if (!value.trim()) {
+                    error = 'Phone number is required';
+                } else if (!/^[0-9+\-\s()]+$/.test(value)) {
+                    error = 'Invalid phone number format';
+                } else {
+                    // Remove non-digit characters for length check
+                    const digitsOnly = value.replace(/\D/g, '');
+                    if (digitsOnly.length < 10) {
+                        error = 'Phone number must be at least 10 digits';
+                    } else if (digitsOnly.length > 15) {
+                        error = 'Phone number must not exceed 15 digits';
+                    }
+                }
+                break;
+
+            case 'shipping_address':
+                if (!value.trim()) {
+                    error = 'Address is required';
+                } else if (value.trim().length < 10) {
+                    error = 'Address must be at least 10 characters';
+                } else if (value.trim().length > 200) {
+                    error = 'Address must not exceed 200 characters';
+                }
+                break;
+
+            case 'shipping_city':
+                if (value && value.trim().length > 0) {
+                    if (value.trim().length < 2) {
+                        error = 'City must be at least 2 characters';
+                    } else if (value.trim().length > 50) {
+                        error = 'City must not exceed 50 characters';
+                    } else if (!/^[a-zA-ZÀ-ỹ\s\-]+$/.test(value)) {
+                        error = 'City can only contain letters, spaces, and hyphens';
+                    }
+                }
+                break;
+
+            case 'shipping_state':
+                if (value && value.trim().length > 0) {
+                    if (value.trim().length < 2) {
+                        error = 'State/Province must be at least 2 characters';
+                    } else if (value.trim().length > 50) {
+                        error = 'State/Province must not exceed 50 characters';
+                    } else if (!/^[a-zA-ZÀ-ỹ\s\-]+$/.test(value)) {
+                        error = 'State/Province can only contain letters, spaces, and hyphens';
+                    }
+                }
+                break;
+
+            case 'shipping_postcode':
+                if (value && value.trim().length > 0) {
+                    if (!/^[0-9A-Za-z\s\-]+$/.test(value)) {
+                        error = 'Invalid postcode format';
+                    } else if (value.trim().length < 4) {
+                        error = 'Postcode must be at least 4 characters';
+                    } else if (value.trim().length > 10) {
+                        error = 'Postcode must not exceed 10 characters';
+                    }
+                }
+                break;
+
+            case 'notes':
+                if (value && value.length > 500) {
+                    error = 'Notes must not exceed 500 characters';
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        return error;
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        const requiredFields = ['shipping_name', 'shipping_phone', 'shipping_address'];
+
+        // Validate all fields
+        Object.keys(formData).forEach(field => {
+            const error = validateField(field, formData[field]);
+            if (error) {
+                newErrors[field] = error;
+            }
+        });
+
+        // Check required fields
+        requiredFields.forEach(field => {
+            if (!formData[field] || !formData[field].trim()) {
+                newErrors[field] = `${field.replace('shipping_', '').replace('_', ' ')} is required`;
+            }
+        });
+
+        setErrors(newErrors);
+        setTouched(
+            Object.keys(formData).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+        );
+
+        // Show first error
+        const errorFields = Object.keys(newErrors);
+        if (errorFields.length > 0) {
+            const firstError = newErrors[errorFields[0]];
+            toast.error(firstError);
+            // Focus on first error field
+            const firstErrorElement = document.querySelector(`[name="${errorFields[0]}"]`);
+            if (firstErrorElement) {
+                firstErrorElement.focus();
+            }
+            return false;
+        }
+
+        return true;
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        
         setFormData(prev => ({
             ...prev,
             [name]: value
+        }));
+
+        // Validate on change if field was touched
+        if (touched[name]) {
+            const error = validateField(name, value);
+            setErrors(prev => ({
+                ...prev,
+                [name]: error
+            }));
+        }
+    };
+
+    const handleBlur = (e) => {
+        const { name, value } = e.target;
+        
+        setTouched(prev => ({
+            ...prev,
+            [name]: true
+        }));
+
+        // Validate on blur
+        const error = validateField(name, value);
+        setErrors(prev => ({
+            ...prev,
+            [name]: error
         }));
     };
 
@@ -100,17 +262,6 @@ const Checkout = () => {
             ...prev,
             payment_method: method
         }));
-    };
-
-    const validateForm = () => {
-        const required = ['shipping_name', 'shipping_phone', 'shipping_address'];
-        for (const field of required) {
-            if (!formData[field].trim()) {
-                toast.error(`Please fill in ${field.replace('shipping_', '').replace('_', ' ')}`);
-                return false;
-            }
-        }
-        return true;
     };
 
     const handlePlaceOrder = async (e) => {
@@ -144,29 +295,22 @@ const Checkout = () => {
 
                 // Handle payment
                 if (formData.payment_method === 'cod') {
-                    // COD - redirect to success page
                     navigate(`/orders/${firstOrder.order_id}`, {
                         state: { message: 'Order placed successfully!' }
                     });
                 } else if (formData.payment_method === 'momo') {
-                    // MoMo payment
                     const paymentResponse = await paymentService.createMoMoPayment(firstOrder.order_id);
                     if (paymentResponse.success) {
-                        // Redirect to MoMo payment page
                         window.location.href = paymentResponse.data.payUrl;
                     }
                 } else if (formData.payment_method === 'zalopay') {
-                    // ZaloPay payment
                     const paymentResponse = await paymentService.createZaloPayPayment(firstOrder.order_id);
                     if (paymentResponse.success) {
-                        // Redirect to ZaloPay payment page
                         window.location.href = paymentResponse.data.orderUrl;
                     }
                 } else if (formData.payment_method === 'vnpay') {
-                    // vnpay payment
                     const paymentResponse = await paymentService.createVnPayPayment(firstOrder.order_id);
                     if (paymentResponse.success) {
-                        // Redirect to VNPay payment page
                         window.location.href = paymentResponse.data.payUrl;
                     }
                 }
@@ -213,7 +357,7 @@ const Checkout = () => {
                     </span>
                 </div>
 
-                <form onSubmit={handlePlaceOrder}>
+                <form onSubmit={handlePlaceOrder} noValidate>
                     <div className="row">
                         {/* Shipping Information */}
                         <div className="col-xl-9 col-lg-8">
@@ -221,84 +365,162 @@ const Checkout = () => {
                                 <h5 className="mb-32">Shipping Information</h5>
                                 <div className="row gy-3">
                                     <div className="col-sm-6">
-                                        <label className="form-label">Full Name <span className="text-danger text-xl line-height-1">*</span>{" "}</label>
+                                        <label className="form-label">
+                                            Full Name <span className="text-danger text-xl line-height-1">*</span>
+                                        </label>
                                         <input
                                             type="text"
                                             name="shipping_name"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_name && errors.shipping_name ? 'border-danger' : ''
+                                            }`}
                                             placeholder="Enter your full name"
                                             value={formData.shipping_name}
                                             onChange={handleInputChange}
-                                            required
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_name && errors.shipping_name && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_name}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-sm-6">
-                                        <label htmlFor="phone" className="form-label">Phone Number <span className="text-danger text-xl line-height-1">*</span>{" "}</label>
+                                        <label htmlFor="phone" className="form-label">
+                                            Phone Number <span className="text-danger text-xl line-height-1">*</span>
+                                        </label>
                                         <input
-                                            type="number"
+                                            type="tel"
                                             name="shipping_phone"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_phone && errors.shipping_phone ? 'border-danger' : ''
+                                            }`}
                                             placeholder="Enter your phone number"
                                             value={formData.shipping_phone}
                                             onChange={handleInputChange}
-                                            required
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_phone && errors.shipping_phone && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_phone}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-12">
-                                        <label className="form-label">Street Address <span className="text-danger text-xl line-height-1">*</span>{" "}</label>
+                                        <label className="form-label">
+                                            Street Address <span className="text-danger text-xl line-height-1">*</span>
+                                        </label>
                                         <input
                                             type="text"
                                             name="shipping_address"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_address && errors.shipping_address ? 'border-danger' : ''
+                                            }`}
                                             placeholder="House number and street name"
                                             value={formData.shipping_address}
                                             onChange={handleInputChange}
-                                            required
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_address && errors.shipping_address && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_address}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-sm-6">
                                         <label className="form-label">City</label>
                                         <input
                                             type="text"
                                             name="shipping_city"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_city && errors.shipping_city ? 'border-danger' : ''
+                                            }`}
                                             placeholder="City"
                                             value={formData.shipping_city}
                                             onChange={handleInputChange}
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_city && errors.shipping_city && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_city}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-sm-6">
                                         <label className="form-label">State/Province</label>
                                         <input
                                             type="text"
                                             name="shipping_state"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_state && errors.shipping_state ? 'border-danger' : ''
+                                            }`}
                                             placeholder="State/Province"
                                             value={formData.shipping_state}
                                             onChange={handleInputChange}
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_state && errors.shipping_state && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_state}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-12">
                                         <label className="form-label">Post Code</label>
                                         <input
                                             type="text"
                                             name="shipping_postcode"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.shipping_postcode && errors.shipping_postcode ? 'border-danger' : ''
+                                            }`}
                                             placeholder="Post Code"
                                             value={formData.shipping_postcode}
                                             onChange={handleInputChange}
+                                            onBlur={handleBlur}
                                         />
+                                        {touched.shipping_postcode && errors.shipping_postcode && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.shipping_postcode}
+                                            </div>
+                                        )}
                                     </div>
+
                                     <div className="col-12">
-                                        <label className="form-label">Order Notes (Optional)</label>
+                                        <label className="form-label">
+                                            Order Notes (Optional)
+                                            <span className="text-gray-500 text-sm ms-8">
+                                                ({formData.notes.length}/500 characters)
+                                            </span>
+                                        </label>
                                         <textarea
                                             name="notes"
-                                            className="common-input border-gray-100"
+                                            className={`common-input border-gray-100 ${
+                                                touched.notes && errors.notes ? 'border-danger' : ''
+                                            }`}
                                             rows="4"
                                             placeholder="Notes about your order, e.g. special notes for delivery"
                                             value={formData.notes}
                                             onChange={handleInputChange}
+                                            onBlur={handleBlur}
+                                            maxLength={500}
                                         ></textarea>
+                                        {touched.notes && errors.notes && (
+                                            <div className="text-danger text-sm mt-8">
+                                                <i className="ph ph-warning-circle me-4"></i>
+                                                {errors.notes}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -438,6 +660,7 @@ const Checkout = () => {
                                             </div>
                                         )}
                                     </div>
+
                                     <div className="payment-item mb-16">
                                         <div className="form-check common-check common-radio">
                                             <input
