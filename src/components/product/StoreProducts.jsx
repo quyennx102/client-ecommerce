@@ -5,6 +5,7 @@ import ReactSlider from 'react-slider';
 import storeService from '../../services/storeService';
 import categoryService from '../../services/categoryService';
 import followService from '../../services/followService';
+import ChatButton from '../ChatButton';
 
 const StoreProducts = () => {
     const navigate = useNavigate();
@@ -307,6 +308,7 @@ const StoreProducts = () => {
                             <div className="col">
                                 <div className="d-flex align-items-center gap-16 mb-12">
                                     <h3 className="mb-0">{store.store_name}</h3>
+                                    <ChatButton storeId={store.store_id} storeName={store.store_name} />
                                     <button
                                         className={`btn ${isFollowing ? 'btn-outline-main' : 'btn-main'} px-32`}
                                         onClick={handleFollowToggle}

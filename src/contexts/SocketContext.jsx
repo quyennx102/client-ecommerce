@@ -20,26 +20,33 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (isAuthenticated) {
       const token = getAccessToken();
-      
-      const newSocket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000', {
+
+      // <CHANGE> Đảm bảo URL đúng và thêm path config
+      const socketUrl = process.env.REACT_APP_API_SOCKET || 'http://localhost:3000';
+
+      const newSocket = io(socketUrl, {
         auth: {
           token: token
         },
-        transports: ['websocket', 'polling']
+        path: '/socket.io/',
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
       });
 
       newSocket.on('connect', () => {
-        console.log('Socket connected');
+        console.log('Socket connected:', newSocket.id);
         setIsConnected(true);
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('Socket disconnected');
+      newSocket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
         setIsConnected(false);
       });
 
       newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+        console.error('Socket connection error:', error.message);
         setIsConnected(false);
       });
 

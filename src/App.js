@@ -50,6 +50,8 @@ import './styles/category-styles.css'
 import ManageUsersPage from "./pages/ManageUsersPage";
 import SellerRevenuePage from "./pages/SellerRevenuePage,";
 import MyFollowedStoresPage from "./pages/MyFollowedStoresPage";
+import ChatPage from './pages/ChatPage';
+import ChatWindowPage from './pages/ChatWindowPage';
 function App() {
   return (
     <BrowserRouter>
@@ -120,6 +122,18 @@ function App() {
                 <Route path="/profile" element={
                   <PrivateRoute>
                     <ProfilePage />
+                  </PrivateRoute>
+                } />
+
+                <Route path="/chat" element={
+                  <PrivateRoute>
+                    <ChatPage />
+                  </PrivateRoute>
+                } />
+
+                <Route path="/chat/:conversationId" element={
+                  <PrivateRoute>
+                    <ChatWindowPage />
                   </PrivateRoute>
                 } />
 

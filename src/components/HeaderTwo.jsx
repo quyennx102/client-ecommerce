@@ -582,8 +582,26 @@ const HeaderTwo = ({ category }) => {
                                     </Link>
                                 )}
 
-                                {/* Notification Bell - Only when authenticated */}
-                                {isAuthenticated && <NotificationBell />}
+                                {/* Notification Bell - Only when authenticated, Chat Icon */}
+                                {isAuthenticated && (
+                                    <>
+                                        <NotificationBell />
+
+                                        {/* Chat Icon */}
+                                        <Link
+                                            to="/chat"
+                                            className="flex-align flex-column gap-8 item-hover-two"
+                                        >
+                                            <span className="text-2xl text-white d-flex position-relative item-hover__text">
+                                                <i className="ph ph-chat-circle-dots" />
+                                                {/* Add unread badge if needed */}
+                                            </span>
+                                            <span className="text-md text-white item-hover__text d-none d-lg-flex">
+                                                Chat
+                                            </span>
+                                        </Link>
+                                    </>
+                                )}
 
                                 <Link
                                     to="/cart"
