@@ -483,7 +483,7 @@ const SellerOrders = () => {
                                             </button>
 
                                             <button
-                                                className="btn btn-outline-primary"
+                                                className="btn btn-primary"
                                                 onClick={() => openStatusModal(order)}
                                             >
                                                 <i className="ph ph-arrows-clockwise me-8"></i>
@@ -491,7 +491,7 @@ const SellerOrders = () => {
                                             </button>
 
                                             <button
-                                                className="btn btn-outline-success"
+                                                className="btn btn-success"
                                                 onClick={() => openPaymentModal(order)}
                                             >
                                                 <i className="ph ph-credit-card me-8"></i>
