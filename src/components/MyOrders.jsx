@@ -2,17 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import orderService from '../services/orderService';
+import paymentService from '../services/paymentService';
 import sweetAlert from '../utils/sweetAlert';
 
 const MyOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
+    const [processingPayment, setProcessingPayment] = useState(null);
 
     // Filters
     const [statusFilter, setStatusFilter] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Payment Modal
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('momo');
 
     // Stats
     const [stats, setStats] = useState({
@@ -108,6 +115,49 @@ const MyOrders = () => {
             toast.error(error.response?.data?.message || 'Failed to cancel order');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handlePayNowClick = (order) => {
+        setSelectedOrder(order);
+        setShowPaymentModal(true);
+    };
+
+    const handlePaymentSubmit = async () => {
+        if (!selectedOrder || !selectedPaymentMethod) return;
+
+        setProcessingPayment(selectedOrder.order_id);
+        try {
+            let paymentResponse;
+
+            switch (selectedPaymentMethod) {
+                case 'momo':
+                    paymentResponse = await paymentService.createMoMoPayment(selectedOrder.order_id);
+                    if (paymentResponse.success) {
+                        window.location.href = paymentResponse.data.payUrl;
+                    }
+                    break;
+
+                case 'zalopay':
+                    paymentResponse = await paymentService.createZaloPayPayment(selectedOrder.order_id);
+                    if (paymentResponse.success) {
+                        window.location.href = paymentResponse.data.orderUrl;
+                    }
+                    break;
+
+                case 'vnpay':
+                    paymentResponse = await paymentService.createVnPayPayment(selectedOrder.order_id);
+                    if (paymentResponse.success) {
+                        window.location.href = paymentResponse.data.payUrl;
+                    }
+                    break;
+
+                default:
+                    toast.error('Invalid payment method');
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to process payment');
+            setProcessingPayment(null);
         }
     };
 
@@ -437,13 +487,20 @@ const MyOrders = () => {
                                         {order.payment_status === 'pending' && order.payment_method !== 'cod' && (
                                             <button
                                                 className="btn btn-success"
-                                                onClick={() => {
-                                                    // Redirect to payment
-                                                    window.location.href = `/payment/${order.order_id}`;
-                                                }}
+                                                onClick={() => handlePayNowClick(order)}
+                                                disabled={processingPayment === order.order_id}
                                             >
-                                                <i className="ph ph-credit-card me-8"></i>
-                                                Pay Now
+                                                {processingPayment === order.order_id ? (
+                                                    <>
+                                                        <span className="spinner-border spinner-border-sm me-8"></span>
+                                                        Processing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <i className="ph ph-credit-card me-8"></i>
+                                                        Pay Now
+                                                    </>
+                                                )}
                                             </button>
                                         )}
 
@@ -515,63 +572,292 @@ const MyOrders = () => {
                         )}
                     </>
                 )}
+
+                {/* Payment Modal */}
+                {showPaymentModal && selectedOrder && (
+                    <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
+                        <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
+                            <div className="modal-header">
+                                <h5 className="mb-0">Choose Payment Method</h5>
+                                <button
+                                    className="btn-close"
+                                    onClick={() => setShowPaymentModal(false)}
+                                >
+                                    <i className="ph ph-x"></i>
+                                </button>
+                            </div>
+
+                            <div className="modal-body">
+                                <div className="order-summary mb-24">
+                                    <p className="text-gray-600 mb-8">Order #{selectedOrder.order_id}</p>
+                                    <h4 className="text-main-600 mb-0">${parseFloat(selectedOrder.final_amount).toFixed(2)}</h4>
+                                </div>
+
+                                <div className="payment-methods">
+                                    <div className="payment-item mb-16">
+                                        <div className="form-check common-check common-radio">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="payment_modal"
+                                                id="payment_modal_momo"
+                                                checked={selectedPaymentMethod === 'momo'}
+                                                onChange={() => setSelectedPaymentMethod('momo')}
+                                            />
+                                            <label className="form-check-label fw-semibold" htmlFor="payment_modal_momo">
+                                                MoMo E-Wallet
+                                            </label>
+                                        </div>
+                                        {selectedPaymentMethod === 'momo' && (
+                                            <div className="payment-item__content px-16 py-16 mt-12 rounded-8 bg-main-50">
+                                                <p className="text-gray-800 text-sm mb-0">
+                                                    Pay securely with MoMo e-wallet. You will be redirected to MoMo payment page.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="payment-item mb-16">
+                                        <div className="form-check common-check common-radio">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="payment_modal"
+                                                id="payment_modal_zalopay"
+                                                checked={selectedPaymentMethod === 'zalopay'}
+                                                onChange={() => setSelectedPaymentMethod('zalopay')}
+                                            />
+                                            <label className="form-check-label fw-semibold" htmlFor="payment_modal_zalopay">
+                                                ZaloPay
+                                            </label>
+                                        </div>
+                                        {selectedPaymentMethod === 'zalopay' && (
+                                            <div className="payment-item__content px-16 py-16 mt-12 rounded-8 bg-main-50">
+                                                <p className="text-gray-800 text-sm mb-0">
+                                                    Pay securely with ZaloPay. You will be redirected to ZaloPay payment page.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="payment-item mb-16">
+                                        <div className="form-check common-check common-radio">
+                                            <input
+                                                className="form-check-input"
+                                                type="radio"
+                                                name="payment_modal"
+                                                id="payment_modal_vnpay"
+                                                checked={selectedPaymentMethod === 'vnpay'}
+                                                onChange={() => setSelectedPaymentMethod('vnpay')}
+                                            />
+                                            <label className="form-check-label fw-semibold" htmlFor="payment_modal_vnpay">
+                                                VNPay
+                                            </label>
+                                        </div>
+                                        {selectedPaymentMethod === 'vnpay' && (
+                                            <div className="payment-item__content px-16 py-16 mt-12 rounded-8 bg-main-50">
+                                                <p className="text-gray-800 text-sm mb-0">
+                                                    Pay securely with VNPay. You will be redirected to VNPay payment page.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal-footer">
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => setShowPaymentModal(false)}
+                                    disabled={processingPayment === selectedOrder.order_id}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-main"
+                                    onClick={handlePaymentSubmit}
+                                    disabled={processingPayment === selectedOrder.order_id}
+                                >
+                                    {processingPayment === selectedOrder.order_id ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-8"></span>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Proceed to Payment'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <style jsx>{`
                 .stats-card {
-                    background: white;
-                    border: 1px solid #e5e7eb;
-                    border-radius: 12px;
-                    padding: 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;
-                    transition: all 0.3s;
-                }
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s;
+}
 
-                .stats-card:hover,
-                .stats-card.active {
-                    border-color: var(--main-600);
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-                    transform: translateY(-2px);
-                }
+.stats-card:hover,
+.stats-card.active {
+    border-color: var(--main-600);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
 
-                .stats-card__icon {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 12px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 24px;
-                }
+.stats-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
 
-                .stats-card__number {
-                    font-size: 24px;
-                    font-weight: 700;
-                    margin-bottom: 4px;
-                }
+.stats-card__number {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
 
-                .stats-card__label {
-                    font-size: 13px;
-                    color: #6b7280;
-                }
+.stats-card__label {
+    font-size: 13px;
+    color: #6b7280;
+}
 
-                .order-card {
-                    background: white;
-                }
+.order-card {
+    background: white;
+}
 
-                .order-card:hover {
-                    border-color: var(--main-600);
-                }
+.order-card:hover {
+    border-color: var(--main-600);
+}
 
-                .hover-shadow {
-                    transition: box-shadow 0.3s;
-                }
+.hover-shadow {
+    transition: box-shadow 0.3s;
+}
 
-                .hover-shadow:hover {
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-                }
+.hover-shadow:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Payment Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.payment-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h5 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #6b7280;
+}
+
+.btn-close:hover {
+    background-color: #f3f4f6;
+    color: #1f2937;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.order-summary {
+    text-align: center;
+    padding: 20px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.order-summary h4 {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.payment-methods {
+    margin-top: 24px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 24px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.modal-footer button {
+    flex: 1;
+}
+
+.btn-outline-gray {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline-gray:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-outline-gray:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
             `}</style>
         </section>
     );
